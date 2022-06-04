@@ -1,0 +1,22 @@
+# This Makefile is the output of a template Makefile that was
+# processed by the m4 macro preprocessor. It is not intended
+# to be human readable.
+
+# Makefile for Windows Visual C++, not DOS Visual C++
+
+CC=cl
+LINK=link
+CFLAGS=
+OBJS=src\extractors\functions\functions.obj src\extractors\macro_functions\macro_functions.obj src\extractors\macros\macros.obj src\extractors\structures\structures.obj src\targets\functions\functions.obj src\targets\functions\backends\manpage.obj src\targets\projects\backends\manpage.obj src\targets\projects\backends\helpcms.obj src\targets\projects\backends\dcfscript.obj src\targets\projects\projects.obj src\arguments.obj src\tags\tags.obj src\libstring\starts.obj src\libstring\replace.obj src\libstring\strip.obj src\libstring\reverse.obj src\libstring\count.obj src\common\common.obj src\libpath\exists.obj src\libpath\mkdir.obj src\libpath\join_path.obj src\libmatch\read.obj src\libmatch\cursor.obj src\libmatch\match.obj src\libmatch\conditions.obj src\libarg\libarg.obj src\main.obj 
+
+.c.obj:
+	$(CC) /c $(CFLAGS) /Fo$@ $<
+
+all: $(OBJS) docgen.exe
+
+docgen.exe: $(OBJS)
+	$(LINK) /out:docgen.exe $(OBJS)
+
+clean:
+    del $(OBJS)
+    del docgen.exe

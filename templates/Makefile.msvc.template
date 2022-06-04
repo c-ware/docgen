@@ -1,0 +1,22 @@
+# This Makefile is the output of a template Makefile that was
+# processed by the m4 macro preprocessor. It is not intended
+# to be human readable.
+
+# Makefile for Windows Visual C++, not DOS Visual C++
+
+CC=cl
+LINK=link
+CFLAGS=
+OBJS=syscmd(`find src/ -type f -name "*.c" | tr "\n" " " | sed "s/\.c/.obj/g" | sed "s://:/:g" | sed "s:/:\\\:g"')
+
+.c.obj:
+	$(CC) /c $(CFLAGS) /Fo$@ $<
+
+all: $(OBJS) docgen.exe
+
+docgen.exe: $(OBJS)
+	$(LINK) /out:docgen.exe $(OBJS)
+
+clean:
+    del $(OBJS)
+    del docgen.exe
