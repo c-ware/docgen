@@ -50,8 +50,6 @@
  * @                     [ --language LANGUAGE | -x LANGUAGE ]
  * @arguments
  *
- * @embed macro_function: my_macro
- *
  * @description
  * @The 'docgen' project is a documentation generation system that uses
  * @a format-agnostic language to convert documentation into arbitrary
@@ -71,6 +69,7 @@
  * @sep: ;
  * @Token;Description
  * @functions;generates manuals for each documented function
+ * @macros;generates manuals for each documented macro function
  * @project;generates a manual for a 'file' which is usually used as its central manual
  * @category;alias for project, but is intended to be used for sub-manuals
  * @table
@@ -87,7 +86,13 @@
  * @
  * @@docgen: <TOKEN_TYPE>
  * @
- * @The token type can be a structure, project, constant, function, or category.
+ * @The token type can be:
+ * @    - structure
+ * @    - project
+ * @    - macro_function
+ * @    - constant
+ * @    - function
+ * @    - category
  * @
  * @A 'function' token will accept:
  * @table
@@ -204,31 +209,9 @@
 
 #include "docgen.h"
 
+#include "targets/macros/macros.h"
 #include "targets/projects/projects.h"
 #include "targets/functions/functions.h"
-
-/*
- * @docgen: macro_function
- * @brief: a macro that does something
- * @name: my_macro
- *
- * @description
- * @This is a macro function that does soemthing
- * @description
- *
- * @notes
- * @This macro is useless.
- * @notes
- *
- * @error: if you use it
- *
- * @param x: the x parameter
- * @param y: the y parameter
- * @param z: the z parameter
-*/
-#define my_macro(x, y, z) \
-    ...
-
 
 int main(int argc, char **argv) {
     int category = 0;
@@ -254,7 +237,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-
     /* Invoke the correct category generator */
     switch(category) {
         case DOCGEN_CATEGORY_FUNCTION:
@@ -265,6 +247,9 @@ int main(int argc, char **argv) {
             break;
         case DOCGEN_CATEGORY_CATEGORY:
             docgen_project_category_generate(arguments, source_file);
+            break;
+        case DOCGEN_CATEGORY_MACROS:
+            docgen_macros_generate(arguments, source_file);
             break;
     }
 

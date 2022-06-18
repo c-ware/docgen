@@ -24,10 +24,6 @@ docgen CATEGORY FILE [ --help | -h ] [ --format FORMAT | -f FORMAT ]
 .br
 
 .br
-\fB#define 
-my_macro(\fIx\fB, \fIy\fB, \fIz\fB);
-.br\fR
-.br
 .SH DESCRIPTION
 The 'docgen' project is a documentation generation system that uses
 a format-agnostic language to convert documentation into arbitrary
@@ -51,6 +47,7 @@ l l
 .
 Token;Description
 functions;generates manuals for each documented function
+macros;generates manuals for each documented macro function
 project;generates a manual for a 'file' which is usually used as its central manual
 category;alias for project, but is intended to be used for sub-manuals
 .TE
@@ -67,7 +64,13 @@ where the second line has this format:
 
 @docgen: <TOKEN_TYPE>
 
-The token type can be a structure, project, constant, function, or category.
+The token type can be:
+    - structure
+    - project
+    - macro_function
+    - constant
+    - function
+    - category
 
 A 'function' token will accept:
 .TS

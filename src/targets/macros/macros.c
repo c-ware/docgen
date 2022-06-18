@@ -35,19 +35,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CWARE_DOCGEN_FUNCTIONS_H
-#define CWARE_DOCGEN_FUNCTIONS_H
+/*
+ * This file is the 'entry point' to the macro documentation generator.
+*/
 
-#include "../../docgen.h"
-#include "../../extractors/functions/functions.h"
+#include "macros.h"
 
-/* Backend selectors */
-void docgen_functions_format(struct DocgenArguments arguments, struct DocgenFunction function);
+void docgen_macros_format(struct DocgenArguments arguments, struct DocgenMacroFunction macro) {
+    if(strcmp(arguments.format, "manpage") == 0)
+        docgen_macros_manpage(arguments, macro);
+    else
+        fprintf(stderr, "docgen: unknown format for macros '%s'\n", arguments.format);
+}
 
-/* Backends */
-void docgen_functions_manpage(struct DocgenArguments arguments, struct DocgenFunction function);
+void docgen_macros_generate(struct DocgenArguments arguments, FILE *file) {
+    int index = 0;
+    struct LibmatchCursor cursor = libmatch_cursor_from_stream(file);
+    struct DocgenMacroFunctions *macros = NULL;
 
-/* Documentation generation */
-void docgen_functions_generate(struct DocgenArguments arguments, FILE *file);
+    /* Comment junk */
+    const char *comment_start = docgen_get_comment_start(arguments);
+    const char *comment_end = docgen_get_comment_end(arguments);
 
-#endif
+    macros = docgen_extract_macro_functions(&cursor, comment_start, comment_end);
+
+    for(index = 0; index < carray_length(macros); index++) {
+        struct DocgenMacroFunction macro = macros->contents[index];
+
+        /* Generate this function manual */
+        docgen_macros_manpage(arguments, macro);
+    }
+
+    libmatch_cursor_free(&cursor);
+    docgen_extract_macro_functions_free(macros);
+}

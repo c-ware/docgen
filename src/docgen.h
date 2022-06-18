@@ -70,6 +70,7 @@
 #define DOCGEN_CATEGORY_FUNCTION    1
 #define DOCGEN_CATEGORY_PROJECT     2
 #define DOCGEN_CATEGORY_CATEGORY    3
+#define DOCGEN_CATEGORY_MACROS      4
 
 /* Supported languages */
 #define DOCGEN_LANGUAGE_UNKNOWN 0

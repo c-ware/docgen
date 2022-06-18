@@ -37,7 +37,6 @@
 
 /*
  * This file is the 'entry point' to the function documentation generator.
- * This contains
 */
 
 #include "functions.h"

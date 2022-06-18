@@ -35,19 +35,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CWARE_DOCGEN_FUNCTIONS_H
-#define CWARE_DOCGEN_FUNCTIONS_H
+#ifndef CWARE_DOCGEN_MACROS_H
+#define CWARE_DOCGEN_MACROS_H
 
 #include "../../docgen.h"
-#include "../../extractors/functions/functions.h"
+#include "../../extractors/macro_functions/macro_functions.h"
 
 /* Backend selectors */
-void docgen_functions_format(struct DocgenArguments arguments, struct DocgenFunction function);
+void docgen_macros_format(struct DocgenArguments arguments, struct DocgenMacroFunction macro);
 
 /* Backends */
-void docgen_functions_manpage(struct DocgenArguments arguments, struct DocgenFunction function);
+void docgen_macros_manpage(struct DocgenArguments arguments, struct DocgenMacroFunction macro);
 
 /* Documentation generation */
-void docgen_functions_generate(struct DocgenArguments arguments, FILE *file);
+void docgen_macros_generate(struct DocgenArguments arguments, FILE *file);
 
 #endif

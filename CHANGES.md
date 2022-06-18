@@ -1,10 +1,11 @@
 # CHANGELOG.md
 
 VERSION: 1.0.6
-DATE: May 31th, 2022
+DATE: June 18th, 2022
 
 ## Features
-No features.
+- You can now generate documentation for macro functions with the `macros`
+  category.
 
 ## Bug Fixes
 - No longer raises an EOF error for a file where the comment is the only
@@ -12,7 +13,7 @@ No features.
   quite literally at the end of the file.
 
 ## Misc
-No miscellaneous changes.
+- License changed-- now using the C-Ware License.
 
 ## Documentation
 No documentation changes.

@@ -194,6 +194,9 @@ int main_enumerate(const char *category) {
     if(strcmp(category, "category") == 0)
         return DOCGEN_CATEGORY_CATEGORY;
 
+    if(strcmp(category, "macros") == 0)
+        return DOCGEN_CATEGORY_MACROS;
+
     fprintf(stderr, "docgen: unknown category '%s'\n", category);
     fprintf(stderr, "%s", "Try 'docgen --help' for more information.\n");
 
