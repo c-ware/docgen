@@ -7,6 +7,6 @@ docgen project ./src/main.c --section cware          \
                             --date "`date +'%b %d, %Y'`"
 
 # Process the Makefiles
-m4 ./templates/Makefile.template > ./Makefile
-m4 ./templates/Makefile.msvc.template > ./Makefile.msvc
-m4 ./templates/Makefile.watcom.template > ./Makefile.watcom
+m4 ./template/Makefile > ./Makefile
+m4 ./template/Makefile.mvc > ./Makefile.mvc
+m4 ./template/Makefile.wat > ./Makefile.wat
