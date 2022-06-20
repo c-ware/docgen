@@ -258,6 +258,9 @@ void docgen_extract_field_line(const char *tag_name, int length, int line,
     liberror_is_negative(docgen_extract_field_line, length);
     liberror_is_negative(docgen_extract_field_line, line);
 
+    /* Perform error checks on the line */
+    field_line_error_check(read, line);
+
     buffer_cursor = libmatch_cursor_init(read, strlen(read));
 
     /* A field line tag must have a : directly after its name. */
@@ -272,6 +275,7 @@ void docgen_extract_field_line(const char *tag_name, int length, int line,
 
         /* Character is non-alphabetic; first instance of this must be
          * a colon. Otherwise, error. */
+
         if(character == ':')
             break;
 
@@ -404,6 +408,7 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
     liberror_is_negative(docgen_extract_field_line_arg, description_length);
     liberror_is_negative(docgen_extract_field_line_arg, line);
 
+    field_line_arg_error_check(read, line);
     cursor = libmatch_cursor_init(read, strlen(read));
 
     libmatch_until(&cursor, "@");
@@ -433,17 +438,6 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
 
     character = -1;
 
-    /* In order to allow syntax like '@field x[32]: ...`, we could always
-     * just ONLY break the loop when a colon is found, but that might lead
-     * to certain syntax errors being silenced since originally we errored
-     * on any non-alphabetical character being in the field name. So, we do
-     * the check here. */
-    if(libmatch_cond_before(&cursor, ':', "\n") == 0) {
-        fprintf(stderr, "docgen: tag '%s' on line %i not immediately followed by a colon (:)\n",
-                tag_name, line);
-        exit(EXIT_FAILURE);
-    }
-
     /* Write the embed type, and do error checks along the way. */
     while(cursor.cursor < cursor.length) {
         character = libmatch_cursor_getch(&cursor);
@@ -462,11 +456,14 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
             continue;
         }
 
-        /* Stop at the first colon */
-        if(character != ':')
-            continue;
+        /* Character is non-alphabetic; first instance of this must be
+         * a colon. Otherwise, error. */
+        if(character == ':')
+            break;
 
-        break;
+        fprintf(stderr, "docgen: tag '%s' argument on line %i not immediately followed by a colon (:)\n",
+                tag_name, line);
+        exit(EXIT_FAILURE);
     }
 
     character = libmatch_cursor_getch(&cursor);

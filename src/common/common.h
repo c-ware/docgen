@@ -124,4 +124,8 @@ struct Reference docgen_extract_reference(struct LibmatchCursor *cursor,
 void docgen_do_padding(struct DocgenStructureField field, int longest, int depth,
                        FILE *location);
 
+void field_line_error_check(const char *line, int line_number);
+
+void field_line_arg_error_check(const char *line, int line_number);
+
 #endif
