@@ -150,9 +150,9 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
             memset(&type_tag_name, 0, sizeof(struct DocgenTagName));
             memset(&new_parameter, 0, sizeof(struct DocgenMacroFunctionParameter));
 
-            docgen_extract_field_line_arg("param", new_tag.line, DOCGEN_MACRO_FUNCTION_PARAMETER_NAME_LENGTH,
-                                          new_parameter.name, DOCGEN_MACRO_FUNCTION_PARAMETER_DESCRIPTION_LENGTH,
-                                          new_parameter.description, cursor->line);
+            docgen_extract_field_line_arg("param", new_parameter.name, DOCGEN_MACRO_FUNCTION_PARAMETER_NAME_LENGTH,
+                                          new_parameter.description, DOCGEN_MACRO_FUNCTION_PARAMETER_DESCRIPTION_LENGTH,
+                                          cursor->line, new_tag.line);
 
             carray_append(new_macro_function.parameters, new_parameter, MACRO_FUNCTION_PARAMETER);
         } else {

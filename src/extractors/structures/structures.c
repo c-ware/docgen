@@ -122,9 +122,10 @@ struct DocgenStructure docgen_extract_parse_structure(struct LibmatchCursor *cur
             memset(&type_tag_name, 0, sizeof(struct DocgenTagName));
             memset(&new_field, 0, sizeof(struct DocgenStructureField));
 
-            docgen_extract_field_line_arg("field", new_tag.line, DOCGEN_STRUCTURE_NAME_LENGTH,
-                                          new_field.name, DOCGEN_STRUCTURE_BRIEF_LENGTH,
-                                          new_field.description, cursor->line);
+            docgen_extract_field_line_arg("field", new_field.name, DOCGEN_STRUCTURE_NAME_LENGTH,
+                                          new_field.description, DOCGEN_STRUCTURE_BRIEF_LENGTH,
+                                          cursor->line, new_tag.line);
+
             type_tag = docgen_tag_next(cursor, comment_start, comment_end);
 
             /* Next line must be a type-- cannot even be emppty. */

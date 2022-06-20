@@ -150,9 +150,9 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             memset(&type_tag_name, 0, sizeof(struct DocgenTagName));
             memset(&new_parameter, 0, sizeof(struct DocgenFunctionParameter));
 
-            docgen_extract_field_line_arg("param", new_tag.line, DOCGEN_PARAMETER_NAME_LENGTH,
-                                          new_parameter.name, DOCGEN_PARAMETER_DESCRIPTION_LENGTH,
-                                          new_parameter.description, cursor->line);
+            docgen_extract_field_line_arg("param", new_parameter.name, DOCGEN_PARAMETER_NAME_LENGTH,
+                                          new_parameter.description, DOCGEN_PARAMETER_DESCRIPTION_LENGTH,
+                                          cursor->line, new_tag.line);
 
             type_tag = docgen_tag_next(cursor, comment_start, comment_end);
 

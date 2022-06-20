@@ -3,8 +3,7 @@
  * 
  * Copyright (c) 2022, C-Ware
  * All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
+ * * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  * 
  * 1. Redistributions of source code must retain the above copyright notice, this
@@ -361,9 +360,9 @@ void docgen_extract_field_block(const char *tag_name, int length, struct Libmatc
     }
 }
 
-void docgen_extract_field_line_arg(const char *tag_name, char *read, int argument_length,
-                                   char *argument_buffer, int description_length,
-                                   char *description_buffer, int line) {
+void docgen_extract_field_line_arg(const char *tag_name, char *argument_buffer,
+                                   int argument_length, char *description_buffer,
+                                   int description_length, int line_number, char *tag_line) {
     int written = 0;
     int character = -1;
     int buffer_cursor = 0;
@@ -371,15 +370,16 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
     char block_line[DOCGEN_BLOCK_LINE_LENGTH + 1];
 
     liberror_is_null(docgen_extract_field_line_arg, tag_name);
-    liberror_is_null(docgen_extract_field_line_arg, read);
+    liberror_is_null(docgen_extract_field_line_arg, tag_line);
     liberror_is_null(docgen_extract_field_line_arg, argument_buffer);
     liberror_is_null(docgen_extract_field_line_arg, description_buffer);
     liberror_is_negative(docgen_extract_field_line_arg, argument_length);
     liberror_is_negative(docgen_extract_field_line_arg, description_length);
-    liberror_is_negative(docgen_extract_field_line_arg, line);
+    liberror_is_negative(docgen_extract_field_line_arg, line_number);
 
-    field_line_arg_error_check(read, line);
-    cursor = libmatch_cursor_init(read, strlen(read));
+    /* Validate the line */
+    field_line_arg_error_check(tag_line, line_number);
+    cursor = libmatch_cursor_init(tag_line, strlen(tag_line));
 
     libmatch_until(&cursor, "@");
 
@@ -396,13 +396,13 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
             break;
 
         fprintf(stderr, "docgen: tag '%s' argument on line %i not immediately followed by a space ( )\n",
-                tag_name, line);
+                tag_name, line_number);
         exit(EXIT_FAILURE);
     }
 
     /* There must be a colon after the tag name */
-    if(strchr(read + cursor.cursor, ':') == NULL) {
-        fprintf(stderr, "docgen: tag '%s' on line %i missing colon (:)\n", tag_name, line);
+    if(strchr(tag_line + cursor.cursor, ':') == NULL) {
+        fprintf(stderr, "docgen: tag '%s' on line %i missing colon (:)\n", tag_name, line_number);
         exit(EXIT_FAILURE);
     }
 
@@ -416,7 +416,7 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
         if(strchr(LIBMATCH_ALPHANUM "_", character) != NULL) {
             if(buffer_cursor == argument_length) {
                 fprintf(stderr, "docgen: argument of tag '%s' on line %i is too long-- max of %i\n",
-                        tag_name, line, argument_length);
+                        tag_name, line_number, argument_length);
                 exit(EXIT_FAILURE);
             }
 
@@ -432,7 +432,7 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
             break;
 
         fprintf(stderr, "docgen: tag '%s' argument on line %i not immediately followed by a colon (:)\n",
-                tag_name, line);
+                tag_name, line_number);
         exit(EXIT_FAILURE);
     }
 
@@ -441,12 +441,12 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
     /* Produce an error for an EOF */
     if(character == -1) {
         fprintf(stderr, "docgen: tag '%s' on line %i has no description-- met EOF\n",
-                tag_name, line);
+                tag_name, line_number);
         exit(EXIT_FAILURE);
     }
 
     if(character != ' ') {
-        fprintf(stderr, "docgen: tag '%s' on line %i expects space after colon\n", tag_name, line);
+        fprintf(stderr, "docgen: tag '%s' on line %i expects space after colon\n", tag_name, line_number);
         exit(EXIT_FAILURE);
     }
 
@@ -455,7 +455,7 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
 
     if(written == description_length) {
         fprintf(stderr, "docgen: description to tag '%s' on line %i is too long-- max length of %i\n",
-                tag_name, line, description_length);
+                tag_name, line_number, description_length);
         exit(EXIT_FAILURE);
     }
 

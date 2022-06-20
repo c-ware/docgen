@@ -151,10 +151,9 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
             memset(embed_type, 0, sizeof(embed_type));
             memset(&new_embed, 0, sizeof(struct DocgenProjectEmbed));
 
-            docgen_extract_field_line_arg("embed", new_tag.line,
-                                   DOCGEN_PROJECT_EMBED_TYPE_LENGTH, embed_type,
-                                   DOCGEN_PROJECT_EMBED_NAME_LENGTH, new_embed.name,
-                                   cursor.line);
+            docgen_extract_field_line_arg("embed", embed_type, DOCGEN_PROJECT_EMBED_TYPE_LENGTH,
+                                   new_embed.name, DOCGEN_PROJECT_EMBED_NAME_LENGTH,
+                                   cursor.line, new_tag.line);
 
             if(strcmp(embed_type, "structure") == 0)
                 new_embed.type = DOCGEN_PROJECT_EMBED_STRUCTURE;

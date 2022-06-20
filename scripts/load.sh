@@ -8,6 +8,8 @@ docgen project ./src/main.c --section cware          \
 
 # Process the Makefiles
 makegen project unix --binary docgen --main src/main.c > Makefile
+makegen project unix --binary docgen --main src/main.c \
+                     --cflags '\-Wall -Wextra -Wpedantic -ansi -g' > Makefile.dev
 
 m4 ./template/Makefile.mvc > ./Makefile.mvc
 m4 ./template/Makefile.wat > ./Makefile.wat

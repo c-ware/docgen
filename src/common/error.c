@@ -75,6 +75,11 @@ void field_line_error_check(const char *line, int line_number) {
 
     colon_separator = strchr(line, ':');
 
+    if(colon_separator == NULL) {
+        fprintf(stderr, "docgen: tag on line %i has no colon (:)\n", line_number);
+        exit(EXIT_FAILURE);
+    }
+
     /* First things first. A tag name with a colon MUST be followed
      * by a SINGLE space. */
     if(*(colon_separator + 1) != ' ') {

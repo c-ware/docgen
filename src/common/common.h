@@ -114,9 +114,15 @@ void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_le
 void docgen_extract_field_block(const char *tag_name, int length, struct LibmatchCursor *cursor,
                                 char *read, char *buffer);
 
+void docgen_extract_field_line_arg(const char *tag_name, char *argument_buffer,
+                                   int argument_length, char *description_buffer,
+                                   int description_length, int line_number, char *tag_line);
+
+/*
 void docgen_extract_field_line_arg(const char *tag_name, char *read, int argument_length,
                                    char *argument_buffer, int description_length,
                                    char *description_buffer, int line);
+*/
 
 struct Reference docgen_extract_reference(struct LibmatchCursor *cursor,
                                           struct DocgenTag new_tag);
