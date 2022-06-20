@@ -127,11 +127,95 @@ void docgen_extract_field_line_arg(const char *tag_name, char *read, int argumen
 struct Reference docgen_extract_reference(struct LibmatchCursor *cursor,
                                           struct DocgenTag new_tag);
 
+/*
+ * @docgen: function
+ * @brief: write a structure field to a file with padding
+ * @name: docgen_do_padding
+ *
+ * @include: common.h
+ *
+ * @description
+ * @Writes a structure field to a file location with added padding for the
+ * @offset from the start of the line, and for the comment. This function
+ * @is ONLY called after all structure fields have been parsed, and as such
+ * @the 'longest' parameter can be known before the function is called.
+ * @description
+ *
+ * @error: longest is negative
+ * @error: depth is negative
+ * @error: location is NULL
+ *
+ * @param field: the structure field to write
+ * @type: struct DocgenStructureField
+ * 
+ * @param longest: the longest structure field that was parsed
+ * @type: int
+ *
+ * @param depth: how deep is this structure field in a nested structure
+ * @type: int
+ * 
+ * @param location: the file to write the field to
+ * @type: FILE *
+*/
 void docgen_do_padding(struct DocgenStructureField field, int longest, int depth,
                        FILE *location);
 
+/*
+ * @docgen: function
+ * @brief: validate a field line
+ * @type: field_line_error_check
+ *
+ * @include: common.h
+ *
+ * @description
+ * @Performs error checks to make sure that a field line is
+ * @syntactically correct so that the main parser can extract the
+ * @contents without worrying about errors
+ * @description
+ *
+ * @error: line is NULL
+ * @error: line_number is negative
+ *
+ * @param line: the parsed line to error check
+ * @type: const char *
+ *
+ * @param line_number: the line number of the parser
+ * @type: int
+*/
 void field_line_error_check(const char *line, int line_number);
 
+/*
+ * @docgen: function
+ * @brief: validate a field + arugment line
+ * @name: field_line_arg_error_check
+ *
+ * @include: common.h
+ *
+ * @description
+ * @Performs error checks to make sure that a field + argument line
+ * @is syntactically correct so that the main parser can extract the
+ * @contents without worrying about errors
+ * @description
+ *
+ * @error: line is NULL
+ * @error: line_number is negative
+ *
+ * @param line: the parsed line to error check
+ * @type: const char *
+ *
+ * @param line_number: the line number of the parser
+ * @type: int
+*/
 void field_line_arg_error_check(const char *line, int line_number);
+
+
+
+
+
+
+
+
+
+
 
 #endif
