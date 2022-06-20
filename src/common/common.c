@@ -364,7 +364,6 @@ void docgen_extract_field_line_arg(const char *tag_name, char *argument_buffer,
                                    int argument_length, char *description_buffer,
                                    int description_length, int line_number, char *tag_line) {
     int written = 0;
-    int character = -1;
     int buffer_cursor = 0;
     struct LibmatchCursor cursor;
     char block_line[DOCGEN_BLOCK_LINE_LENGTH + 1];
@@ -381,74 +380,32 @@ void docgen_extract_field_line_arg(const char *tag_name, char *argument_buffer,
     field_line_arg_error_check(tag_line, line_number);
     cursor = libmatch_cursor_init(tag_line, strlen(tag_line));
 
+    /* Jump to the @, then the first space to begin parsing the argument */
     libmatch_until(&cursor, "@");
-
-    /* The first non-alphabetical character must be a space */
-    while(cursor.cursor < cursor.length) {
-        character = libmatch_cursor_getch(&cursor);
-
-        if(strchr(LIBMATCH_ALPHANUM "_", character) != NULL)
-            continue;
-
-        /* Character is non-alphabetic; first instance of this must be
-         * a colon. Otherwise, error. */
-        if(character == ' ')
-            break;
-
-        fprintf(stderr, "docgen: tag '%s' argument on line %i not immediately followed by a space ( )\n",
-                tag_name, line_number);
-        exit(EXIT_FAILURE);
-    }
-
-    /* There must be a colon after the tag name */
-    if(strchr(tag_line + cursor.cursor, ':') == NULL) {
-        fprintf(stderr, "docgen: tag '%s' on line %i missing colon (:)\n", tag_name, line_number);
-        exit(EXIT_FAILURE);
-    }
-
-    character = -1;
+    libmatch_until(&cursor, " ");
 
     /* Write the embed type, and do error checks along the way. */
     while(cursor.cursor < cursor.length) {
+        int character = -1;
+
         character = libmatch_cursor_getch(&cursor);
 
-        /* Add the character */
-        if(strchr(LIBMATCH_ALPHANUM "_", character) != NULL) {
-            if(buffer_cursor == argument_length) {
-                fprintf(stderr, "docgen: argument of tag '%s' on line %i is too long-- max of %i\n",
-                        tag_name, line_number, argument_length);
-                exit(EXIT_FAILURE);
-            }
-
-            argument_buffer[buffer_cursor] = character;
-            buffer_cursor++;
-
-            continue;
-        }
-
-        /* Character is non-alphabetic; first instance of this must be
-         * a colon. Otherwise, error. */
+        /* Stop at the : */
         if(character == ':')
             break;
 
-        fprintf(stderr, "docgen: tag '%s' argument on line %i not immediately followed by a colon (:)\n",
-                tag_name, line_number);
-        exit(EXIT_FAILURE);
+        /* Can the buffer hold an extra character? */
+        if(buffer_cursor == argument_length) {
+            fprintf(stderr, "docgen: argument of tag '%s' on line %i is too long-- max of %i\n",
+                    tag_name, line_number, argument_length);
+            exit(EXIT_FAILURE);
+        }
+
+        argument_buffer[buffer_cursor] = character;
+        buffer_cursor++;
     }
 
-    character = libmatch_cursor_getch(&cursor);
-
-    /* Produce an error for an EOF */
-    if(character == -1) {
-        fprintf(stderr, "docgen: tag '%s' on line %i has no description-- met EOF\n",
-                tag_name, line_number);
-        exit(EXIT_FAILURE);
-    }
-
-    if(character != ' ') {
-        fprintf(stderr, "docgen: tag '%s' on line %i expects space after colon\n", tag_name, line_number);
-        exit(EXIT_FAILURE);
-    }
+    libmatch_cursor_getch(&cursor);
 
     /* Read the description */
     written = libmatch_read_until(&cursor, description_buffer, description_length, "\n");
