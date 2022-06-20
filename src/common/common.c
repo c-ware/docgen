@@ -246,22 +246,22 @@ void docgen_create_file_path(struct DocgenArguments arguments, const char *name,
     libpath_join_path(buffer, length, "./doc/", name, ".", arguments.section, NULL);
 }
 
-void docgen_extract_field_line(const char *tag_name, int length, int line,
-                               char *read, char *buffer) {
+void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_length,
+                               int line_number, char *tag_line) {
     int written = 0;
     int character = -1;
     struct LibmatchCursor buffer_cursor;
 
     liberror_is_null(docgen_extract_field_line, tag_name);
     liberror_is_null(docgen_extract_field_line, buffer);
-    liberror_is_null(docgen_extract_field_line, read);
-    liberror_is_negative(docgen_extract_field_line, length);
-    liberror_is_negative(docgen_extract_field_line, line);
+    liberror_is_null(docgen_extract_field_line, tag_line);
+    liberror_is_negative(docgen_extract_field_line, buffer_length);
+    liberror_is_negative(docgen_extract_field_line, line_number);
 
     /* Perform error checks on the line */
-    field_line_error_check(read, line);
+    field_line_error_check(tag_line, line_number);
 
-    buffer_cursor = libmatch_cursor_init(read, strlen(read));
+    buffer_cursor = libmatch_cursor_init(tag_line, strlen(tag_line));
 
     /* A field line tag must have a : directly after its name.
      * Jump to the @, then the start of the :, and then
@@ -271,11 +271,11 @@ void docgen_extract_field_line(const char *tag_name, int length, int line,
     libmatch_cursor_getch(&buffer_cursor);
 
     /* Read the name, and do some final error checks. */
-    written = libmatch_read_until(&buffer_cursor, buffer, length, "\n");
+    written = libmatch_read_until(&buffer_cursor, buffer, buffer_length, "\n");
 
-    if(written == length) {
+    if(written >= buffer_length) {
         fprintf(stderr, "docgen: description of tag '%s' on line %i is too long-- max length of %i\n",
-                tag_name, line, length);
+                tag_name, line_number, buffer_length);
         exit(EXIT_FAILURE);
     }
 }
@@ -471,8 +471,8 @@ struct Reference docgen_extract_reference(struct LibmatchCursor *cursor,
 
     liberror_is_null(docgen_extract_reference, cursor);
 
-    docgen_extract_field_line("reference", DOCGEN_TAG_LINE_LENGTH,
-                              cursor->line, new_tag.line, reference_line);
+    docgen_extract_field_line("reference", reference_line, DOCGEN_TAG_LINE_LENGTH,
+                              cursor->line, new_tag.line);
 
     if(strchr(reference_line, '(') == NULL) {
         fprintf(stderr, "docgen: tag 'reference' on line %i is missing opening parenthesis\n",

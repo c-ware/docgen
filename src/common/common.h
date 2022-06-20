@@ -108,8 +108,8 @@ const char *docgen_get_comment_end(struct DocgenArguments arguments);
 void docgen_create_file_path(struct DocgenArguments arguments, const char *name,
                              char *buffer, int length);
 
-void docgen_extract_field_line(const char *tag_name, int length, int line,
-                               char *read, char *buffer);
+void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_length,
+                               int line_number, char *tag_line);
 
 void docgen_extract_field_block(const char *tag_name, int length, struct LibmatchCursor *cursor,
                                 char *read, char *buffer);

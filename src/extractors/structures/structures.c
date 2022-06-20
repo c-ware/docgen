@@ -106,12 +106,12 @@ struct DocgenStructure docgen_extract_parse_structure(struct LibmatchCursor *cur
         }
 
         if(strcmp(tag_name.name, "name") == 0)
-            docgen_extract_field_line("name", DOCGEN_STRUCTURE_NAME_LENGTH, cursor->line,
-                                      new_tag.line, new_structure.name);
+            docgen_extract_field_line("name", new_structure.name, DOCGEN_STRUCTURE_NAME_LENGTH,
+                                      cursor->line, new_tag.line);
 
         else if(strcmp(tag_name.name, "brief") == 0)
-            docgen_extract_field_line("brief", DOCGEN_STRUCTURE_BRIEF_LENGTH, cursor->line,
-                                      new_tag.line, new_structure.brief);
+            docgen_extract_field_line("brief", new_structure.brief, DOCGEN_STRUCTURE_BRIEF_LENGTH,
+                                      cursor->line, new_tag.line);
 
         else if(strcmp(tag_name.name, "field") == 0) {
             struct DocgenTag type_tag;
@@ -142,7 +142,8 @@ struct DocgenStructure docgen_extract_parse_structure(struct LibmatchCursor *cur
             }
 
             /* Parse the type */
-            docgen_extract_field_line("type", DOCGEN_STRUCTURE_FIELD_TYPE_LENGTH, cursor->line, type_tag.line, new_field.type);
+            docgen_extract_field_line("type", new_field.type, DOCGEN_STRUCTURE_FIELD_TYPE_LENGTH,
+                                      cursor->line, type_tag.line);
             carray_append(new_structure.fields, new_field, STRUCTURE_FIELD);
 
             /* Continue-- to reset new_tag.line */

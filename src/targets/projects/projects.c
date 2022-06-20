@@ -103,12 +103,12 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
 
         /* Handle the tags */
         if(strcmp(tag_name.name, "name") == 0)
-            docgen_extract_field_line("name", DOCGEN_PROJECT_NAME_LENGTH, cursor.line,
-                                      new_tag.line, new_project.name);
+            docgen_extract_field_line("name", new_project.name, DOCGEN_PROJECT_NAME_LENGTH,
+                                      cursor.line, new_tag.line);
 
         else if(strcmp(tag_name.name, "brief") == 0)
-            docgen_extract_field_line("brief", DOCGEN_PROJECT_BRIEF_LENGTH, cursor.line,
-                                      new_tag.line, new_project.brief);
+            docgen_extract_field_line("brief", new_project.brief, DOCGEN_PROJECT_BRIEF_LENGTH,
+                                      cursor.line, new_tag.line);
 
         else if(strcmp(tag_name.name, "arguments") == 0)
             docgen_extract_field_block("arguments", DOCGEN_PROJECT_ARGUMENTS_LENGTH,
@@ -131,8 +131,8 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
             char setting_name[DOCGEN_PROJECT_SETTING_LENGTH + 1];
 
             memset(setting_name, 0, sizeof(setting_name));
-            docgen_extract_field_line("setting", DOCGEN_PROJECT_SETTING_LENGTH, cursor.line,
-                                       new_tag.line, setting_name);
+            docgen_extract_field_line("setting", setting_name, DOCGEN_PROJECT_SETTING_LENGTH,
+                                      cursor.line, new_tag.line);
 
             if(strcmp(setting_name, "func-briefs") == 0)
                 new_project.function_briefs = 1;
