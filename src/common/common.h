@@ -109,12 +109,119 @@ void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer,
 const char *docgen_get_comment_start(struct DocgenArguments arguments);
 const char *docgen_get_comment_end(struct DocgenArguments arguments);
 
+/*
+ * @docgen: function
+ * @brief: construct a path to a file
+ * @name: docgen_create_file_path
+ *
+ * @include: common.h
+ *
+ * @description
+ * @This function exists for two reasons:
+ * @    - Reduce the boilerplate for creating file paths, which may or may
+ * @      may not have portability differences
+ * @    - Future proof path-dependant code (which we all know is a problem)
+ * @
+ * @The final path that is produced by this functionw will be NUL terminated.
+ * @description
+ *
+ * @error: name is NULL
+ * @error: buffer is NULL
+ * @error: length is negative
+ *
+ * @param arguments: the parsed command line arguments given to docgen
+ * @type: struct DocgenArguments
+ *
+ * @param name: the name of the file to create
+ * @type: const char *
+ *
+ * @param buffer: the buffer to write the path to
+ * @type: char *
+ *
+ * @param length: the maximum length of the buffer
+ * @type: int
+*/
 void docgen_create_file_path(struct DocgenArguments arguments, const char *name,
                              char *buffer, int length);
 
+/*
+ * @docgen: function
+ * @brief: extract a field from a line
+ * @name: docgen_extract_field_line
+ *
+ * @include: common.h
+ *
+ * @description
+ * @This function will extract a field from a line into a buffer. The buffer
+ * @will be NUL terminated, and the expected input is something of the form of
+ * @@<TAG_NAME>: <FIELD>
+ * @description
+ *
+ * @error: tag_name is NULL
+ * @error: buffer is NULL
+ * @error: tag_line is NULL
+ * @error: buffer_length is negative
+ * @error: line_number is negative
+ *
+ * @param tag_name: the name of the tag that is being parsed
+ * @type: const char *
+ *
+ * @param buffer: the buffer to write the field into
+ * @type: char *
+ *
+ * @param buffer_length: the maximum length of the buffer
+ * @type: int
+ *
+ * @param line_number: the line number of the cursor
+ * @type: int
+ *
+ * @param tag_line: the line to extract data from
+ * @type: char *
+*/
 void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_length,
                                int line_number, char *tag_line);
 
+/*
+ * @docgen: function
+ * @brief: extract lines between two instances of the same tag
+ * @name: docgen_extract_field_block
+ *
+ * @include: common.h
+ *
+ * @description
+ * @This function will extract all lines between two instances of the same
+ * @tag, and write it into a buffer. Used internally for tags like descriptions,
+ * @notes, etc. Each in between the two tags must have a '@' appear somewhere,
+ * @and after that character the 'line' will be considered to start. As such,
+ * @the '@' will not appear in the final buffer.
+ * @description
+ *
+ * @notes
+ * @This function has not yet been 'prettified,' either in parameter naming
+ * @or internal structure. Also, the cursor parameter will most likely be
+ * @ripped from the function arguments.
+ * @notes
+ *
+ * @error: tag_name is NULL
+ * @error: cursor is NULL
+ * @error: read is NULL
+ * @error: buffer is NULL
+ *
+ * @param tag_name: the name of the tag that is being parsed
+ * @type: const char *
+ *
+ * @param length: the length of the block buffer
+ * @type: int
+ *
+ * @param cursor: the cursor to use
+ * @type: struct LibmatchCursor *
+ *
+ * @param read: the line that the first tag is on
+ * @type: char *
+ *
+ * @param buffer: the buffer to write the block into
+ * @type: char *
+*/
 void docgen_extract_field_block(const char *tag_name, int length, struct LibmatchCursor *cursor,
                                 char *read, char *buffer);
 
