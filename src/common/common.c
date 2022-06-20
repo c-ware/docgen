@@ -263,42 +263,12 @@ void docgen_extract_field_line(const char *tag_name, int length, int line,
 
     buffer_cursor = libmatch_cursor_init(read, strlen(read));
 
-    /* A field line tag must have a : directly after its name. */
+    /* A field line tag must have a : directly after its name.
+     * Jump to the @, then the start of the :, and then
+     * traverse past it to start reading the argument until the \n */
     libmatch_until(&buffer_cursor, "@");
-
-    /* The first non-alphabetical character must be a colon */
-    while(buffer_cursor.cursor < buffer_cursor.length) {
-        int character = libmatch_cursor_getch(&buffer_cursor);
-
-        if(strchr(LIBMATCH_ALPHANUM "_", character) != NULL)
-            continue;
-
-        /* Character is non-alphabetic; first instance of this must be
-         * a colon. Otherwise, error. */
-
-        if(character == ':')
-            break;
-
-        fprintf(stderr, "docgen: tag '%s' on line %i not immediately followed by a colon (:)\n",
-                tag_name, line);
-        exit(EXIT_FAILURE);
-    }
-
-    /* This code will only run it has the correct format up until this point--
-     * so check if the next character is a space, then read. */
-    character = libmatch_cursor_getch(&buffer_cursor);
-
-    /* Produce an error for an EOF */
-    if(character == -1) {
-        fprintf(stderr, "docgen: tag '%s' on line %i has no description-- met EOF\n",
-                tag_name, line);
-        exit(EXIT_FAILURE);
-    }
-
-    if(character != ' ') {
-        fprintf(stderr, "docgen: tag '%s' on line %i expects space after colon\n", tag_name, line);
-        exit(EXIT_FAILURE);
-    }
+    libmatch_until(&buffer_cursor, ":");
+    libmatch_cursor_getch(&buffer_cursor);
 
     /* Read the name, and do some final error checks. */
     written = libmatch_read_until(&buffer_cursor, buffer, length, "\n");
