@@ -97,11 +97,15 @@ struct DocgenStructureField;
     }                                                                                                           \
 
 void docgen_extract_type(struct LibmatchCursor *cursor, char *buffer, int length);
+
 void docgen_parse_comment(struct LibmatchCursor *cursor);
+
 int docgen_comment_is_type(struct LibmatchCursor *cursor, const char *comment_start,
                            const char *commend_end, const char *type);
+
 void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer,
                           int length, const char *bound);
+
 const char *docgen_get_comment_start(struct DocgenArguments arguments);
 const char *docgen_get_comment_end(struct DocgenArguments arguments);
 
@@ -114,16 +118,92 @@ void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_le
 void docgen_extract_field_block(const char *tag_name, int length, struct LibmatchCursor *cursor,
                                 char *read, char *buffer);
 
+/*
+ * @docgen: function
+ * @brief: extract an argument and field from a line
+ * @name: docgen_extract_field_line_arg
+ *
+ * @include: common.h
+ *
+ * @description
+ * @Given a line, extract the argument and field from the line-- or, in a more
+ * @visual way (<[A-Z]+> are place holders):
+ * @
+ * @@<TAG_NAME> <ARGUMENT>: <FIELD>
+ * @
+ * @The final buffers will be terminated by a NUL byte, and the buffers should
+ * @have an actual size of LENGTH + 1 to make space for the NUL byte, although
+ * @this function should just have LENGTH as the actual size.
+ * @description
+ *
+ * @notes
+ * @A potential future development is changing the parameter 'argument_{buffer,length}'
+ * @to field_{buffer,length} to keep things more consistent. This is not remotely
+ * @a breaking API change, but it is a rather small thing.
+ * @notes
+ *
+ * @error: tag_name is NULL
+ * @error: argument_buffer is NULL
+ * @error: description_buffer is NULL
+ * @error: tag_line is NULL
+ * @error: argument_length is negative
+ * @error: description_length is negative
+ * @error: line_length is negative
+ *
+ * @param tag_name: the name of the tag that is being parsed
+ * @type: const char *
+ *
+ * @param argument_buffer: the buffer to write the argument to
+ * @type: char *
+ *
+ * @param argument_length: the maximum length of the argument buffer
+ * @type: int
+ *
+ * @param description_buffer: the buffer to write the description to
+ * @type: char *
+ *
+ * @param description_length: the maximum length of the description buffer
+ * @type: int
+ *
+ * @param line_number: the line number the cursor is on
+ * @type: int
+ *
+ * @param tag_line: the line to extract data from
+ * @type: char *
+*/
 void docgen_extract_field_line_arg(const char *tag_name, char *argument_buffer,
                                    int argument_length, char *description_buffer,
                                    int description_length, int line_number, char *tag_line);
 
 /*
-void docgen_extract_field_line_arg(const char *tag_name, char *read, int argument_length,
-                                   char *argument_buffer, int description_length,
-                                   char *description_buffer, int line);
+ * @docgen: function
+ * @brief: extract a reference from a line
+ * @name: docgen_extract_reference
+ *
+ * @include: common.h
+ *
+ * @description
+ * @Given a line that should contain a reference, attempt to extract it
+ * @and produce a structure that has the information of the reference.
+ * @description
+ *
+ * @notes
+ * @The cursor parameter is HIGHLY likely to be removed in the future, and
+ * @replaced with a parameter that is just the line that the cursor is on,
+ * @as that the only thing that is accessed in it.
+ * @notes
+ *
+ * @error: cursor is NULL
+ *
+ * @param cursor: the cursor (potentially deprecated-- see notes)
+ * @type: struct LibmatchCursor *
+ *
+ * @param new_tag: the tag to extract the reference from
+ * @type: struct DocgenTag
+ *
+ * @return: a parsed reference
+ * @type: struct Reference
 */
-
 struct Reference docgen_extract_reference(struct LibmatchCursor *cursor,
                                           struct DocgenTag new_tag);
 
