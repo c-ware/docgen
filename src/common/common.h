@@ -96,13 +96,6 @@ struct DocgenStructureField;
             exit(EXIT_FAILURE);                                                                                 \
     }                                                                                                           \
 
-void docgen_extract_type(struct LibmatchCursor *cursor, char *buffer, int length);
-
-/*
- * @docgen: function
- * @brief:
-*/
-void docgen_parse_comment(struct LibmatchCursor *cursor);
 
 /*
  * @docgen: function
@@ -465,18 +458,13 @@ void field_line_error_check(const char *line, int line_number);
 void field_line_arg_error_check(const char *line, int line_number);
 
 /*
- * From what I can tell, this function is not used anywhere, so I have decided
- * to deprecate this for now, but it might have use somewhere else and I just
+ * From what I can tell, this functions are not used anywhere, so I have decided
+ * to deprecate them for now, but they might have use somewhere else and I just
  * could not find it.
  *
- * void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer,
- *                       int length, const char *bound);
+ * void docgen_parse_comment(struct LibmatchCursor *cursor);
+ * void docgen_extract_type(struct LibmatchCursor *cursor, char *buffer, int length);
+ * void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer, int length, const char *bound);
 */
-
-
-
-
-
-
 
 #endif
