@@ -45,3 +45,64 @@ following platforms:
   - VM/ESA 2.4 (OpenVM)
   - MVS/ESA 6.0.2 (OpenMVS)
   - OpenVMS 7.3
+
+Docgen is quite simple to use. The way that docgen knows what to document is
+through the use of source code comments. Through these, docgen can document all
+sorts of things in C source code, including:
+  - Functions
+  - Projects (like program manuals)
+  - Structures
+  - Constants
+  - Macro functions
+
+Each of these things has different 'tags' that are used to describe a certain
+thing about them. For example, functions have the '@param' tag to describe a
+parameter, and an '@type' tag to describe the type of said parameter. These
+are composed in a single source code comment with a 'header' that specifies what
+type of thing is being documented. For example, let us say we want to document a
+function that produces the factorial of a certain integer, and it is in a file
+called `math.h`.
+
+```c
+/*
+ * @docgen: function
+ * @brief: compute the factorial of an integer
+ * @name: factorial
+ *
+ * @include: math.h
+ *
+ * @description
+ * @Compute the factorial of an integer x.
+ * @description
+ *
+ * @example
+ * @#include <stdio.h>
+ * @#include "math.h"
+ * @
+ * @int main(void) {
+ * @    unsigned long number = 0;
+ * @
+ * @    number = factorial(5);
+ * @    printf("The factorial of %i is %lu\n", 5, number);
+ * @
+ * @    return 0;
+ * @}
+ * @example
+ *
+ * @error: x is negative
+ * 
+ * @param x: the integer to compute the factorial of
+ * @type: int
+*/
+unsigned long factorial(int x);
+```
+
+
+
+
+
+
+
+
+
+
