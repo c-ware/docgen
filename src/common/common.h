@@ -98,15 +98,84 @@ struct DocgenStructureField;
 
 void docgen_extract_type(struct LibmatchCursor *cursor, char *buffer, int length);
 
+/*
+ * @docgen: function
+ * @brief:
+*/
 void docgen_parse_comment(struct LibmatchCursor *cursor);
 
+/*
+ * @docgen: function
+ * @brief: determine if the type of the comment is expected
+ * @name: docgen_comment_is_type
+ *
+ * @include: common.h
+ *
+ * @description
+ * @Given the cursor's position in the comment, determine if the comment
+ * @has a type that matches the expected type
+ * @description
+ *
+ * @param cursor: the cursor to read the comment type from
+ * @type: struct LibmatchCursor *
+ *
+ * @param comment_start: the start of comment token
+ * @type: const char *
+ *
+ * @param comment_end: the end of comment token
+ * @type: const char *
+ *
+ * @param type: the expected type
+ * @type: const char *
+ *
+ * @return: whether or not the comment matches
+ * @type: int
+*/
 int docgen_comment_is_type(struct LibmatchCursor *cursor, const char *comment_start,
-                           const char *commend_end, const char *type);
+                           const char *comment_end, const char *type);
 
-void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer,
-                          int length, const char *bound);
-
+/*
+ * @docgen: function
+ * @brief: determine the characters that qualify a start of comment
+ * @name: docgen_get_comment_start
+ *
+ * @include: common.h
+ *
+ * @description
+ * @This function will, given the command line arguments to docgen, determine
+ * @what the proper start of block comment token is. This function really only 
+ * @exists to assist in future-proofing docgen incase of any other language
+ * @support we may want to add in the future, but it is also a bit cleaner.
+ * @description
+ *
+ * @param arguments: the arguments to docgen
+ * @type: struct DocgenArguments
+ *
+ * @return: the start of comment token
+ * @type: const char *
+*/
 const char *docgen_get_comment_start(struct DocgenArguments arguments);
+
+/*
+ * @docgen: function
+ * @brief: determine the characters that qualify an end of comment
+ * @name: docgen_get_comment_end
+ *
+ * @include: common.h
+ *
+ * @description
+ * @This function will, given the command line arguments to docgen, determine
+ * @what the proper end of block comment token is. This function really only 
+ * @exists to assist in future-proofing docgen incase of any other language
+ * @support we may want to add in the future, but it is also a bit cleaner.
+ * @description
+ *
+ * @param arguments: the arguments to docgen
+ * @type: struct DocgenArguments
+ *
+ * @return: the end of comment token
+ * @type: const char *
+*/
 const char *docgen_get_comment_end(struct DocgenArguments arguments);
 
 /*
@@ -395,9 +464,14 @@ void field_line_error_check(const char *line, int line_number);
 */
 void field_line_arg_error_check(const char *line, int line_number);
 
-
-
-
+/*
+ * From what I can tell, this function is not used anywhere, so I have decided
+ * to deprecate this for now, but it might have use somewhere else and I just
+ * could not find it.
+ *
+ * void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer,
+ *                       int length, const char *bound);
+*/
 
 
 
