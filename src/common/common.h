@@ -38,12 +38,18 @@
 #ifndef CWARE_DOCGEN_COMMON_H
 #define CWARE_DOCGEN_COMMON_H
 
-#define docgen_get_field_length(field, depth) \
-    (((depth + 1) * DOCGEN_INDENTATION) + strlen((field).type) + strlen((field).name) + 1 + 1)
 
 struct LibmatchCursor;
 struct DocgenArguments;
 struct DocgenStructureField;
+
+/* Utility macros */
+#define libmatch_exec_until(_cursor, character)         \
+    while(((_cursor)->buffer[(_cursor)->cursor] != (character)) && \
+           ((_cursor)->cursor < (_cursor)->length))
+
+#define docgen_get_field_length(field, depth) \
+    (((depth + 1) * DOCGEN_INDENTATION) + strlen((field).type) + strlen((field).name) + 1 + 1)
 
 /* Error handling */
 #define tag_error(new_tag, cursor)                                                                         \

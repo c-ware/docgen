@@ -115,7 +115,6 @@ static void embed_macro_functions(struct DocgenProject project,
 
         /* Generate the arguments and parameters */
         for(parameter_index = 0; parameter_index < carray_length(macro_function.parameters); parameter_index++) {
-            int is_ptr = 0;
             struct DocgenMacroFunctionParameter parameter;
 
             parameter = macro_function.parameters->contents[parameter_index];
@@ -384,14 +383,10 @@ static void description_table(struct LibmatchCursor *cursor, FILE *location,
 }
 
 static void description_eval(FILE *location, char *buffer) {
-    char table_line[DOCGEN_LINE_LENGTH + 1];
-    char table_buffer[DOCGEN_TABLE_LENGTH + 1];
     struct LibmatchCursor cursor = libmatch_cursor_init(buffer, strlen(buffer));
 
     /* Display the description, and any tables. */
     while(cursor.cursor < cursor.length) { 
-        int character = -1;
-
         /* Saving the cursor position here because if a line starts with
          * any of the first letters of "table", even though it might not be
          * "table", then it will not display those characters. */

@@ -103,7 +103,6 @@ int strrepl_shift_forward(char *string, const char *find, const char *replace,
 
     for(index = 0; index < length; index++) {
         size_t cursor = 0;
-        size_t missed = 0;
 
         if(strstarts(string + index, find) == 0)
             continue;

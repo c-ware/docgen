@@ -158,57 +158,9 @@ int docgen_comment_is_type(struct LibmatchCursor *cursor, const char *comment_st
     return 1;
 }
 
-/*
-void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
-                                struct LibmatchCursor *cursor, char *tag_line) {
-    int index = 0;
-
-    liberror_is_null(docgen_extract_field_block, tag_name);
-    liberror_is_null(docgen_extract_field_block, cursor);
-    liberror_is_null(docgen_extract_field_block, buffer);
-    liberror_is_null(docgen_extract_field_block, tag_line);
-    liberror_is_negative(docgen_extract_field_block, length);
-
-    while(cursor->cursor != cursor->length) {
-        int character = -1;
-
-        if(libmatch_cond_before(cursor, '\n', "@") == 0) {
-            fprintf(stderr, "docgen: unterminated block on line %i\n", cursor->line);
-            exit(EXIT_FAILURE);
-        }
-
-        libmatch_until(cursor, "@");
-        libmatch_cursor_enable_pushback(cursor);
-        
-        if(libmatch_string_expect(cursor, tag_line) == 1)
-            break;
-
-        libmatch_cursor_disable_pushback(cursor);
-
-        while(index < length) {
-            character = libmatch_cursor_getch(cursor);
-
-            if(character == LIBMATCH_EOF)
-                break;
-
-            buffer[index] = character;
-            index++;
-
-            if(character == '\n')
-                break;
-        }
-    }
-
-    buffer[index] = '\0';
-    libmatch_next_line(cursor);
-    libmatch_cursor_disable_pushback(cursor);
-}
-*/
-
 void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
                                 struct LibmatchCursor *cursor, char *tag_line) {
     int written = 0;
-    int character = -1;
     int block_length = 0;
     struct LibmatchCursor buffer_cursor;
     char block_line[DOCGEN_BLOCK_LINE_LENGTH + 1];
@@ -219,7 +171,7 @@ void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
     liberror_is_null(docgen_extract_field_block, read);
     liberror_is_negative(docgen_extract_field_block, length);
 
-    buffer_cursor = libmatch_cursor_init(read, strlen(read));
+    buffer_cursor = libmatch_cursor_init(tag_line, strlen(tag_line));
     libmatch_until(&buffer_cursor, "@");
 
     /* The first non-alphabetical character must be a new line */
@@ -331,7 +283,6 @@ void docgen_create_file_path(struct DocgenArguments arguments, const char *name,
 void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_length,
                                int line_number, char *tag_line) {
     int written = 0;
-    int character = -1;
     struct LibmatchCursor buffer_cursor;
 
     liberror_is_null(docgen_extract_field_line, tag_name);
@@ -369,7 +320,6 @@ void docgen_extract_field_line_arg(const char *tag_name, char *argument_buffer,
     int written = 0;
     int buffer_cursor = 0;
     struct LibmatchCursor cursor;
-    char block_line[DOCGEN_BLOCK_LINE_LENGTH + 1];
 
     liberror_is_null(docgen_extract_field_line_arg, tag_name);
     liberror_is_null(docgen_extract_field_line_arg, tag_line);
@@ -475,7 +425,6 @@ void docgen_do_padding(struct DocgenStructureField field, int longest, int depth
                        FILE *location) {
     int padding = 0;
     int padding_index = 0;
-    int field_length = 0;
 
     liberror_is_null(docgen_extract_field_block, location);
     liberror_is_negative(docgen_extract_field_block, longest);

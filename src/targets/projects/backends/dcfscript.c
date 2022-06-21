@@ -219,14 +219,10 @@ void docgen_project_dcfscript_description_table(struct LibmatchCursor *cursor,
 }
 
 void docgen_project_dcfscript_description_eval(FILE *location, char *buffer) {
-    char table_line[DOCGEN_LINE_LENGTH + 1];
-    char table_buffer[DOCGEN_TABLE_LENGTH + 1];
     struct LibmatchCursor cursor = libmatch_cursor_init(buffer, strlen(buffer));
 
     /* Display the description, and any tables. */
     while(cursor.cursor < cursor.length) { 
-        int character = -1;
-
         /* Saving the cursor position here because if a line starts with
          * any of the first letters of "table", even though it might not be
          * "table", then it will not display those characters. */

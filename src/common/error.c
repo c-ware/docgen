@@ -198,12 +198,10 @@ void block_error_check(const char *line, int line_number) {
     liberror_is_null(block_error_check, line);
     liberror_is_negative(block_error_check, line_number);
 
-/*
     cursor = libmatch_cursor_init((char *) line, strlen(line));
 
-    if(libmatch_cond_before(cursor, '\n', "@") == 0)
-        return
-*/
+    if(libmatch_cond_before(&cursor, '\n', "@") == 0)
+        return;
 
     fprintf(stderr, "docgen: unterminated block on line %i\n", line_number);
     exit(EXIT_FAILURE);

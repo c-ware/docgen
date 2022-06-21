@@ -3,7 +3,7 @@ TESTOBJS=./src/arguments.o ./src/libarg/libarg.o ./src/libmatch/read.o ./src/lib
 TESTS=
 CC=cc
 PREFIX=/usr/local
-CFLAGS=-Wall -Wextra -Wpedantic -ansi -g
+CFLAGS=-Wall -Werror -Wextra -Wpedantic -Wno-unused-parameter -ansi -g
 
 all: $(OBJS) $(TESTS) docgen
 

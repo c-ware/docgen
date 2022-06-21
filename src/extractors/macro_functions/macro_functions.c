@@ -87,16 +87,16 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
                                       cursor->line, new_tag.line);
 
         else if(strcmp(tag_name.name, "description") == 0)
-            docgen_extract_field_block("description", DOCGEN_MACRO_FUNCTION_DESCRIPTION_LENGTH, cursor,
-                                      new_tag.line, new_macro_function.description);
+            docgen_extract_field_block("description", new_macro_function.description,
+                                       DOCGEN_MACRO_FUNCTION_DESCRIPTION_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "notes") == 0)
-            docgen_extract_field_block("notes", DOCGEN_MACRO_FUNCTION_NOTES_LENGTH, cursor,
-                                      new_tag.line, new_macro_function.notes);
+            docgen_extract_field_block("notes", new_macro_function.notes,
+                                       DOCGEN_MACRO_FUNCTION_NOTES_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "example") == 0)
-            docgen_extract_field_block("example", DOCGEN_MACRO_FUNCTION_EXAMPLE_LENGTH, cursor,
-                                      new_tag.line, new_macro_function.example);
+            docgen_extract_field_block("example", new_macro_function.example,
+                                       DOCGEN_MACRO_FUNCTION_EXAMPLE_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "include") == 0) {
             struct Inclusion new_inclusion;

@@ -88,7 +88,6 @@ int libmatch_atleast(struct LibmatchCursor *cursor, int count,
 }
 
 int libmatch_string_expect(struct LibmatchCursor *cursor, const char *string) {
-    int matched = 0;
     int character = -1;
     int string_cursor = 0;
 

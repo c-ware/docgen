@@ -1,4 +1,4 @@
-.TH "docgen" "cware" "Jun 20, 2022" "" "C-Ware Manuals"
+.TH "docgen" "cware" "Jun 21, 2022" "" "C-Ware Manuals"
 .SH NAME
 docgen - generate documentation from c source code
 .SH SYNOPSIS

@@ -111,12 +111,12 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
                                       cursor.line, new_tag.line);
 
         else if(strcmp(tag_name.name, "arguments") == 0)
-            docgen_extract_field_block("arguments", DOCGEN_PROJECT_ARGUMENTS_LENGTH,
-                                 &cursor, new_tag.line, new_project.arguments);
+            docgen_extract_field_block("arguments", new_project.arguments,
+                                       DOCGEN_PROJECT_ARGUMENTS_LENGTH, &cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "description") == 0)
-            docgen_extract_field_block("description", DOCGEN_PROJECT_DESCRIPTION_LENGTH,
-                                 &cursor, new_tag.line, new_project.description);
+            docgen_extract_field_block("description", new_project.description,
+                                       DOCGEN_PROJECT_DESCRIPTION_LENGTH, &cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "reference") == 0) {
             struct Reference new_reference;
@@ -191,8 +191,6 @@ void docgen_project_generate(struct DocgenArguments arguments, FILE *file) {
 
     /* Find comments */
     while(cursor.cursor != cursor.length) {
-        struct DocgenFunction new_function;
-
         if(libmatch_string_expect(&cursor, comment_start) == 0)
             continue;
 
@@ -220,7 +218,6 @@ void docgen_project_generate(struct DocgenArguments arguments, FILE *file) {
 }
 
 void docgen_project_category_generate(struct DocgenArguments arguments, FILE *file) {
-    int saved_position = 0;
     struct DocgenProject project;
     struct LibmatchCursor cursor = libmatch_cursor_from_stream(file);    
 
@@ -230,8 +227,6 @@ void docgen_project_category_generate(struct DocgenArguments arguments, FILE *fi
 
     /* Find comments */
     while(cursor.cursor != cursor.length) {
-        struct DocgenFunction new_function;
-
         if(libmatch_string_expect(&cursor, comment_start) == 0)
             continue;
 

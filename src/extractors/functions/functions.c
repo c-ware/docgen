@@ -87,16 +87,16 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                                       cursor->line, new_tag.line);
 
         else if(strcmp(tag_name.name, "description") == 0)
-            docgen_extract_field_block("description", DOCGEN_FUNCTION_DESCRIPTION_LENGTH, cursor,
-                                      new_tag.line, new_function.description);
+            docgen_extract_field_block("description", new_function.description,
+                                       DOCGEN_FUNCTION_DESCRIPTION_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "notes") == 0)
-            docgen_extract_field_block("notes", DOCGEN_FUNCTION_NOTES_LENGTH, cursor,
-                                      new_tag.line, new_function.notes);
+            docgen_extract_field_block("notes", new_function.notes,
+                                       DOCGEN_FUNCTION_NOTES_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "example") == 0)
-            docgen_extract_field_block("example", DOCGEN_FUNCTION_EXAMPLE_LENGTH, cursor,
-                                      new_tag.line, new_function.example);
+            docgen_extract_field_block("example", new_function.example,
+                                       DOCGEN_FUNCTION_EXAMPLE_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "include") == 0) {
             struct Inclusion new_inclusion;
@@ -195,7 +195,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
 
                     exit(EXIT_FAILURE);
                 case DOCGEN_TAG_STATUS_DONE:
-                    fprintf(stderr, "%s", "docgen: comment ended at line %i before type could be determined\n",
+                    fprintf(stderr, "docgen: comment ended at line %i before type could be determined\n",
                             cursor->line);
 
                     exit(EXIT_FAILURE);
