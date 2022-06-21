@@ -179,7 +179,35 @@ void field_line_arg_error_check(const char *line, int line_number) {
     }
 }
 
+/*
+ * This function will enforce this regular expression on each line
+ * inside of a block. This function itself does NOT traverse each
+ * line itself, but rather relies on the caller to extract the
+ * next line.
+ *
+ * The regular expression that is enforced is:
+ * @.+
+ *
+ * The only real thing that needs to be 'enforced' here is the
+ * presence of a @ at the start of the line, but who knows
+ * what the future might hold.
+*/
+void block_error_check(const char *line, int line_number) {
+    struct LibmatchCursor cursor;
 
+    liberror_is_null(block_error_check, line);
+    liberror_is_negative(block_error_check, line_number);
+
+/*
+    cursor = libmatch_cursor_init((char *) line, strlen(line));
+
+    if(libmatch_cond_before(cursor, '\n', "@") == 0)
+        return
+*/
+
+    fprintf(stderr, "docgen: unterminated block on line %i\n", line_number);
+    exit(EXIT_FAILURE);
+}
 
 
 

@@ -48,7 +48,7 @@
 void docgen_extract_type(struct LibmatchCursor *cursor, char *buffer, int length) {
     liberror_is_null(docgen_extract_type, cursor);
     liberror_is_null(docgen_extract_type, buffer);
-    liberror_is_negative(docgen_extract_field_block, length);
+    liberror_is_negative(docgen_extract_type, length);
 
     /* Type should follow
      * TODO: Add checks for there being no type tag following this,
@@ -158,32 +158,33 @@ int docgen_comment_is_type(struct LibmatchCursor *cursor, const char *comment_st
     return 1;
 }
 
-void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer,
-                          int length, const char *bound) {
+/*
+void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
+                                struct LibmatchCursor *cursor, char *tag_line) {
     int index = 0;
 
+    liberror_is_null(docgen_extract_field_block, tag_name);
     liberror_is_null(docgen_extract_field_block, cursor);
     liberror_is_null(docgen_extract_field_block, buffer);
-    liberror_is_null(docgen_extract_field_block, bound);
+    liberror_is_null(docgen_extract_field_block, tag_line);
     liberror_is_negative(docgen_extract_field_block, length);
 
     while(cursor->cursor != cursor->length) {
         int character = -1;
 
-        /* TODO: report error here */
         if(libmatch_cond_before(cursor, '\n', "@") == 0) {
-    
+            fprintf(stderr, "docgen: unterminated block on line %i\n", cursor->line);
+            exit(EXIT_FAILURE);
         }
 
         libmatch_until(cursor, "@");
         libmatch_cursor_enable_pushback(cursor);
         
-        if(libmatch_string_expect(cursor, bound) == 1)
+        if(libmatch_string_expect(cursor, tag_line) == 1)
             break;
 
         libmatch_cursor_disable_pushback(cursor);
 
-        /* Read the line */
         while(index < length) {
             character = libmatch_cursor_getch(cursor);
 
@@ -202,85 +203,10 @@ void docgen_extract_block(struct LibmatchCursor *cursor, char *buffer,
     libmatch_next_line(cursor);
     libmatch_cursor_disable_pushback(cursor);
 }
+*/
 
-const char *docgen_get_comment_start(struct DocgenArguments arguments) {
-    if(strcmp(arguments.language, "c") == 0) {
-        return "/*";
-    }    
-
-    /* From: single comment mode attempt
-    if(strcmp(arguments.language, "py") == 0) {
-        return "#";
-    }    
-    */
-
-    liberror_unhandled(docgen_get_comment_start);
-
-    return NULL;
-}
-
-const char *docgen_get_comment_end(struct DocgenArguments arguments) {
-    if(strcmp(arguments.language, "c") == 0) {
-        return "*/";
-    }    
-
-    /* From: single comment mode attempt
-    if(strcmp(arguments.language, "py") == 0) {
-        return "";
-    }    
-    */
-
-    liberror_unhandled(docgen_get_comment_end);
-
-    return NULL;
-}
-
-void docgen_create_file_path(struct DocgenArguments arguments, const char *name,
-                             char *buffer, int length) {
-
-    liberror_is_null(docgen_create_file_path, name);
-    liberror_is_null(docgen_create_file_path, buffer);
-    liberror_is_negative(docgen_create_file_path, length);
-
-    libpath_join_path(buffer, length, "./doc/", name, ".", arguments.section, NULL);
-}
-
-void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_length,
-                               int line_number, char *tag_line) {
-    int written = 0;
-    int character = -1;
-    struct LibmatchCursor buffer_cursor;
-
-    liberror_is_null(docgen_extract_field_line, tag_name);
-    liberror_is_null(docgen_extract_field_line, buffer);
-    liberror_is_null(docgen_extract_field_line, tag_line);
-    liberror_is_negative(docgen_extract_field_line, buffer_length);
-    liberror_is_negative(docgen_extract_field_line, line_number);
-
-    /* Perform error checks on the line */
-    field_line_error_check(tag_line, line_number);
-
-    buffer_cursor = libmatch_cursor_init(tag_line, strlen(tag_line));
-
-    /* A field line tag must have a : directly after its name.
-     * Jump to the @, then the start of the :, and then
-     * traverse past it to start reading the argument until the \n */
-    libmatch_until(&buffer_cursor, "@");
-    libmatch_until(&buffer_cursor, ":");
-    libmatch_cursor_getch(&buffer_cursor);
-
-    /* Read the name, and do some final error checks. */
-    written = libmatch_read_until(&buffer_cursor, buffer, buffer_length, "\n");
-
-    if(written >= buffer_length) {
-        fprintf(stderr, "docgen: description of tag '%s' on line %i is too long-- max length of %i\n",
-                tag_name, line_number, buffer_length);
-        exit(EXIT_FAILURE);
-    }
-}
-
-void docgen_extract_field_block(const char *tag_name, int length, struct LibmatchCursor *cursor,
-                                char *read, char *buffer) {
+void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
+                                struct LibmatchCursor *cursor, char *tag_line) {
     int written = 0;
     int character = -1;
     int block_length = 0;
@@ -359,6 +285,83 @@ void docgen_extract_field_block(const char *tag_name, int length, struct Libmatc
         strcat(buffer, "\n");
     }
 }
+
+const char *docgen_get_comment_start(struct DocgenArguments arguments) {
+    if(strcmp(arguments.language, "c") == 0) {
+        return "/*";
+    }    
+
+    /* From: single comment mode attempt
+    if(strcmp(arguments.language, "py") == 0) {
+        return "#";
+    }    
+    */
+
+    liberror_unhandled(docgen_get_comment_start);
+
+    return NULL;
+}
+
+const char *docgen_get_comment_end(struct DocgenArguments arguments) {
+    if(strcmp(arguments.language, "c") == 0) {
+        return "*/";
+    }    
+
+    /* From: single comment mode attempt
+    if(strcmp(arguments.language, "py") == 0) {
+        return "";
+    }    
+    */
+
+    liberror_unhandled(docgen_get_comment_end);
+
+    return NULL;
+}
+
+void docgen_create_file_path(struct DocgenArguments arguments, const char *name,
+                             char *buffer, int length) {
+
+    liberror_is_null(docgen_create_file_path, name);
+    liberror_is_null(docgen_create_file_path, buffer);
+    liberror_is_negative(docgen_create_file_path, length);
+
+    libpath_join_path(buffer, length, "./doc/", name, ".", arguments.section, NULL);
+}
+
+void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_length,
+                               int line_number, char *tag_line) {
+    int written = 0;
+    int character = -1;
+    struct LibmatchCursor buffer_cursor;
+
+    liberror_is_null(docgen_extract_field_line, tag_name);
+    liberror_is_null(docgen_extract_field_line, buffer);
+    liberror_is_null(docgen_extract_field_line, tag_line);
+    liberror_is_negative(docgen_extract_field_line, buffer_length);
+    liberror_is_negative(docgen_extract_field_line, line_number);
+
+    /* Perform error checks on the line */
+    field_line_error_check(tag_line, line_number);
+
+    buffer_cursor = libmatch_cursor_init(tag_line, strlen(tag_line));
+
+    /* A field line tag must have a : directly after its name.
+     * Jump to the @, then the start of the :, and then
+     * traverse past it to start reading the argument until the \n */
+    libmatch_until(&buffer_cursor, "@");
+    libmatch_until(&buffer_cursor, ":");
+    libmatch_cursor_getch(&buffer_cursor);
+
+    /* Read the name, and do some final error checks. */
+    written = libmatch_read_until(&buffer_cursor, buffer, buffer_length, "\n");
+
+    if(written >= buffer_length) {
+        fprintf(stderr, "docgen: description of tag '%s' on line %i is too long-- max length of %i\n",
+                tag_name, line_number, buffer_length);
+        exit(EXIT_FAILURE);
+    }
+}
+
 
 void docgen_extract_field_line_arg(const char *tag_name, char *argument_buffer,
                                    int argument_length, char *description_buffer,

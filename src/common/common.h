@@ -265,12 +265,16 @@ void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_le
  * @notes
  *
  * @error: tag_name is NULL
+ * @error: tag_line is NULL
  * @error: cursor is NULL
- * @error: read is NULL
  * @error: buffer is NULL
+ * @error: length is negative
  *
  * @param tag_name: the name of the tag that is being parsed
  * @type: const char *
+ *
+ * @param buffer: the buffer to write the block into
+ * @type: char *
  *
  * @param length: the length of the block buffer
  * @type: int
@@ -280,12 +284,9 @@ void docgen_extract_field_line(const char *tag_name, char *buffer, int buffer_le
  *
  * @param read: the line that the first tag is on
  * @type: char *
- *
- * @param buffer: the buffer to write the block into
- * @type: char *
 */
-void docgen_extract_field_block(const char *tag_name, int length, struct LibmatchCursor *cursor,
-                                char *read, char *buffer);
+void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
+                                struct LibmatchCursor *cursor, char *tag_line);
 
 /*
  * @docgen: function
@@ -456,6 +457,35 @@ void field_line_error_check(const char *line, int line_number);
  * @type: int
 */
 void field_line_arg_error_check(const char *line, int line_number);
+
+/*
+ * @docgen: function
+ * @brief: perform error checking on a line in a block
+ * @name: block_error_check
+ *
+ * @include: common.h
+ *
+ * @description
+ * @This function will enforce a specific format on on each line inside of
+ * @a block. This function itself does NOT traverse each line itself, but
+ * @rather relies on the caller to extract the next line.
+ * @description
+ *
+ * @notes
+ * @This function is currently unused, although it is my intention to
+ * @use it sometime in the future.
+ * @notes
+ *
+ * @error: line is NULL
+ * @error: line_number is negative
+ *
+ * @param line: the parsed line to error check
+ * @type: const char *
+ *
+ * @param line_number: the line number of the parser
+ * @type: int
+*/
+void block_error_check(const char *line, int line_number);
 
 /*
  * From what I can tell, this functions are not used anywhere, so I have decided
