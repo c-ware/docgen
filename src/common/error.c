@@ -206,9 +206,3 @@ void block_error_check(const char *line, int line_number) {
     fprintf(stderr, "docgen: unterminated block on line %i\n", line_number);
     exit(EXIT_FAILURE);
 }
-
-
-
-
-
-

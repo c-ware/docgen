@@ -1,7 +1,7 @@
 # CHANGELOG.md
 
 VERSION: 1.0.6
-DATE: June 18th, 2022
+DATE: June 21st, 2022
 
 ## Features
 - You can now generate documentation for macro functions with the `macros`
@@ -14,6 +14,11 @@ DATE: June 18th, 2022
 
 ## Misc
 - License changed-- now using the C-Ware License.
+- Complete overhaul of the internal functions for extracting individual tags
+  into usable buffers. Reformatted the parameter order for them, as well as
+  separated most of the error checking into their own functions to improve
+  code readability.
 
 ## Documentation
-No documentation changes.
+- Added internal documentation for functions, albeit it is not generated
+  *yet*.

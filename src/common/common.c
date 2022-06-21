@@ -163,7 +163,7 @@ void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
     int written = 0;
     int block_length = 0;
     struct LibmatchCursor buffer_cursor;
-    char block_line[DOCGEN_BLOCK_LINE_LENGTH + 1];
+    char block_line[DOCGEN_BLOCK_LINE_LENGTH + 1] = "";
 
     liberror_is_null(docgen_extract_field_block, tag_name);
     liberror_is_null(docgen_extract_field_block, buffer);
@@ -174,42 +174,20 @@ void docgen_extract_field_block(const char *tag_name, char *buffer, int length,
     buffer_cursor = libmatch_cursor_init(tag_line, strlen(tag_line));
     libmatch_until(&buffer_cursor, "@");
 
-    /* The first non-alphabetical character must be a new line */
-    while(buffer_cursor.cursor < buffer_cursor.length) {
-        int character = libmatch_cursor_getch(&buffer_cursor);
-
-        if(strchr(LIBMATCH_ALPHANUM "_", character) != NULL)
-            continue;
-
-        /* Character is non-alphabetic; first instance of this must be
-         * a colon. Otherwise, error. */
-        if(character == '\n')
-            break;
-
-        fprintf(stderr, "docgen: tag '%s' on line %i not immediately followed by a new line (\\n)\n",
-                tag_name, cursor->line);
-        exit(EXIT_FAILURE);
-    }
-
     buffer[0] = '\0';
 
     /* Read the lines of the block until the end of the block */
     while(1) {
         struct LibmatchCursor line_cursor;
-        char line_buffer[DOCGEN_BLOCK_LINE_LENGTH + 1];
+        char line_buffer[DOCGEN_BLOCK_LINE_LENGTH + 1] = "";
 
+        /* Error handle the line */
         written = libmatch_read_until(cursor, block_line, DOCGEN_BLOCK_LINE_LENGTH, "\n");
+        block_error_check(block_line, cursor->line);
 
         if(written == DOCGEN_BLOCK_LINE_LENGTH) {
             fprintf(stderr, "docgen: line %i in body of tag '%s' is too long. max of %i\n",
                     cursor->line, tag_name, DOCGEN_BLOCK_LINE_LENGTH);
-            exit(EXIT_FAILURE);
-        }
-
-        /* Line must has a field sign */
-        if(strchr(block_line, '@') == NULL) {
-            fprintf(stderr, "docgen: line %i in body of tag '%s' has no @.\n", cursor->line,
-                    tag_name);
             exit(EXIT_FAILURE);
         }
 
