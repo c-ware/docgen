@@ -66,6 +66,7 @@ void main_load_defaults(struct DocgenArguments *arguments,
     arguments->title = "Title";
     arguments->date = "Date";
     arguments->language = "c";
+    arguments->md_mono = 0;
 
     callbacks->error = main_error;
     callbacks->parameters = main_parameters;
@@ -115,6 +116,7 @@ void main_error(const char *option, int type, int expected, int got) {
             fprintf(stderr, "%s", "                            [ --section SECTION | -s SECTION ] [ --title TITLE | -t TITLE ]\n");
             fprintf(stderr, "%s", "                            [ --date DATE | -d DATE ] [ --include INCLUDE | -l INCLUDE ]\n");
             fprintf(stderr, "%s", "                            [ --isystem INCLUDE | -d INCLUDE ] [ --language LANGUAGE | -x LANGUAGE ]\n");
+            fprintf(stderr, "%s", "                            [ --md-mono | -m ] \n");
             fprintf(stderr, "%s", "\nArguments:\n");
             fprintf(stderr, "%s", "       category                    the type of documentation to generate\n");
             fprintf(stderr, "%s", "       file                        the file to generate documentation from (can be - for stdin)\n");
@@ -223,6 +225,7 @@ int main_parameters(const char *option) {
     liberror_is_null(main_parameters, option);
 
     docgen_option("--help", "-h", 0);
+    docgen_option("--md-mono", "-m", 0);
     docgen_option("--format", "-f", 1);
     docgen_option("--section", "-s", 1);
     docgen_option("--title", "-t", 1);
@@ -251,6 +254,11 @@ struct DocgenArguments main_parse(int argc, char **argv) {
     docgen_get_option_argument("--title", "-t", arguments.title);
     docgen_get_option_argument("--date", "-d", arguments.date);
     docgen_get_option_argument("--language", "-x", arguments.language);
+
+    if(libarg_find_option("--md-mono") != LIBARG_UNKNOWN_OPTION ||
+       libarg_find_option("-m") != LIBARG_UNKNOWN_OPTION)
+        arguments.md_mono = 1;
+
 
     /* Extract inclusions */
     main_extract_inclusions(argc, argv, &arguments);

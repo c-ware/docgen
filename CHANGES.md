@@ -6,6 +6,7 @@ DATE: June 21st, 2022
 ## Features
 - You can now generate documentation for macro functions with the `macros`
   category.
+- --md-mono option for enabling or disabling Monospace fonts for code
 
 ## Bug Fixes
 - No longer raises an EOF error for a file where the comment is the only
@@ -22,3 +23,6 @@ DATE: June 21st, 2022
 ## Documentation
 - Added internal documentation for functions, albeit it is not generated
   *yet*.
+
+## Work In Progress
+- Markdown generator

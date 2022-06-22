@@ -50,11 +50,19 @@ do {                                                                       \
     while(__INCLUSION_INDEX < carray_length(array)) {                      \
         struct Inclusion inclusion = (array)->contents[__INCLUSION_INDEX]; \
                                                                            \
+        if(arguments.md_mono == 1)                                         \
+            fprintf(location, "%c", '`');                                  \
+                                                                           \
         if(inclusion.type == DOCGEN_INCLUSION_LOCAL) {                     \
-            fprintf(location, "`#include \"%s\"`\n", inclusion.path);      \
+            fprintf(location, "#include \"%s\"", inclusion.path);          \
         } else if(inclusion.type == DOCGEN_INCLUSION_SYSTEM) {             \
-            fprintf(location, "`#include <%s>`\n", inclusion.path);        \
+            fprintf(location, "#include <%s>", inclusion.path);            \
         }                                                                  \
+                                                                           \
+        if(arguments.md_mono == 1)                                         \
+            fprintf(location, "%c", '`');                                  \
+                                                                           \
+        fprintf(location, "%c", '\n');                                     \
                                                                            \
         __INCLUSION_INDEX++;                                               \
     }                                                                      \
@@ -63,14 +71,14 @@ do {                                                                       \
 
 void head(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
     fprintf(location, "# %s.md\n\n", function.name);
-    fprintf(location, "%s", "# NAME\n");
+    fprintf(location, "%s", "### NAME\n");
     fprintf(location, "%s - %s\n\n", function.name, function.brief);
 }
 
 void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
     int index = 0;
 
-    fprintf(location, "%s", "# SYNOPSIS\n");
+    fprintf(location, "%s", "### SYNOPSIS\n");
 
     write_inclusions(arguments.inclusions);
     write_inclusions(function.inclusions);
@@ -78,30 +86,50 @@ void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFun
     fprintf(location, "%c", '\n');
 
     /* Write the function signature */
-    fprintf(location, "`%s %s(", function.return_data.return_type,  function.name);
+    if(arguments.md_mono == 0)
+        fprintf(location, "%s %s(", function.return_data.return_type,  function.name);
+    else
+        fprintf(location, "`%s %s(", function.return_data.return_type,  function.name);
 
     /* Function parameters */
     for(index = 0; index < carray_length(function.parameters); index++) {
         struct DocgenFunctionParameter parameter = function.parameters->contents[index];
 
-        /*
-        if(strchr(parameter.type, '*') == NULL)
-            fprintf(location, "%s %s", parameter.type, parameter.name);
-        else {
-            int parameter_index = 0;
+        /* Do not use backticks for generating a monospaced font for
+         * code. */
+        if(arguments.md_mono == 0) {
+            if(strchr(parameter.type, '*') == NULL)
+                fprintf(location, "%s %s", parameter.type, parameter.name);
+            else {
+                int parameter_index = 0;
 
-            // Add '\' before each asterisk in the type
-            while(parameter.type[parameter_index] != '\0') {
-                int character = parameter.type[parameter_index];
+                // Add '\' before each asterisk in the type
+                while(parameter.type[parameter_index] != '\0') {
+                    int character = parameter.type[parameter_index];
 
-                if(character == '*')
-                    fprintf(location, "%c", '\\');
+                    if(character == '*')
+                        fprintf(location, "%c", '\\');
+                    
+                    fprintf(location, "%c", character);
+                    parameter_index++;
+                }
+
+                fprintf(location, "%s", parameter.name);
+
+                // Do not output a comma
+                if(index == (carray_length(function.parameters) - 1))
+                    continue;
                 
-                fprintf(location, "%c", character);
-                parameter_index++;
+                fprintf(location, "%s", ", ");
             }
+        }
 
-            fprintf(location, "%s", parameter.name);
+        /* Use backticks for generating a monospaced font for code. */
+        if(arguments.md_mono == 1) {
+            if(strchr(parameter.type, '*') == NULL)
+                fprintf(location, "%s %s", parameter.type, parameter.name);
+            else
+                fprintf(location, "%s%s", parameter.type, parameter.name);
 
             // Do not output a comma
             if(index == (carray_length(function.parameters) - 1))
@@ -109,10 +137,12 @@ void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFun
             
             fprintf(location, "%s", ", ");
         }
-        */
     }
 
-    fprintf(location, "%s", ")`");
+    if(arguments.md_mono == 0)
+        fprintf(location, "%s", ")");
+    else
+        fprintf(location, "%s", ")`");
 }
 
 void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
