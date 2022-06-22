@@ -103,20 +103,20 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
 
         /* Handle the tags */
         if(strcmp(tag_name.name, "name") == 0)
-            docgen_extract_field_line("name", DOCGEN_PROJECT_NAME_LENGTH, cursor.line,
-                                      new_tag.line, new_project.name);
+            docgen_extract_field_line("name", new_project.name, DOCGEN_PROJECT_NAME_LENGTH,
+                                      cursor.line, new_tag.line);
 
         else if(strcmp(tag_name.name, "brief") == 0)
-            docgen_extract_field_line("brief", DOCGEN_PROJECT_BRIEF_LENGTH, cursor.line,
-                                      new_tag.line, new_project.brief);
+            docgen_extract_field_line("brief", new_project.brief, DOCGEN_PROJECT_BRIEF_LENGTH,
+                                      cursor.line, new_tag.line);
 
         else if(strcmp(tag_name.name, "arguments") == 0)
-            docgen_extract_field_block("arguments", DOCGEN_PROJECT_ARGUMENTS_LENGTH,
-                                 &cursor, new_tag.line, new_project.arguments);
+            docgen_extract_field_block("arguments", new_project.arguments,
+                                       DOCGEN_PROJECT_ARGUMENTS_LENGTH, &cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "description") == 0)
-            docgen_extract_field_block("description", DOCGEN_PROJECT_DESCRIPTION_LENGTH,
-                                 &cursor, new_tag.line, new_project.description);
+            docgen_extract_field_block("description", new_project.description,
+                                       DOCGEN_PROJECT_DESCRIPTION_LENGTH, &cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "reference") == 0) {
             struct Reference new_reference;
@@ -131,8 +131,8 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
             char setting_name[DOCGEN_PROJECT_SETTING_LENGTH + 1];
 
             memset(setting_name, 0, sizeof(setting_name));
-            docgen_extract_field_line("setting", DOCGEN_PROJECT_SETTING_LENGTH, cursor.line,
-                                       new_tag.line, setting_name);
+            docgen_extract_field_line("setting", setting_name, DOCGEN_PROJECT_SETTING_LENGTH,
+                                      cursor.line, new_tag.line);
 
             if(strcmp(setting_name, "func-briefs") == 0)
                 new_project.function_briefs = 1;
@@ -151,10 +151,9 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
             memset(embed_type, 0, sizeof(embed_type));
             memset(&new_embed, 0, sizeof(struct DocgenProjectEmbed));
 
-            docgen_extract_field_line_arg("embed", new_tag.line,
-                                   DOCGEN_PROJECT_EMBED_TYPE_LENGTH, embed_type,
-                                   DOCGEN_PROJECT_EMBED_NAME_LENGTH, new_embed.name,
-                                   cursor.line);
+            docgen_extract_field_line_arg("embed", embed_type, DOCGEN_PROJECT_EMBED_TYPE_LENGTH,
+                                   new_embed.name, DOCGEN_PROJECT_EMBED_NAME_LENGTH,
+                                   cursor.line, new_tag.line);
 
             if(strcmp(embed_type, "structure") == 0)
                 new_embed.type = DOCGEN_PROJECT_EMBED_STRUCTURE;
@@ -192,8 +191,6 @@ void docgen_project_generate(struct DocgenArguments arguments, FILE *file) {
 
     /* Find comments */
     while(cursor.cursor != cursor.length) {
-        struct DocgenFunction new_function;
-
         if(libmatch_string_expect(&cursor, comment_start) == 0)
             continue;
 
@@ -221,7 +218,6 @@ void docgen_project_generate(struct DocgenArguments arguments, FILE *file) {
 }
 
 void docgen_project_category_generate(struct DocgenArguments arguments, FILE *file) {
-    int saved_position = 0;
     struct DocgenProject project;
     struct LibmatchCursor cursor = libmatch_cursor_from_stream(file);    
 
@@ -231,8 +227,6 @@ void docgen_project_category_generate(struct DocgenArguments arguments, FILE *fi
 
     /* Find comments */
     while(cursor.cursor != cursor.length) {
-        struct DocgenFunction new_function;
-
         if(libmatch_string_expect(&cursor, comment_start) == 0)
             continue;
 

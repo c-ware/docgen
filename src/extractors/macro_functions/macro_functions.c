@@ -79,24 +79,24 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
 
         /* Handle the tags */
         if(strcmp(tag_name.name, "name") == 0)
-            docgen_extract_field_line("name", DOCGEN_MACRO_FUNCTION_NAME_LENGTH, cursor->line,
-                                      new_tag.line, new_macro_function.name);
+            docgen_extract_field_line("name", new_macro_function.name, DOCGEN_MACRO_FUNCTION_NAME_LENGTH,
+                                      cursor->line, new_tag.line);
 
         else if(strcmp(tag_name.name, "brief") == 0)
-            docgen_extract_field_line("brief", DOCGEN_MACRO_FUNCTION_BRIEF_LENGTH, cursor->line,
-                                      new_tag.line, new_macro_function.brief);
+            docgen_extract_field_line("brief", new_macro_function.brief, DOCGEN_MACRO_FUNCTION_BRIEF_LENGTH,
+                                      cursor->line, new_tag.line);
 
         else if(strcmp(tag_name.name, "description") == 0)
-            docgen_extract_field_block("description", DOCGEN_MACRO_FUNCTION_DESCRIPTION_LENGTH, cursor,
-                                      new_tag.line, new_macro_function.description);
+            docgen_extract_field_block("description", new_macro_function.description,
+                                       DOCGEN_MACRO_FUNCTION_DESCRIPTION_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "notes") == 0)
-            docgen_extract_field_block("notes", DOCGEN_MACRO_FUNCTION_NOTES_LENGTH, cursor,
-                                      new_tag.line, new_macro_function.notes);
+            docgen_extract_field_block("notes", new_macro_function.notes,
+                                       DOCGEN_MACRO_FUNCTION_NOTES_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "example") == 0)
-            docgen_extract_field_block("example", DOCGEN_MACRO_FUNCTION_EXAMPLE_LENGTH, cursor,
-                                      new_tag.line, new_macro_function.example);
+            docgen_extract_field_block("example", new_macro_function.example,
+                                       DOCGEN_MACRO_FUNCTION_EXAMPLE_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "include") == 0) {
             struct Inclusion new_inclusion;
@@ -104,8 +104,8 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
             new_inclusion.type = DOCGEN_INCLUSION_LOCAL;
 
-            docgen_extract_field_line("include", DOCGEN_MACRO_FUNCTION_INCLUSION_LENGTH,
-                                      cursor->line, new_tag.line, new_inclusion.path);
+            docgen_extract_field_line("include", new_inclusion.path, DOCGEN_MACRO_FUNCTION_INCLUSION_LENGTH,
+                                      cursor->line, new_tag.line);
 
             carray_append(new_macro_function.inclusions, new_inclusion, INCLUDE);
         }
@@ -116,8 +116,8 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
             new_inclusion.type = DOCGEN_INCLUSION_SYSTEM;
 
-            docgen_extract_field_line("isystem", DOCGEN_MACRO_FUNCTION_INCLUSION_LENGTH,
-                                      cursor->line, new_tag.line, new_inclusion.path);
+            docgen_extract_field_line("isystem", new_inclusion.path, DOCGEN_MACRO_FUNCTION_INCLUSION_LENGTH,
+                                      cursor->line, new_tag.line);
 
             carray_append(new_macro_function.inclusions, new_inclusion, INCLUDE);
         }
@@ -126,8 +126,8 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
             struct DocgenMacroFunctionError new_error;
 
             memset(&new_error, 0, sizeof(struct DocgenMacroFunctionError));
-            docgen_extract_field_line("error", DOCGEN_MACRO_FUNCTION_ERROR_DESCRIPTION_LENGTH,
-                                      cursor->line, new_tag.line, new_error.description);
+            docgen_extract_field_line("error", new_error.description, DOCGEN_MACRO_FUNCTION_ERROR_DESCRIPTION_LENGTH,
+                                      cursor->line, new_tag.line);
 
             carray_append(new_macro_function.errors, new_error, MACRO_FUNCTION_ERROR);
         }
@@ -150,9 +150,9 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
             memset(&type_tag_name, 0, sizeof(struct DocgenTagName));
             memset(&new_parameter, 0, sizeof(struct DocgenMacroFunctionParameter));
 
-            docgen_extract_field_line_arg("param", new_tag.line, DOCGEN_MACRO_FUNCTION_PARAMETER_NAME_LENGTH,
-                                          new_parameter.name, DOCGEN_MACRO_FUNCTION_PARAMETER_DESCRIPTION_LENGTH,
-                                          new_parameter.description, cursor->line);
+            docgen_extract_field_line_arg("param", new_parameter.name, DOCGEN_MACRO_FUNCTION_PARAMETER_NAME_LENGTH,
+                                          new_parameter.description, DOCGEN_MACRO_FUNCTION_PARAMETER_DESCRIPTION_LENGTH,
+                                          cursor->line, new_tag.line);
 
             carray_append(new_macro_function.parameters, new_parameter, MACRO_FUNCTION_PARAMETER);
         } else {

@@ -66,11 +66,6 @@
         libmatch_cursor_ungetch(cursor);    \
     }
 
-/* Utility macros */
-#define libmatch_exec_until(_cursor, character)         \
-    while(((_cursor)->buffer[(_cursor)->cursor] != (character)) && \
-           ((_cursor)->cursor < (_cursor)->length))
-
 /*
  * A 'cursor' used to tell where the matching process is in a
  * stream.

@@ -79,24 +79,24 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
 
         /* Handle the tags */
         if(strcmp(tag_name.name, "name") == 0)
-            docgen_extract_field_line("name", DOCGEN_FUNCTION_NAME_LENGTH, cursor->line,
-                                      new_tag.line, new_function.name);
+            docgen_extract_field_line("name", new_function.name, DOCGEN_FUNCTION_NAME_LENGTH, cursor->line,
+                                      new_tag.line);
 
         else if(strcmp(tag_name.name, "brief") == 0)
-            docgen_extract_field_line("brief", DOCGEN_FUNCTION_BRIEF_LENGTH, cursor->line,
-                                      new_tag.line, new_function.brief);
+            docgen_extract_field_line("brief", new_function.brief, DOCGEN_FUNCTION_BRIEF_LENGTH,
+                                      cursor->line, new_tag.line);
 
         else if(strcmp(tag_name.name, "description") == 0)
-            docgen_extract_field_block("description", DOCGEN_FUNCTION_DESCRIPTION_LENGTH, cursor,
-                                      new_tag.line, new_function.description);
+            docgen_extract_field_block("description", new_function.description,
+                                       DOCGEN_FUNCTION_DESCRIPTION_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "notes") == 0)
-            docgen_extract_field_block("notes", DOCGEN_FUNCTION_NOTES_LENGTH, cursor,
-                                      new_tag.line, new_function.notes);
+            docgen_extract_field_block("notes", new_function.notes,
+                                       DOCGEN_FUNCTION_NOTES_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "example") == 0)
-            docgen_extract_field_block("example", DOCGEN_FUNCTION_EXAMPLE_LENGTH, cursor,
-                                      new_tag.line, new_function.example);
+            docgen_extract_field_block("example", new_function.example,
+                                       DOCGEN_FUNCTION_EXAMPLE_LENGTH, cursor, new_tag.line);
 
         else if(strcmp(tag_name.name, "include") == 0) {
             struct Inclusion new_inclusion;
@@ -104,8 +104,8 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
             new_inclusion.type = DOCGEN_INCLUSION_LOCAL;
 
-            docgen_extract_field_line("include", DOCGEN_INCLUSION_LENGTH,
-                                      cursor->line, new_tag.line, new_inclusion.path);
+            docgen_extract_field_line("include", new_inclusion.path, DOCGEN_INCLUSION_LENGTH,
+                                      cursor->line, new_tag.line);
 
             carray_append(new_function.inclusions, new_inclusion, INCLUDE);
         }
@@ -116,8 +116,8 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
             new_inclusion.type = DOCGEN_INCLUSION_SYSTEM;
 
-            docgen_extract_field_line("isystem", DOCGEN_INCLUSION_LENGTH,
-                                      cursor->line, new_tag.line, new_inclusion.path);
+            docgen_extract_field_line("isystem", new_inclusion.path, DOCGEN_INCLUSION_LENGTH,
+                                      cursor->line, new_tag.line);
 
             carray_append(new_function.inclusions, new_inclusion, INCLUDE);
         }
@@ -126,8 +126,8 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             struct DocgenFunctionError new_error;
 
             memset(&new_error, 0, sizeof(struct DocgenFunctionError));
-            docgen_extract_field_line("error", DOCGEN_ERROR_DESCRIPTION_LENGTH,
-                                      cursor->line, new_tag.line, new_error.description);
+            docgen_extract_field_line("error", new_error.description, DOCGEN_ERROR_DESCRIPTION_LENGTH,
+                                      cursor->line, new_tag.line);
 
             carray_append(new_function.errors, new_error, ERROR);
         }
@@ -150,9 +150,9 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             memset(&type_tag_name, 0, sizeof(struct DocgenTagName));
             memset(&new_parameter, 0, sizeof(struct DocgenFunctionParameter));
 
-            docgen_extract_field_line_arg("param", new_tag.line, DOCGEN_PARAMETER_NAME_LENGTH,
-                                          new_parameter.name, DOCGEN_PARAMETER_DESCRIPTION_LENGTH,
-                                          new_parameter.description, cursor->line);
+            docgen_extract_field_line_arg("param", new_parameter.name, DOCGEN_PARAMETER_NAME_LENGTH,
+                                          new_parameter.description, DOCGEN_PARAMETER_DESCRIPTION_LENGTH,
+                                          cursor->line, new_tag.line);
 
             type_tag = docgen_tag_next(cursor, comment_start, comment_end);
 
@@ -171,7 +171,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             }
 
             /* Parse the type */
-            docgen_extract_field_line("type", DOCGEN_TYPE_LENGTH, cursor->line, type_tag.line, new_parameter.type);
+            docgen_extract_field_line("type", new_parameter.type, DOCGEN_TYPE_LENGTH, cursor->line, type_tag.line);
             carray_append(new_function.parameters, new_parameter, PARAMETER);
         }
 
@@ -181,8 +181,9 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
 
             memset(&type_tag, 0, sizeof(struct DocgenTag));
             memset(&return_tag_name, 0, sizeof(struct DocgenTagName));
-            docgen_extract_field_line("return", DOCGEN_FUNCTION_RETURN_LENGTH, cursor->line,
-                                      new_tag.line, new_function.return_data.return_value);
+            docgen_extract_field_line("return", new_function.return_data.return_value,
+                                      DOCGEN_FUNCTION_RETURN_LENGTH, cursor->line,
+                                      new_tag.line);
 
             type_tag = docgen_tag_next(cursor, comment_start, comment_end);
 
@@ -194,7 +195,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
 
                     exit(EXIT_FAILURE);
                 case DOCGEN_TAG_STATUS_DONE:
-                    fprintf(stderr, "%s", "docgen: comment ended at line %i before type could be determined\n",
+                    fprintf(stderr, "docgen: comment ended at line %i before type could be determined\n",
                             cursor->line);
 
                     exit(EXIT_FAILURE);
@@ -224,8 +225,8 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             }
 
             /* Parse the type */
-            docgen_extract_field_line("type", DOCGEN_TYPE_LENGTH, cursor->line,
-                                      type_tag.line, new_function.return_data.return_type);
+            docgen_extract_field_line("type", new_function.return_data.return_type, DOCGEN_TYPE_LENGTH,
+                                      cursor->line, type_tag.line);
         } else {
             fprintf(stderr, "docgen: unknown tag '%s' in function extractor on line %i (%s)\n",
                     tag_name.name, cursor->line, new_tag.line);

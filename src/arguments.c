@@ -42,28 +42,6 @@
 
 #include "docgen.h"
 
-static const char *help = 
-"Usage: docgen CATEGORY FILE [ --help | -h ] [ --format NAME | -f NAME ]\n"
-"                            [ --section SECTION | -s SECTION ] [ --title TITLE | -t TITLE ]\n"
-"                            [ --date DATE | -d DATE ] [ --include INCLUDE | -l INCLUDE ]\n"
-"                            [ --isystem INCLUDE | -d INCLUDE ] [ --language LANGUAGE | -x LANGUAGE ]\n"
-"Arguments:\n"
-"       category                    the type of documentation to generate\n"
-"       file                        the file to generate documentation from (can be - for stdin)\n"
-"\n\n"
-"Options:\n"
-"       --help,     -h              show this message\n"
-"       --format,   -f NAME         select the format to output the manual(s) in\n"
-"       --section,  -s SECTION      the manual section name\n"
-"       --title,    -t TITLE        the title at the top of the manual\n"
-"       --date,     -d DATE         the current date\n"
-"       --include,  -l INCLUDE      specify local files that should be included\n"
-"       --isystem,  -d INCLUDE      specify system header files that should be included\n"
-"       --language, -x LANGUAGE     specify the language of the file\n"
-""
-"";
-
-
 /* Retrieve an option's argument */
 #define docgen_get_option_argument(longf, shortf, location)                 \
 do {                                                                        \
@@ -133,7 +111,24 @@ void main_error(const char *option, int type, int expected, int got) {
                             "\n");
             break;
         case LIBARG_ERR_HELP:
-            fprintf(stderr, "%s", help);
+            fprintf(stderr, "%s", "Usage: docgen CATEGORY FILE [ --help | -h ] [ --format NAME | -f NAME ]\n");
+            fprintf(stderr, "%s", "                            [ --section SECTION | -s SECTION ] [ --title TITLE | -t TITLE ]\n");
+            fprintf(stderr, "%s", "                            [ --date DATE | -d DATE ] [ --include INCLUDE | -l INCLUDE ]\n");
+            fprintf(stderr, "%s", "                            [ --isystem INCLUDE | -d INCLUDE ] [ --language LANGUAGE | -x LANGUAGE ]\n");
+            fprintf(stderr, "%s", "Arguments:\n");
+            fprintf(stderr, "%s", "       category                    the type of documentation to generate\n");
+            fprintf(stderr, "%s", "       file                        the file to generate documentation from (can be - for stdin)\n");
+            fprintf(stderr, "%s", "\n\n");
+            fprintf(stderr, "%s", "Options:\n");
+            fprintf(stderr, "%s", "       --help,     -h              show this message\n");
+            fprintf(stderr, "%s", "       --format,   -f NAME         select the format to output the manual(s) in\n");
+            fprintf(stderr, "%s", "       --section,  -s SECTION      the manual section name\n");
+            fprintf(stderr, "%s", "       --title,    -t TITLE        the title at the top of the manual\n");
+            fprintf(stderr, "%s", "       --date,     -d DATE         the current date\n");
+            fprintf(stderr, "%s", "       --include,  -l INCLUDE      specify local files that should be included\n");
+            fprintf(stderr, "%s", "       --isystem,  -d INCLUDE      specify system header files that should be included\n");
+            fprintf(stderr, "%s", "       --language, -x LANGUAGE     specify the language of the file\n");
+
             break;
         default:
             liberror_unhandled(main_error);
