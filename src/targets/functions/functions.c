@@ -45,6 +45,8 @@ void docgen_functions_format(struct DocgenArguments arguments,
                             struct DocgenFunction function) {
     if(strcmp(arguments.format, "manpage") == 0)
         docgen_functions_manpage(arguments, function);
+    if(strcmp(arguments.format, "markdown") == 0)
+        docgen_functions_markdown(arguments, function);
     else
         fprintf(stderr, "docgen: unknown format for functions '%s'\n", arguments.format);
 }
@@ -64,7 +66,7 @@ void docgen_functions_generate(struct DocgenArguments arguments, FILE *file) {
         struct DocgenFunction function = functions->contents[index];
 
         /* Generate this function manual */
-        docgen_functions_manpage(arguments, function);
+        docgen_functions_format(arguments, function);
     }
 
     libmatch_cursor_free(&cursor);

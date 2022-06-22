@@ -35,20 +35,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CWARE_DOCGEN_FUNCTIONS_H
-#define CWARE_DOCGEN_FUNCTIONS_H
+/*
+ * The backend for converting 'function' tokens into Markdown files
+*/
 
-#include "../../docgen.h"
-#include "../../extractors/functions/functions.h"
+#include "../functions.h"
 
-/* Backend selectors */
-void docgen_functions_format(struct DocgenArguments arguments, struct DocgenFunction function);
+void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
+    int index = 0;
+    FILE *location = NULL;
+    char file_path[LIBPATH_MAX_PATH + 1];
 
-/* Backends */
-void docgen_functions_manpage(struct DocgenArguments arguments, struct DocgenFunction function);
-void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function);
 
-/* Documentation generation */
-void docgen_functions_generate(struct DocgenArguments arguments, FILE *file);
+    printf("...\n");
 
-#endif
+    /* Open the file */
+    docgen_create_file_path(arguments, function.name, file_path, LIBPATH_MAX_PATH);
+    libpath_join_path(file_path, LIBPATH_MAX_PATH, "./doc/", function.name,
+                      ".md", NULL);
+    location = fopen(file_path, "w");
+}

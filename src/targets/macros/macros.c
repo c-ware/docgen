@@ -63,7 +63,7 @@ void docgen_macros_generate(struct DocgenArguments arguments, FILE *file) {
         struct DocgenMacroFunction macro = macros->contents[index];
 
         /* Generate this function manual */
-        docgen_macros_manpage(arguments, macro);
+        docgen_macros_format(arguments, macro);
     }
 
     libmatch_cursor_free(&cursor);
