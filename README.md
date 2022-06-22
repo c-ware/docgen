@@ -17,19 +17,31 @@ following platforms:
   - OpenBSD 7.0
   - BSDi 5.1
 - Linux
-  - Arch Linux
+  - Arch Linux 06-2022
   - Debian 11.2.0
   - Linux Mint 20.3
-  - Red Hat 7.1
+  - Red Hat Linux 7.1
 - Other UNIXes
   - Solaris
     - Solaris 9
     - Solaris 10
-  - UnixWare 7.1.4
+  - UnixWare
+    - UnixWare 7.1.1
+    - UnixWare 7.1.4
   - AIX 5.1
   - NeXTSTEP 4.0
   - OSF/1 5.1
+  - IRIX
+    - IRIX 5.3
+    - IRIX 6.5
+  - GNU/Hurd 0.9
 - Windows, DOS, and related
   - Windows NT 4.0
+  - OS/2 3.0
+- Mac OS
+  - OS X 10.6
+  - OS X 11.5
 - Misc. Operating systems
+  - VM/ESA 2.4 (OpenVM)
+  - MVS/ESA 6.0.2 (OpenMVS)
   - OpenVMS 7.3
