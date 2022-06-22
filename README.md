@@ -55,7 +55,7 @@ sorts of things in C source code, including:
   - Constants
   - Macro functions
 
-Each of these things has different 'tags' that are used to describe a certain
+Each of these things have different 'tags' that are used to describe a certain
 thing about them. For example, functions have the '@param' tag to describe a
 parameter, and an '@type' tag to describe the type of said parameter. These
 are composed in a single source code comment with a 'header' that specifies what
@@ -93,16 +93,44 @@ called `math.h`.
  * 
  * @param x: the integer to compute the factorial of
  * @type: int
+ *
+ * @return: the factorial of x
+ * @type: unsigned long
 */
 unsigned long factorial(int x);
 ```
 
+When you are ready to actually generate documentation for your project,
+go to the root directory of your project, create a `doc/` directory, and
+then run docgen. To generate documentation for all functions for example,
+you can do the following:
+```sh
+docgen functions path/to/file
+```
 
+The first argument to docgen is the `category` to generate documentation for.
+It tells docgen what kind of comment with what kind of header to look for. All
+the categories can be found by running `docgen --help`, but without having to
+compile docgen yourself, it supports:
+  - Functions
+  - Program manuals
+  - Macro functions
+As for the file, it is quite literally just the path to the file that contains
+the documentation you want to generate.
 
+What we mean by 'document' here is that you can generate individual manuals or
+other forms of documentation with the purpose of documenting that kind of token.
+However, the list at the start of this README also included `constants` and
+`structures`. While these on their own cannot have individual manual pages, they
+can be *embedded* into the above forms of documentation.
 
+Embedding these types of objects in a manual basically means that they are put
+into the synopsis of the manual. Things other than constants and structures can
+be embedded as well. A full list would be:
+  - Functions
+  - Macro functions
+  - Constants
+  - Structures
 
-
-
-
-
-
+If you wish to know *how* to embed them, please see the manuals for further
+information.
