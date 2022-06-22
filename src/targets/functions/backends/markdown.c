@@ -39,19 +39,104 @@
  * The backend for converting 'function' tokens into Markdown files
 */
 
+#include <string.h>
+
 #include "../functions.h"
+
+#define write_inclusions(array)                                            \
+do {                                                                       \
+    int __INCLUSION_INDEX = 0;                                             \
+                                                                           \
+    while(__INCLUSION_INDEX < carray_length(array)) {                      \
+        struct Inclusion inclusion = (array)->contents[__INCLUSION_INDEX]; \
+                                                                           \
+        if(inclusion.type == DOCGEN_INCLUSION_LOCAL) {                     \
+            fprintf(location, "`#include \"%s\"`\n", inclusion.path);      \
+        } else if(inclusion.type == DOCGEN_INCLUSION_SYSTEM) {             \
+            fprintf(location, "`#include <%s>`\n", inclusion.path);        \
+        }                                                                  \
+                                                                           \
+        __INCLUSION_INDEX++;                                               \
+    }                                                                      \
+} while(0)
+
+
+void head(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+    fprintf(location, "# %s.md\n\n", function.name);
+    fprintf(location, "%s", "# NAME\n");
+    fprintf(location, "%s - %s\n\n", function.name, function.brief);
+}
+
+void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+    int index = 0;
+
+    fprintf(location, "%s", "# SYNOPSIS\n");
+
+    write_inclusions(arguments.inclusions);
+    write_inclusions(function.inclusions);
+
+    fprintf(location, "%c", '\n');
+
+    /* Write the function signature */
+    fprintf(location, "`%s %s(", function.return_data.return_type,  function.name);
+
+    /* Function parameters */
+    for(index = 0; index < carray_length(function.parameters); index++) {
+        struct DocgenFunctionParameter parameter = function.parameters->contents[index];
+
+        /*
+        if(strchr(parameter.type, '*') == NULL)
+            fprintf(location, "%s %s", parameter.type, parameter.name);
+        else {
+            int parameter_index = 0;
+
+            // Add '\' before each asterisk in the type
+            while(parameter.type[parameter_index] != '\0') {
+                int character = parameter.type[parameter_index];
+
+                if(character == '*')
+                    fprintf(location, "%c", '\\');
+                
+                fprintf(location, "%c", character);
+                parameter_index++;
+            }
+
+            fprintf(location, "%s", parameter.name);
+
+            // Do not output a comma
+            if(index == (carray_length(function.parameters) - 1))
+                continue;
+            
+            fprintf(location, "%s", ", ");
+        }
+        */
+    }
+
+    fprintf(location, "%s", ")`");
+}
 
 void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
     int index = 0;
     FILE *location = NULL;
     char file_path[LIBPATH_MAX_PATH + 1];
 
-
-    printf("...\n");
-
     /* Open the file */
     docgen_create_file_path(arguments, function.name, file_path, LIBPATH_MAX_PATH);
     libpath_join_path(file_path, LIBPATH_MAX_PATH, "./doc/", function.name,
                       ".md", NULL);
     location = fopen(file_path, "w");
+
+    /* Dump parts of the Markdown */
+    head(location, arguments, function);
+    synopsis(location, arguments, function);
 }
+
+
+
+
+
+
+
+
+
+

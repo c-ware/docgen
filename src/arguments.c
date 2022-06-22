@@ -115,19 +115,21 @@ void main_error(const char *option, int type, int expected, int got) {
             fprintf(stderr, "%s", "                            [ --section SECTION | -s SECTION ] [ --title TITLE | -t TITLE ]\n");
             fprintf(stderr, "%s", "                            [ --date DATE | -d DATE ] [ --include INCLUDE | -l INCLUDE ]\n");
             fprintf(stderr, "%s", "                            [ --isystem INCLUDE | -d INCLUDE ] [ --language LANGUAGE | -x LANGUAGE ]\n");
-            fprintf(stderr, "%s", "Arguments:\n");
+            fprintf(stderr, "%s", "\nArguments:\n");
             fprintf(stderr, "%s", "       category                    the type of documentation to generate\n");
             fprintf(stderr, "%s", "       file                        the file to generate documentation from (can be - for stdin)\n");
-            fprintf(stderr, "%s", "\n\n");
-            fprintf(stderr, "%s", "Options:\n");
+            fprintf(stderr, "%s", "\nOptions:\n");
             fprintf(stderr, "%s", "       --help,     -h              show this message\n");
             fprintf(stderr, "%s", "       --format,   -f NAME         select the format to output the manual(s) in\n");
-            fprintf(stderr, "%s", "       --section,  -s SECTION      the manual section name\n");
-            fprintf(stderr, "%s", "       --title,    -t TITLE        the title at the top of the manual\n");
-            fprintf(stderr, "%s", "       --date,     -d DATE         the current date\n");
             fprintf(stderr, "%s", "       --include,  -l INCLUDE      specify local files that should be included\n");
             fprintf(stderr, "%s", "       --isystem,  -d INCLUDE      specify system header files that should be included\n");
             fprintf(stderr, "%s", "       --language, -x LANGUAGE     specify the language of the file\n");
+            fprintf(stderr, "%s", "\nManpage Options\n");
+            fprintf(stderr, "%s", "       --title,    -t TITLE        the title at the top of the manual\n");
+            fprintf(stderr, "%s", "       --date,     -d DATE         the current date\n");
+            fprintf(stderr, "%s", "       --section,  -s SECTION      the manual section name\n");
+            fprintf(stderr, "%s", "\nMarkdown Options\n");
+            fprintf(stderr, "%s", "       --md-mono,  -m              whether or not to use backticks for monospace\n");
 
             break;
         default:
