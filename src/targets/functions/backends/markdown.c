@@ -69,13 +69,13 @@ do {                                                                       \
 } while(0)
 
 
-void head(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+static void head(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
     fprintf(location, "# %s.md\n\n", function.name);
     fprintf(location, "%s", "### NAME\n");
     fprintf(location, "%s - %s\n\n", function.name, function.brief);
 }
 
-void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+static void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
     int index = 0;
 
     fprintf(location, "%s", "### SYNOPSIS\n");
@@ -147,16 +147,67 @@ void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFun
     fprintf(location, "%s", "\n\n");
 }
 
-void description(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+static void description(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
     fprintf(location, "%s", "### DESCRIPTION\n");
     fprintf(location, "%s", function.description);
     fprintf(location, "%s", "\n");
 }
 
-void return_value(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+static void return_value(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
     fprintf(location, "%s", "### RETURN VALUE\n");
-    fprintf(location, "This function will return %s\n", function.return_data.return_value);
+
+    /* No return value, or no description provided */
+    if(function.return_data.return_value[0] == '\0')
+        fprintf(location, "%s", "This function has no return value.\n");
+    else
+        fprintf(location, "This function will return %s\n", function.return_data.return_value);
+
     fprintf(location, "%s", "\n");
+}
+
+static void notes(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+    fprintf(location, "%s", "### NOTES\n");
+
+    /* No notes */
+    if(function.notes[0] == '\0')
+        fprintf(location, "%s", "This function has no notes.\n");
+    else
+        fprintf(location, "%s\n", function.notes);
+}
+
+static void examples(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+    fprintf(location, "%s", "### EXAMPLES\n");
+
+    /* No examples */
+    if(function.example[0] == '\0')
+        fprintf(location, "%s", "This function has no examples.\n");
+    else
+        fprintf(location, "%s\n", function.example);
+}
+
+static void see_also(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+    int index = 0;
+
+    fprintf(location, "%s", "### SEE ALSO\n");
+
+    if(carray_length(function.references) == 0) {
+        fprintf(location, "%s", "This function has no references.\n");
+        return;
+    }
+
+    while(index < carray_length(function.references)) {
+        struct Reference reference = function.references->contents[index];
+
+        fprintf(location, "%s(%s)", reference.manual, reference.section);
+
+        /* Add a comma */
+        if(index < (carray_length(function.references) - 1))
+            fprintf(location, "%s", ", ");
+
+        index++;
+    }
+
+    fprintf(location, "%c", '\n');
 }
 
 void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
@@ -175,14 +226,9 @@ void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFu
     synopsis(location, arguments, function);
     description(location, arguments, function);
     return_value(location, arguments, function);
+    notes(location, arguments, function);
+    examples(location, arguments, function);
+    see_also(location, arguments, function);
+
+    fflush(location);
 }
-
-
-
-
-
-
-
-
-
-
