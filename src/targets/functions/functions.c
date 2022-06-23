@@ -45,7 +45,7 @@ void docgen_functions_format(struct DocgenArguments arguments,
                             struct DocgenFunction function) {
     if(strcmp(arguments.format, "manpage") == 0)
         docgen_functions_manpage(arguments, function);
-    if(strcmp(arguments.format, "markdown") == 0)
+    else if(strcmp(arguments.format, "markdown") == 0)
         docgen_functions_markdown(arguments, function);
     else
         fprintf(stderr, "docgen: unknown format for functions '%s'\n", arguments.format);

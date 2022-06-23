@@ -145,6 +145,11 @@ void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFun
         fprintf(location, "%s", ")`");
 }
 
+void description(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+    fprintf(location, "%s", "### DESCRIPTION\n");
+    fprintf(location, "%s", function.description);
+}
+
 void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
     int index = 0;
     FILE *location = NULL;
@@ -159,6 +164,7 @@ void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFu
     /* Dump parts of the Markdown */
     head(location, arguments, function);
     synopsis(location, arguments, function);
+    description(location, arguments, function);
 }
 
 
