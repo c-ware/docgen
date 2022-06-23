@@ -56,6 +56,8 @@ void docgen_project_format(struct DocgenArguments arguments,
 
     if(strcmp(arguments.format, "manpage") == 0)
         docgen_project_manpage(arguments, cursor, project);
+    else if(strcmp(arguments.format, "markdown") == 0)
+        docgen_project_markdown(arguments, cursor, project);
     else if(strcmp(arguments.format, "dcfscript") == 0)
         docgen_project_dcfscript(arguments, cursor, project);
     else if(strcmp(arguments.format, "helpcms") == 0) 

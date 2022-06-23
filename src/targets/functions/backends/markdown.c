@@ -229,6 +229,4 @@ void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFu
     notes(location, arguments, function);
     examples(location, arguments, function);
     see_also(location, arguments, function);
-
-    fflush(location);
 }

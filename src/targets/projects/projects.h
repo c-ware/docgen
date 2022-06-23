@@ -142,6 +142,11 @@ void docgen_project_manpage(struct DocgenArguments arguments,
                             struct LibmatchCursor cursor,
                             struct DocgenProject project);
 
+/* Markdown */
+void docgen_project_markdown(struct DocgenArguments arguments,
+                             struct LibmatchCursor cursor,
+                             struct DocgenProject project);
+
 /* IBM VM/CMS and MVS Document Composition Facility */
 void docgen_project_dcfscript(struct DocgenArguments arguments,
                             struct LibmatchCursor cursor,
