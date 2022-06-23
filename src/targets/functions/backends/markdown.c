@@ -143,11 +143,20 @@ void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenFun
         fprintf(location, "%s", ")");
     else
         fprintf(location, "%s", ")`");
+
+    fprintf(location, "%s", "\n\n");
 }
 
 void description(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
     fprintf(location, "%s", "### DESCRIPTION\n");
     fprintf(location, "%s", function.description);
+    fprintf(location, "%s", "\n");
+}
+
+void return_value(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
+    fprintf(location, "%s", "### RETURN VALUE\n");
+    fprintf(location, "This function will return %s\n", function.return_data.return_value);
+    fprintf(location, "%s", "\n");
 }
 
 void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
@@ -165,6 +174,7 @@ void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFu
     head(location, arguments, function);
     synopsis(location, arguments, function);
     description(location, arguments, function);
+    return_value(location, arguments, function);
 }
 
 
