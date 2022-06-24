@@ -1,10 +1,10 @@
 # docgen
 
 Docgen is a utility program for generating documentation from the source
-code of a program. While docgen is mainly intended to produce manual pages (it
-is very easy to see the UNIX heritage in the some parts of the internal
-structure of docgen), it can also produce documentation in arbitrary formats
-as long as a backend exists for it.
+code of a program. While docgen is mainly intended to produce manual pages (its
+UNIX heritage can easily be seen in pretty much all documentation produced, as
+the structure will mirror that of UNIX manuals), it can also produce documentation
+in arbitrary formats as long as a backend exists for it.
 
 Docgen is written in highly portable ANSI C, and is known to compile on the
 following platforms:

@@ -35,10 +35,14 @@ struct MyStructure {
     } MySubStructure;
 };
 ```
+
 ```c
 struct pollfd test_function(const char *foo, unsigned int bar);
 struct pollfd test_function(const char *foo, unsigned int bar);
+```
 
+```c
+#define test_macro(foo);
 ```
 
 ### DESCRIPTION

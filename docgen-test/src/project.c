@@ -9,6 +9,7 @@
  * @embed constant: MY_OTHER_CONSTANT
  * @embed structure: MyStructure
  * @embed structure: MyStructure
+ * @embed macro_function: test_macro
  *
  * @arguments
  * @These are the arguments to the program.
@@ -89,4 +90,25 @@
  * @field tuna: the tuna field
  * @type: struct Foobar *
  * @struct_end
+*/
+
+/*
+ * @docgen: macro_function
+ * @brief: this is a macro function
+ * @name: test_macro
+ *
+ * @include: foo
+ *
+ * @description
+ * @This is a description
+ * @description
+ *
+ * @notes
+ * @These are the notes for the macro function
+ * @notes
+ *
+ * @error: this is an error
+ * @error: this is another error
+ *
+ * @param foo: the foo parameter
 */

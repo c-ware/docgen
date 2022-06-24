@@ -99,7 +99,7 @@ void field_line_error_check(const char *line, int line_number) {
 /*
  * This function will enforce this regular expression on the line passed
  * to it as an argument, producing errors to the stderr if it is violated:
- * @TAGNAME {1}[a-zA-Z].*: [^\s]+
+ * @TAGNAME {1}[a-zA-Z_].*: [^\s]+
 */
 void field_line_arg_error_check(const char *line, int line_number) {
     int character = -1;

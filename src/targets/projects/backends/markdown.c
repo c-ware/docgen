@@ -68,7 +68,7 @@ do {                                                                       \
     }                                                                      \
 } while(0)
 
-int number_of_embedded_types(struct DocgenProjectEmbeds *embeds, int type) {
+static int number_of_embedded_types(struct DocgenProjectEmbeds *embeds, int type) {
     int index = 0;
     int counted = 0;
 
@@ -162,11 +162,8 @@ static void embed_macro_functions(struct DocgenProject project,
         if((strlen(macro_function.brief) != 0) && project.macro_function_briefs == 1)
             fprintf(location, "/* %s */", macro_function.brief);
 
-        /* "#define " */
-        fprintf(location, "%s", "#define ");
-
-        /* Name */
-        fprintf(location, "\n%s(", macro_function.name);
+        /* "#define NAME" */
+        fprintf(location, "#define %s(", macro_function.name);
 
         /* Generate the arguments and parameters */
         for(parameter_index = 0; parameter_index < carray_length(macro_function.parameters); parameter_index++) {
@@ -176,16 +173,16 @@ static void embed_macro_functions(struct DocgenProject project,
 
             /* Decide whether or not to display the trailing comma */
             if(parameter_index == carray_length(macro_function.parameters) - 1) {
-                fprintf(location, "\\fI%s\\fB", parameter.name);
+                fprintf(location, "%s", parameter.name);
             } else {
-                fprintf(location, "\\fI%s\\fB, ", parameter.name);
+                fprintf(location, "%s, ", parameter.name);
             }
         }
 
-        fprintf(location, "%s", ");\n.br\\fR");
+        fprintf(location, "%s", ");\n");
     }
 
-    fprintf(location, "```\n");
+    fprintf(location, "```\n\n");
 }
 
 static void embed_functions(struct DocgenProject project,
@@ -264,8 +261,7 @@ static void embed_functions(struct DocgenProject project,
         fprintf(location, "%s", ");\n");
     }
 
-    fprintf(location, "%s", "\n");
-    fprintf(location, "```\n\n");
+    fprintf(location, "%s", "```\n\n");
 }
 
 static void embed_structures_recurse(struct DocgenProject project,
@@ -392,7 +388,7 @@ static void embed_structures(struct DocgenProject project,
             fprintf(location, "%c", '\n');
     }
 
-    fprintf(location, "%s", "```\n");
+    fprintf(location, "%s", "```\n\n");
 }
 
 
@@ -437,9 +433,7 @@ static void synopsis(FILE *location, struct LibmatchCursor cursor,
     embed_constants(project, macros, location);
     embed_structures(project, structures, location);
     embed_functions(project, functions, location);
-    /*
     embed_macro_functions(project, macro_functions, location);
-    */
 
     docgen_extract_macros_free(macros);
     docgen_extract_functions_free(functions);
