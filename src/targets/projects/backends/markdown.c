@@ -36,7 +36,7 @@
 */
 
 /*
- * The backend for converting 'function' tokens into Markdown files
+ * The backend for converting 'project' tokens into Markdown files
 */
 
 #include <string.h>
@@ -68,23 +68,340 @@ do {                                                                       \
     }                                                                      \
 } while(0)
 
+/* 
+ * EMBEDDING LOGIC
+*/
+static void embed_constants(struct DocgenProject project,
+                            struct DocgenMacros *macros,
+                            FILE *location) {
+    int index = 0;
+
+    /* Constant Embeds */
+    for(index = 0; index < carray_length(project.embeds); index++) {
+        int macro_index = 0;
+        struct DocgenMacro macro;
+        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+
+        if(embed.type != DOCGEN_PROJECT_EMBED_CONSTANT)
+            continue;
+
+        fprintf(location, "```c\n", macro.name);
+
+        macro_index = carray_find(macros, embed.name, macro_index, MACRO);
+        macro = macros->contents[macro_index];
+
+        /* Write the comment if there is one */
+        if(strlen(macro.brief) != 0)
+            fprintf(location, "/* %s */\n", macro.brief);
+        
+        /* Wrap the #define in an #ifndef */
+        if(macro.ifndef == 1)
+            fprintf(location, "#ifndef %s\n", macro.name);
+
+        fprintf(location, "#define %s %s\n", macro.name, macro.value);
+
+        if(macro.ifndef == 1)
+            fprintf(location, "%s", "#endif\n");
+
+        fprintf(location, "```\n", macro.name);
+        fprintf(location, "%s", "\n");
+    }
+
+}
+
+static void embed_macro_functions(struct DocgenProject project,
+                            struct DocgenMacroFunctions *macro_functions,
+                            FILE *location) {
+    int index = 0;
+
+    fprintf(location, "%s", "\n.br\n");
+
+    /* Macro Function Embeds */
+    for(index = 0; index < carray_length(project.embeds); index++) {
+        int parameter_index = 0;
+        int macro_function_index = 0;
+        struct DocgenMacroFunction macro_function;
+        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+
+        if(embed.type != DOCGEN_PROJECT_EMBED_MACRO_FUNCTION)
+            continue;
+
+        macro_function_index = carray_find(macro_functions, embed.name, macro_function_index, MACRO_FUNCTION);
+
+        if(macro_function_index == -1) {
+            fprintf(stderr, "docgen: attempt to embed unknown macro_function '%s'\n", embed.name);
+            exit(EXIT_FAILURE);
+        }
+
+        macro_function = macro_functions->contents[macro_function_index];
+
+        /* Write the comment if there is one, and its allowed */
+        if((strlen(macro_function.brief) != 0) && project.macro_function_briefs == 1)
+            fprintf(location, "/* %s */", macro_function.brief);
+
+        /* "#define " */
+        fprintf(location, "%s", "\n.br\n\\fB#define ");
+
+        /* Name */
+        fprintf(location, "\n%s(", macro_function.name);
+
+        /* Generate the arguments and parameters */
+        for(parameter_index = 0; parameter_index < carray_length(macro_function.parameters); parameter_index++) {
+            struct DocgenMacroFunctionParameter parameter;
+
+            parameter = macro_function.parameters->contents[parameter_index];
+
+            /* Decide whether or not to display the trailing comma */
+            if(parameter_index == carray_length(macro_function.parameters) - 1) {
+                fprintf(location, "\\fI%s\\fB", parameter.name);
+            } else {
+                fprintf(location, "\\fI%s\\fB, ", parameter.name);
+            }
+        }
+        fprintf(location, "%s", ");\n.br\\fR");
+    }
+
+    fprintf(location, "%s", "\n.br\n");
+}
+
+static void embed_functions(struct DocgenProject project,
+                            struct DocgenFunctions *functions,
+                            FILE *location) {
+    int index = 0;
+
+    fprintf(location, "%s", "\n.br\n");
+
+    /* Function Embeds */
+    for(index = 0; index < carray_length(project.embeds); index++) {
+        int function_index = 0;
+        int parameter_index = 0;
+        struct DocgenFunction function;
+        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+
+        if(embed.type != DOCGEN_PROJECT_EMBED_FUNCTION)
+            continue;
+
+        function_index = carray_find(functions, embed.name, function_index, FUNCTION);
+
+        if(function_index == -1) {
+            fprintf(stderr, "docgen: attempt to embed unknown function '%s'\n", embed.name);
+            exit(EXIT_FAILURE);
+        }
+
+        function = functions->contents[function_index];
+
+        /* Write the comment if there is one, and its allowed */
+        if((strlen(function.brief) != 0) && project.function_briefs == 1)
+            fprintf(location, "/* %s */\n.br", function.brief);
+
+        /* "void" return type */
+        if(function.return_data.return_type[0] == '\0')
+            strcat(function.return_data.return_type, "void ");
+
+        /* Function signature
+         * Non-pointer types should not require a space after them to produce
+         * the space, but asterisk attached to type instead of name should.
+        */
+        if(strchr(function.return_data.return_type, '*') == NULL)
+            fprintf(location, "\n\\fB%s %s(", function.return_data.return_type,
+                    function.name);
+        else
+            fprintf(location, "\n\\fB%s%s(", function.return_data.return_type,
+                    function.name);
+
+        /* Generate the arguments and parameters */
+        for(parameter_index = 0; parameter_index < carray_length(function.parameters); parameter_index++) {
+            int is_ptr = 0;
+            struct DocgenFunctionParameter parameter;
+
+            parameter = function.parameters->contents[parameter_index];
+
+            if(strchr(parameter.type, '*') != NULL)
+                is_ptr = 1;
+
+            /* Decide whether or not to display the trailing comma */
+            if(parameter_index == carray_length(function.parameters) - 1) {
+                if(is_ptr == 0) {
+                    fprintf(location, "%s \\fI%s\\fB", parameter.type, parameter.name);
+                } else {
+                    fprintf(location, "%s\\fI%s\\fB", parameter.type, parameter.name);
+                }
+            } else {
+                if(is_ptr == 0) {
+                    fprintf(location, "%s \\fI%s\\fB, ", parameter.type,
+                            parameter.name);
+                } else {
+                    fprintf(location, "%s\\fI%s\\fB, ", parameter.type,
+                            parameter.name);
+                }
+            }
+        }
+
+        /* If theres no parameters, simply do void */
+        if(carray_length(function.parameters) == 0)
+            fprintf(location, "%s", "void");
+            
+        fprintf(location, "%s", ");\n.br\\fR");
+    }
+
+    fprintf(location, "%s", "\n.br\n");
+}
+
+static void embed_structures_recurse(struct DocgenProject project,
+                                     struct DocgenStructures *structures,
+                                     FILE *location, int longest, int depth) {
+    int index = 0;
+
+    for(index = 0; index < carray_length(structures); index++) {
+        int field_index = 0;
+        struct DocgenStructure structure = structures->contents[index];
+
+        fprintf(location, "%s", "struct {\n.br\n");
+        fprintf(location, "%s", ".RS  0.4i\n.br\n");
+
+        /* Display all fields */
+        for(field_index = 0; field_index < carray_length(structure.fields); field_index++) {
+            struct DocgenStructureField field;
+
+            if(structure.fields == NULL)
+                break;
+
+            field = structure.fields->contents[field_index];
+
+            /* Should be a space if there is no pointer, so regular
+             * fields will not have an asterisk. Lack of pointer should
+             * also have a shorter length since the length calculation
+             * does not account for the artifical insertion of a space
+             * between field and type names in situations without pointers. */
+            if(strchr(field.type, '*') == NULL) {
+                fprintf(location, "%s %s; ", field.type, field.name);
+                docgen_do_padding(field, longest - 1, depth, location);
+            } else {
+                fprintf(location, "%s%s; ", field.type, field.name);
+                docgen_do_padding(field, longest, depth, location);
+            }
+
+
+            if(strlen(field.description) != 0)
+                fprintf(location, "/* %s */\n.br\n", field.description);
+        }
+
+        /* Display nested structures */
+        embed_structures_recurse(project, structure.nested, location, longest,
+                                 depth + 1);
+
+        fprintf(location, "%s", ".RE\n.br\n");
+        fprintf(location, "} %s;\n.br\n", structure.name);
+    }
+}
+
+static void embed_structures(struct DocgenProject project,
+                             struct DocgenStructures *structures,
+                             FILE *location) {
+    int index = 0;
+    int longest_field = docgen_get_longest_field(structures, 0);
+
+    fprintf(location, "%s", "\n.br\n");
+
+    for(index = 0; index < carray_length(project.embeds); index++) {
+        int field_index = 0;
+        int structure_index = 0;
+        struct DocgenStructure structure;
+        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+
+        if(embed.type != DOCGEN_PROJECT_EMBED_STRUCTURE)
+            continue;
+
+        structure_index = carray_find(structures, embed.name, structure_index, STRUCTURE);
+        liberror_is_number(docgen_project_manpage_embed_structures, structure_index, "%i", -1);
+        structure = structures->contents[structure_index];
+
+        if(strlen(structure.brief) != 0)
+            fprintf(location, "/* %s */\n.br\n", structure.brief);
+
+        fprintf(location, "struct %s {\n.br\n", structure.name);
+        fprintf(location, "%s", ".RS  0.4i\n.br\n");
+
+        /* Display all fields */
+        for(field_index = 0; field_index < carray_length(structure.fields); field_index++) {
+            struct DocgenStructureField field;
+
+            field = structure.fields->contents[field_index];
+
+            /* Should be a space if there is no pointer, so regular
+             * fields will not have an asterisk. Lack of pointer should
+             * also have a shorter length since the length calculation
+             * does not account for the artifical insertion of a space
+             * between field and type names in situations without pointers. */
+            if(strchr(field.type, '*') == NULL) {
+                fprintf(location, "%s %s; ", field.type, field.name);
+                docgen_do_padding(field, longest_field - 1, 0, location);
+            } else {
+                fprintf(location, "%s%s; ", field.type, field.name);
+                docgen_do_padding(field, longest_field, 0, location);
+            }
+
+            if(strlen(field.description) != 0)
+                fprintf(location, "/* %s */\n.br\n", field.description);
+        }
+
+        embed_structures_recurse(project, structure.nested, location, longest_field, 1);
+
+        fprintf(location, "%s", ".RE\n.br\n");
+        fprintf(location, "%s", "};\n.br\n");
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 static void head(FILE *location, struct DocgenArguments arguments, struct DocgenProject project) {
     fprintf(location, "# %s.md\n\n", project.name);
     fprintf(location, "%s", "### NAME\n");
     fprintf(location, "%s - %s\n\n", project.name, project.brief);
 }
 
-static void synopsis(FILE *location, struct DocgenArguments arguments, struct DocgenProject project) {
+static void synopsis(FILE *location, struct LibmatchCursor cursor,
+                     struct DocgenArguments arguments, struct DocgenProject project) {
     int index = 0;
+    struct DocgenMacros *macros = NULL;
+    struct DocgenFunctions *functions = NULL;
+    struct DocgenStructures *structures = NULL;
+    struct DocgenMacroFunctions *macro_functions = NULL;
+
+    /* Comment junk */
+    const char *comment_start = docgen_get_comment_start(arguments);
+    const char *comment_end = docgen_get_comment_end(arguments);
+
+    macros = docgen_extract_macros(&cursor, comment_start, comment_end);
+    functions = docgen_extract_functions(&cursor, comment_start, comment_end);
+    structures = docgen_extract_structures(&cursor, comment_start, comment_end); 
+    macro_functions = docgen_extract_macro_functions(&cursor, comment_start, comment_end); 
 
     fprintf(location, "%s", "### SYNOPSIS\n");
-
+    fprintf(location, "%s\n", project.arguments);
+    
     write_inclusions(arguments.inclusions);
 
-    fprintf(location, "%c", '\n');
+    embed_constants(project, macros, location);
+    /*
+    embed_structures(project, structures, location);
+    embed_functions(project, functions, location);
+    embed_macro_functions(project, macro_functions, location);
+    */
 
-
-    fprintf(location, "%s", "\n\n");
+    docgen_extract_macros_free(macros);
+    docgen_extract_functions_free(functions);
+    docgen_extract_structures_free(structures);
+    docgen_extract_macro_functions_free(macro_functions);
 }
 
 static void description(FILE *location, struct DocgenArguments arguments, struct DocgenProject project) {
@@ -131,7 +448,7 @@ void docgen_project_markdown(struct DocgenArguments arguments, struct LibmatchCu
 
     /* Dump parts of the Markdown */
     head(location, arguments, project);
-    synopsis(location, arguments, project);
+    synopsis(location, cursor, arguments, project);
     description(location, arguments, project);
     see_also(location, arguments, project);
 }
