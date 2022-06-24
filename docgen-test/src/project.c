@@ -5,6 +5,9 @@
  *
  * @embed function: test_function
  * @embed constant: MY_CONSTANT
+ * @embed constant: MY_OTHER_CONSTANT
+ * @embed structure: MyStructure
+ * @embed structure: MyStructure
  *
  * @arguments
  * @These are the arguments to the program.
@@ -21,6 +24,13 @@
 /*
  * @docgen: constant
  * @name: MY_CONSTANT
+ * @brief: this is a constant
+ * @value: 0
+*/
+
+/*
+ * @docgen: constant
+ * @name: MY_OTHER_CONSTANT
  * @brief: this is a constant
  * @value: 0
 */
@@ -55,4 +65,27 @@
  *
  * @return: some data
  * @type: struct pollfd
+*/
+
+/*
+ * @docgen: structure
+ * @brief: this is a structure
+ * @name: MyStructure
+ *
+ * @field foo: the foo field
+ * @type: int
+ *
+ * @field bar: the bar field
+ * @type: struct Foobar *
+ *
+ * @struct_start
+ * @brief: this is a substructure
+ * @name: MySubStructure
+ *
+ * @field baz: the baz field
+ * @type: int
+ *
+ * @field tuna: the tuna field
+ * @type: struct Foobar *
+ * @struct_end
 */

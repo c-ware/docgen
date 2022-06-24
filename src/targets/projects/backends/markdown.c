@@ -76,6 +76,8 @@ static void embed_constants(struct DocgenProject project,
                             FILE *location) {
     int index = 0;
 
+    fprintf(location, "```c\n");
+
     /* Constant Embeds */
     for(index = 0; index < carray_length(project.embeds); index++) {
         int macro_index = 0;
@@ -84,8 +86,6 @@ static void embed_constants(struct DocgenProject project,
 
         if(embed.type != DOCGEN_PROJECT_EMBED_CONSTANT)
             continue;
-
-        fprintf(location, "```c\n", macro.name);
 
         macro_index = carray_find(macros, embed.name, macro_index, MACRO);
         macro = macros->contents[macro_index];
@@ -102,11 +102,9 @@ static void embed_constants(struct DocgenProject project,
 
         if(macro.ifndef == 1)
             fprintf(location, "%s", "#endif\n");
-
-        fprintf(location, "```\n", macro.name);
-        fprintf(location, "%s", "\n");
     }
 
+    fprintf(location, "```\n\n");
 }
 
 static void embed_macro_functions(struct DocgenProject project,
@@ -114,7 +112,7 @@ static void embed_macro_functions(struct DocgenProject project,
                             FILE *location) {
     int index = 0;
 
-    fprintf(location, "%s", "\n.br\n");
+    fprintf(location, "```c\n");
 
     /* Macro Function Embeds */
     for(index = 0; index < carray_length(project.embeds); index++) {
@@ -140,7 +138,7 @@ static void embed_macro_functions(struct DocgenProject project,
             fprintf(location, "/* %s */", macro_function.brief);
 
         /* "#define " */
-        fprintf(location, "%s", "\n.br\n\\fB#define ");
+        fprintf(location, "%s", "#define ");
 
         /* Name */
         fprintf(location, "\n%s(", macro_function.name);
@@ -158,10 +156,11 @@ static void embed_macro_functions(struct DocgenProject project,
                 fprintf(location, "\\fI%s\\fB, ", parameter.name);
             }
         }
+
         fprintf(location, "%s", ");\n.br\\fR");
     }
 
-    fprintf(location, "%s", "\n.br\n");
+    fprintf(location, "```\n");
 }
 
 static void embed_functions(struct DocgenProject project,
@@ -253,11 +252,16 @@ static void embed_structures_recurse(struct DocgenProject project,
     int index = 0;
 
     for(index = 0; index < carray_length(structures); index++) {
+        int pad_index = 0;
         int field_index = 0;
         struct DocgenStructure structure = structures->contents[index];
 
-        fprintf(location, "%s", "struct {\n.br\n");
-        fprintf(location, "%s", ".RS  0.4i\n.br\n");
+        /* Add manual padding */
+        for(pad_index = 0; pad_index < depth * 4; pad_index++) {
+            fprintf(location, "%c", ' ');
+        } 
+
+        fprintf(location, "%s", "struct {\n");
 
         /* Display all fields */
         for(field_index = 0; field_index < carray_length(structure.fields); field_index++) {
@@ -268,30 +272,39 @@ static void embed_structures_recurse(struct DocgenProject project,
 
             field = structure.fields->contents[field_index];
 
+            /* Add manual padding */
+            for(pad_index = 0; pad_index < depth * 4; pad_index++) {
+                fprintf(location, "%c", ' ');
+            } 
+
             /* Should be a space if there is no pointer, so regular
              * fields will not have an asterisk. Lack of pointer should
              * also have a shorter length since the length calculation
              * does not account for the artifical insertion of a space
              * between field and type names in situations without pointers. */
             if(strchr(field.type, '*') == NULL) {
-                fprintf(location, "%s %s; ", field.type, field.name);
+                fprintf(location, "    %s %s; ", field.type, field.name);
                 docgen_do_padding(field, longest - 1, depth, location);
             } else {
-                fprintf(location, "%s%s; ", field.type, field.name);
+                fprintf(location, "    %s%s; ", field.type, field.name);
                 docgen_do_padding(field, longest, depth, location);
             }
 
 
             if(strlen(field.description) != 0)
-                fprintf(location, "/* %s */\n.br\n", field.description);
+                fprintf(location, "/* %s */\n", field.description);
         }
 
         /* Display nested structures */
         embed_structures_recurse(project, structure.nested, location, longest,
                                  depth + 1);
 
-        fprintf(location, "%s", ".RE\n.br\n");
-        fprintf(location, "} %s;\n.br\n", structure.name);
+        /* Add manual padding */
+        for(pad_index = 0; pad_index < depth * 4; pad_index++) {
+            fprintf(location, "%c", ' ');
+        } 
+
+        fprintf(location, "} %s;\n", structure.name);
     }
 }
 
@@ -301,7 +314,7 @@ static void embed_structures(struct DocgenProject project,
     int index = 0;
     int longest_field = docgen_get_longest_field(structures, 0);
 
-    fprintf(location, "%s", "\n.br\n");
+    fprintf(location, "%s", "```c\n");
 
     for(index = 0; index < carray_length(project.embeds); index++) {
         int field_index = 0;
@@ -317,10 +330,9 @@ static void embed_structures(struct DocgenProject project,
         structure = structures->contents[structure_index];
 
         if(strlen(structure.brief) != 0)
-            fprintf(location, "/* %s */\n.br\n", structure.brief);
+            fprintf(location, "/* %s */\n", structure.brief);
 
-        fprintf(location, "struct %s {\n.br\n", structure.name);
-        fprintf(location, "%s", ".RS  0.4i\n.br\n");
+        fprintf(location, "struct %s {\n", structure.name);
 
         /* Display all fields */
         for(field_index = 0; field_index < carray_length(structure.fields); field_index++) {
@@ -334,22 +346,23 @@ static void embed_structures(struct DocgenProject project,
              * does not account for the artifical insertion of a space
              * between field and type names in situations without pointers. */
             if(strchr(field.type, '*') == NULL) {
-                fprintf(location, "%s %s; ", field.type, field.name);
+                fprintf(location, "    %s %s; ", field.type, field.name);
                 docgen_do_padding(field, longest_field - 1, 0, location);
             } else {
-                fprintf(location, "%s%s; ", field.type, field.name);
+                fprintf(location, "    %s%s; ", field.type, field.name);
                 docgen_do_padding(field, longest_field, 0, location);
             }
 
             if(strlen(field.description) != 0)
-                fprintf(location, "/* %s */\n.br\n", field.description);
+                fprintf(location, "/* %s */\n", field.description);
         }
 
         embed_structures_recurse(project, structure.nested, location, longest_field, 1);
 
-        fprintf(location, "%s", ".RE\n.br\n");
-        fprintf(location, "%s", "};\n.br\n");
+        fprintf(location, "%s", "};\n");
     }
+
+    fprintf(location, "%s", "```\n");
 }
 
 
@@ -392,8 +405,8 @@ static void synopsis(FILE *location, struct LibmatchCursor cursor,
     write_inclusions(arguments.inclusions);
 
     embed_constants(project, macros, location);
-    /*
     embed_structures(project, structures, location);
+    /*
     embed_functions(project, functions, location);
     embed_macro_functions(project, macro_functions, location);
     */
