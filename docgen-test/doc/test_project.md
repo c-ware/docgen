@@ -9,6 +9,7 @@ These are the arguments to the program.
 ```c
 /* this is a constant */
 #define MY_CONSTANT 0
+
 /* this is a constant */
 #define MY_OTHER_CONSTANT 0
 ```
@@ -23,6 +24,7 @@ struct MyStructure {
         struct Foobar *tuna; /* the tuna field */
     } MySubStructure;
 };
+
 /* this is a structure */
 struct MyStructure {
     int foo;                 /* the foo field */
@@ -33,6 +35,12 @@ struct MyStructure {
     } MySubStructure;
 };
 ```
+```c
+struct pollfd test_function(const char *foo, unsigned int bar);
+struct pollfd test_function(const char *foo, unsigned int bar);
+
+```
+
 ### DESCRIPTION
 This is a description.
 

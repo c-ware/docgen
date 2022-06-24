@@ -40,8 +40,8 @@
 */
 
 #include <unistd.h>
-#include "../docgen.h"
 
+#include "../docgen.h"
 #include "common.h"
 #include "../extractors/structures/structures.h"
 

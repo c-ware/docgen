@@ -68,6 +68,23 @@ do {                                                                       \
     }                                                                      \
 } while(0)
 
+int number_of_embedded_types(struct DocgenProjectEmbeds *embeds, int type) {
+    int index = 0;
+    int counted = 0;
+
+    liberror_is_null(number_of_embedded_types, embeds);
+
+    for(index = 0; index < carray_length(embeds); index++) {
+        if(embeds->contents[index].type != type)
+            continue;
+
+        counted++;
+
+    }
+
+    return counted;
+}
+
 /* 
  * EMBEDDING LOGIC
 */
@@ -75,6 +92,8 @@ static void embed_constants(struct DocgenProject project,
                             struct DocgenMacros *macros,
                             FILE *location) {
     int index = 0;
+    int embeds = 0;
+    int number_of_embeds = number_of_embedded_types(project.embeds, DOCGEN_PROJECT_EMBED_CONSTANT);
 
     fprintf(location, "```c\n");
 
@@ -86,6 +105,8 @@ static void embed_constants(struct DocgenProject project,
 
         if(embed.type != DOCGEN_PROJECT_EMBED_CONSTANT)
             continue;
+
+        embeds++;
 
         macro_index = carray_find(macros, embed.name, macro_index, MACRO);
         macro = macros->contents[macro_index];
@@ -102,6 +123,10 @@ static void embed_constants(struct DocgenProject project,
 
         if(macro.ifndef == 1)
             fprintf(location, "%s", "#endif\n");
+
+        /* Add an extra new line */
+        if(embeds < number_of_embeds)
+            fprintf(location, "%c", '\n');
     }
 
     fprintf(location, "```\n\n");
@@ -168,7 +193,7 @@ static void embed_functions(struct DocgenProject project,
                             FILE *location) {
     int index = 0;
 
-    fprintf(location, "%s", "\n.br\n");
+    fprintf(location, "```c\n");
 
     /* Function Embeds */
     for(index = 0; index < carray_length(project.embeds); index++) {
@@ -191,7 +216,7 @@ static void embed_functions(struct DocgenProject project,
 
         /* Write the comment if there is one, and its allowed */
         if((strlen(function.brief) != 0) && project.function_briefs == 1)
-            fprintf(location, "/* %s */\n.br", function.brief);
+            fprintf(location, "/* %s */\n", function.brief);
 
         /* "void" return type */
         if(function.return_data.return_type[0] == '\0')
@@ -202,11 +227,9 @@ static void embed_functions(struct DocgenProject project,
          * the space, but asterisk attached to type instead of name should.
         */
         if(strchr(function.return_data.return_type, '*') == NULL)
-            fprintf(location, "\n\\fB%s %s(", function.return_data.return_type,
-                    function.name);
+            fprintf(location, "%s %s(", function.return_data.return_type, function.name);
         else
-            fprintf(location, "\n\\fB%s%s(", function.return_data.return_type,
-                    function.name);
+            fprintf(location, "%s%s(", function.return_data.return_type, function.name);
 
         /* Generate the arguments and parameters */
         for(parameter_index = 0; parameter_index < carray_length(function.parameters); parameter_index++) {
@@ -221,17 +244,15 @@ static void embed_functions(struct DocgenProject project,
             /* Decide whether or not to display the trailing comma */
             if(parameter_index == carray_length(function.parameters) - 1) {
                 if(is_ptr == 0) {
-                    fprintf(location, "%s \\fI%s\\fB", parameter.type, parameter.name);
+                    fprintf(location, "%s %s", parameter.type, parameter.name);
                 } else {
-                    fprintf(location, "%s\\fI%s\\fB", parameter.type, parameter.name);
+                    fprintf(location, "%s%s", parameter.type, parameter.name);
                 }
             } else {
                 if(is_ptr == 0) {
-                    fprintf(location, "%s \\fI%s\\fB, ", parameter.type,
-                            parameter.name);
+                    fprintf(location, "%s %s, ", parameter.type, parameter.name);
                 } else {
-                    fprintf(location, "%s\\fI%s\\fB, ", parameter.type,
-                            parameter.name);
+                    fprintf(location, "%s%s, ", parameter.type, parameter.name);
                 }
             }
         }
@@ -240,10 +261,11 @@ static void embed_functions(struct DocgenProject project,
         if(carray_length(function.parameters) == 0)
             fprintf(location, "%s", "void");
             
-        fprintf(location, "%s", ");\n.br\\fR");
+        fprintf(location, "%s", ");\n");
     }
 
-    fprintf(location, "%s", "\n.br\n");
+    fprintf(location, "%s", "\n");
+    fprintf(location, "```\n\n");
 }
 
 static void embed_structures_recurse(struct DocgenProject project,
@@ -312,6 +334,8 @@ static void embed_structures(struct DocgenProject project,
                              struct DocgenStructures *structures,
                              FILE *location) {
     int index = 0;
+    int embeds = 0;
+    int number_of_embeds = number_of_embedded_types(project.embeds, DOCGEN_PROJECT_EMBED_STRUCTURE);
     int longest_field = docgen_get_longest_field(structures, 0);
 
     fprintf(location, "%s", "```c\n");
@@ -324,6 +348,8 @@ static void embed_structures(struct DocgenProject project,
 
         if(embed.type != DOCGEN_PROJECT_EMBED_STRUCTURE)
             continue;
+
+        embeds++;
 
         structure_index = carray_find(structures, embed.name, structure_index, STRUCTURE);
         liberror_is_number(docgen_project_manpage_embed_structures, structure_index, "%i", -1);
@@ -360,6 +386,10 @@ static void embed_structures(struct DocgenProject project,
         embed_structures_recurse(project, structure.nested, location, longest_field, 1);
 
         fprintf(location, "%s", "};\n");
+
+        /* Add an extra new line */
+        if(embeds < number_of_embeds)
+            fprintf(location, "%c", '\n');
     }
 
     fprintf(location, "%s", "```\n");
@@ -406,8 +436,8 @@ static void synopsis(FILE *location, struct LibmatchCursor cursor,
 
     embed_constants(project, macros, location);
     embed_structures(project, structures, location);
-    /*
     embed_functions(project, functions, location);
+    /*
     embed_macro_functions(project, macro_functions, location);
     */
 

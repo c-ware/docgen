@@ -4,6 +4,7 @@
  * @name: test_project
  *
  * @embed function: test_function
+ * @embed function: test_function
  * @embed constant: MY_CONSTANT
  * @embed constant: MY_OTHER_CONSTANT
  * @embed structure: MyStructure
