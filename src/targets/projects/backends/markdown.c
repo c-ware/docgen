@@ -527,7 +527,7 @@ static void description(FILE *location, struct DocgenArguments arguments, struct
             continue;
         }
 
-        fprintf(location, "%s\n<\\br>\n", line);
+        fprintf(location, "%s\n</br>\n", line);
     }
 
     fprintf(location, "%s", "\n");
