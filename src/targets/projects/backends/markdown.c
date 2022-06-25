@@ -458,31 +458,31 @@ static void evaluate_table(FILE *location, struct LibmatchCursor *cursor) {
     separator = *(line + strlen("sep: "));
 
     libmatch_read_until(cursor, line, DOCGEN_LINE_LENGTH, "\n");
-    fprintf(stdout, "%s", "| ");
+    fprintf(location, "%s", "| ");
 
     /* Dump the header */
     for(index = 0; line[index] != '\0'; index++) {
         int character = line[index];
 
         if(character == separator)
-            fprintf(stdout, "%s", " | ");
+            fprintf(location, "%s", " | ");
         else
-            fprintf(stdout, "%c", character);
+            fprintf(location, "%c", character);
     }
 
-    fprintf(stdout, "%s", " |\n| ");
+    fprintf(location, "%s", " |\n| ");
 
     /* Dump the hyphons */
     for(index = 0; line[index] != '\0'; index++) {
         int character = line[index];
 
         if(character == separator)
-            fprintf(stdout, "%s", " | ");
+            fprintf(location, "%s", " | ");
         else
-            fprintf(stdout, "%c", '-');
+            fprintf(location, "%c", '-');
     }
 
-    fprintf(stdout, "%s", " |\n");
+    fprintf(location, "%s", " |\n");
 
     /* Start reading parts of the table */
     while(cursor->cursor < cursor->length) {
@@ -492,19 +492,19 @@ static void evaluate_table(FILE *location, struct LibmatchCursor *cursor) {
         if(strcmp(line, "table") == 0)
             return;
 
-        fprintf(stdout, "%s", "| ");
+        fprintf(location, "%s", "| ");
 
         /* Dump each section of the table */
         for(index = 0; line[index] != '\0'; index++) {
             int character = line[index];
 
             if(character == separator)
-                fprintf(stdout, "%s", " | ");
+                fprintf(location, "%s", " | ");
             else
-                fprintf(stdout, "%c", character);
+                fprintf(location, "%c", character);
         }
 
-        fprintf(stdout, "%s", " |\n");
+        fprintf(location, "%s", " |\n");
     }
 }
 
@@ -527,7 +527,7 @@ static void description(FILE *location, struct DocgenArguments arguments, struct
             continue;
         }
 
-        fprintf(stdout, "%s\n", line);
+        fprintf(location, "%s\n", line);
     }
 
     fprintf(location, "%s", "\n");

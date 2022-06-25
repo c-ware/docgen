@@ -46,6 +46,13 @@ struct pollfd test_function(const char *foo, unsigned int bar);
 ```
 
 ### DESCRIPTION
+This is a description.
+This is another line
+This is also another line.
+| a | b |
+| - | - |
+| foo | bar |
+| baz | spam |
 
 ### SEE ALSO
 foo(bar), baz(tuna)
