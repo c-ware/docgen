@@ -46,7 +46,6 @@ struct pollfd test_function(const char *foo, unsigned int bar);
 ```
 
 ### DESCRIPTION
-This is a description.
 
 ### SEE ALSO
 foo(bar), baz(tuna)

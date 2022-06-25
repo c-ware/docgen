@@ -17,6 +17,14 @@
  *
  * @description
  * @This is a description.
+ * @This is another line
+ * @This is also another line.
+ * @table
+ * @sep: ;
+ * @a;b
+ * @foo;bar
+ * @baz;spam
+ * @table
  * @description
  *
  * @reference: foo(bar)

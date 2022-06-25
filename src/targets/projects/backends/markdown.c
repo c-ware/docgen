@@ -441,9 +441,95 @@ static void synopsis(FILE *location, struct LibmatchCursor cursor,
     docgen_extract_macro_functions_free(macro_functions);
 }
 
+static void evaluate_table(FILE *location, struct LibmatchCursor *cursor) {
+    int index = 0;
+    int separator = -1;
+    char line[DOCGEN_LINE_LENGTH + 1] = "";
+
+    libmatch_read_until(cursor, line, DOCGEN_LINE_LENGTH, "\n");
+
+    /* Must be followed by a separator */
+    if(strstarts(line, "sep: ") == 0) {
+        fprintf(stderr, "docgen: table on line %i expected separator immediately following "
+                "it of form '@sep: SEP_CHAR', got '%s'\n", cursor->line - 1, line);
+        exit(EXIT_FAILURE);
+    }
+
+    separator = *(line + strlen("sep: "));
+
+    libmatch_read_until(cursor, line, DOCGEN_LINE_LENGTH, "\n");
+    fprintf(stdout, "%s", "| ");
+
+    /* Dump the header */
+    for(index = 0; line[index] != '\0'; index++) {
+        int character = line[index];
+
+        if(character == separator)
+            fprintf(stdout, "%s", " | ");
+        else
+            fprintf(stdout, "%c", character);
+    }
+
+    fprintf(stdout, "%s", " |\n| ");
+
+    /* Dump the hyphons */
+    for(index = 0; line[index] != '\0'; index++) {
+        int character = line[index];
+
+        if(character == separator)
+            fprintf(stdout, "%s", " | ");
+        else
+            fprintf(stdout, "%c", '-');
+    }
+
+    fprintf(stdout, "%s", " |\n");
+
+    /* Start reading parts of the table */
+    while(cursor->cursor < cursor->length) {
+        libmatch_read_until(cursor, line, DOCGEN_LINE_LENGTH, "\n");
+
+        /* Stop dumping the table */
+        if(strcmp(line, "table") == 0)
+            return;
+
+        fprintf(stdout, "%s", "| ");
+
+        /* Dump each section of the table */
+        for(index = 0; line[index] != '\0'; index++) {
+            int character = line[index];
+
+            if(character == separator)
+                fprintf(stdout, "%s", " | ");
+            else
+                fprintf(stdout, "%c", character);
+        }
+
+        fprintf(stdout, "%s", " |\n");
+    }
+}
+
 static void description(FILE *location, struct DocgenArguments arguments, struct DocgenProject project) {
+    char line[DOCGEN_LINE_LENGTH + 1] = "";
+    struct LibmatchCursor description_cursor;
+
+    description_cursor = libmatch_cursor_init(project.description, strlen(project.description));
+
     fprintf(location, "%s", "### DESCRIPTION\n");
-    fprintf(location, "%s", project.description);
+
+    /* Iterate through each line */
+    while(description_cursor.cursor < description_cursor.length) {
+        libmatch_read_until(&description_cursor, line, DOCGEN_LINE_LENGTH, "\n");
+
+        /* Start parsing a table */
+        if(strcmp(line, "table") == 0) {
+            evaluate_table(location, &description_cursor);
+
+            continue;
+        }
+
+        fprintf(stdout, "%s\n", line);
+    }
+
     fprintf(location, "%s", "\n");
 }
 
