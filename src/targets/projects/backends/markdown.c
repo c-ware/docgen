@@ -50,17 +50,11 @@ do {                                                                       \
     while(__INCLUSION_INDEX < carray_length(array)) {                      \
         struct Inclusion inclusion = (array)->contents[__INCLUSION_INDEX]; \
                                                                            \
-        if(arguments.md_mono == 1)                                         \
-            fprintf(location, "%c", '`');                                  \
-                                                                           \
         if(inclusion.type == DOCGEN_INCLUSION_LOCAL) {                     \
             fprintf(location, "#include \"%s\"", inclusion.path);          \
         } else if(inclusion.type == DOCGEN_INCLUSION_SYSTEM) {             \
             fprintf(location, "#include <%s>", inclusion.path);            \
         }                                                                  \
-                                                                           \
-        if(arguments.md_mono == 1)                                         \
-            fprintf(location, "%c", '`');                                  \
                                                                            \
         fprintf(location, "%c", '\n');                                     \
                                                                            \
@@ -574,4 +568,6 @@ void docgen_project_markdown(struct DocgenArguments arguments, struct LibmatchCu
     synopsis(location, cursor, arguments, project);
     description(location, arguments, project);
     see_also(location, arguments, project);
+
+    fclose(location);
 }

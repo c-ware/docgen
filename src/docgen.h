@@ -145,9 +145,6 @@ struct DocgenArguments {
     char *date;
     const char *language;
 
-    /* Markdown Options */
-    int md_mono;
-
     /* Inclusions to load into each manual */
     struct Inclusions *inclusions;
 };

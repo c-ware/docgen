@@ -50,17 +50,11 @@ do {                                                                       \
     while(__INCLUSION_INDEX < carray_length(array)) {                      \
         struct Inclusion inclusion = (array)->contents[__INCLUSION_INDEX]; \
                                                                            \
-        if(arguments.md_mono == 1)                                         \
-            fprintf(location, "%c", '`');                                  \
-                                                                           \
         if(inclusion.type == DOCGEN_INCLUSION_LOCAL) {                     \
             fprintf(location, "#include \"%s\"", inclusion.path);          \
         } else if(inclusion.type == DOCGEN_INCLUSION_SYSTEM) {             \
             fprintf(location, "#include <%s>", inclusion.path);            \
         }                                                                  \
-                                                                           \
-        if(arguments.md_mono == 1)                                         \
-            fprintf(location, "%c", '`');                                  \
                                                                            \
         fprintf(location, "%c", '\n');                                     \
                                                                            \
@@ -86,65 +80,26 @@ static void synopsis(FILE *location, struct DocgenArguments arguments, struct Do
     fprintf(location, "%c", '\n');
 
     /* Write the function signature */
-    if(arguments.md_mono == 0)
-        fprintf(location, "%s %s(", function.return_data.return_type,  function.name);
-    else
-        fprintf(location, "`%s %s(", function.return_data.return_type,  function.name);
+    fprintf(location, "`%s %s(", function.return_data.return_type,  function.name);
 
     /* Function parameters */
     for(index = 0; index < carray_length(function.parameters); index++) {
         struct DocgenFunctionParameter parameter = function.parameters->contents[index];
 
-        /* Do not use backticks for generating a monospaced font for
-         * code. */
-        if(arguments.md_mono == 0) {
-            if(strchr(parameter.type, '*') == NULL)
-                fprintf(location, "%s %s", parameter.type, parameter.name);
-            else {
-                int parameter_index = 0;
-
-                // Add '\' before each asterisk in the type
-                while(parameter.type[parameter_index] != '\0') {
-                    int character = parameter.type[parameter_index];
-
-                    if(character == '*')
-                        fprintf(location, "%c", '\\');
-                    
-                    fprintf(location, "%c", character);
-                    parameter_index++;
-                }
-
-                fprintf(location, "%s", parameter.name);
-
-                // Do not output a comma
-                if(index == (carray_length(function.parameters) - 1))
-                    continue;
-                
-                fprintf(location, "%s", ", ");
-            }
-        }
-
         /* Use backticks for generating a monospaced font for code. */
-        if(arguments.md_mono == 1) {
-            if(strchr(parameter.type, '*') == NULL)
-                fprintf(location, "%s %s", parameter.type, parameter.name);
-            else
-                fprintf(location, "%s%s", parameter.type, parameter.name);
+        if(strchr(parameter.type, '*') == NULL)
+            fprintf(location, "%s %s", parameter.type, parameter.name);
+        else
+            fprintf(location, "%s%s", parameter.type, parameter.name);
 
-            // Do not output a comma
-            if(index == (carray_length(function.parameters) - 1))
-                continue;
-            
-            fprintf(location, "%s", ", ");
-        }
+        // Do not output a comma
+        if(index == (carray_length(function.parameters) - 1))
+            continue;
+        
+        fprintf(location, "%s", ", ");
     }
 
-    if(arguments.md_mono == 0)
-        fprintf(location, "%s", ")");
-    else
-        fprintf(location, "%s", ")`");
-
-    fprintf(location, "%s", "\n\n");
+    fprintf(location, "%s", ")`\n\n");
 }
 
 static void description(FILE *location, struct DocgenArguments arguments, struct DocgenFunction function) {
@@ -229,4 +184,6 @@ void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFu
     notes(location, arguments, function);
     examples(location, arguments, function);
     see_also(location, arguments, function);
+
+    fclose(location);
 }
