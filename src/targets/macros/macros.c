@@ -44,6 +44,8 @@
 void docgen_macros_format(struct DocgenArguments arguments, struct DocgenMacroFunction macro) {
     if(strcmp(arguments.format, "manpage") == 0)
         docgen_macros_manpage(arguments, macro);
+    if(strcmp(arguments.format, "markdown") == 0)
+        docgen_macros_markdown(arguments, macro);
     else
         fprintf(stderr, "docgen: unknown format for macros '%s'\n", arguments.format);
 }

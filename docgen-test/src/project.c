@@ -115,6 +115,10 @@
  * @These are the notes for the macro function
  * @notes
  *
+ * @example
+ * @This is an example.
+ * @example
+ *
  * @error: this is an error
  * @error: this is another error
  *

@@ -46,6 +46,7 @@ void docgen_macros_format(struct DocgenArguments arguments, struct DocgenMacroFu
 
 /* Backends */
 void docgen_macros_manpage(struct DocgenArguments arguments, struct DocgenMacroFunction macro);
+void docgen_macros_markdown(struct DocgenArguments arguments, struct DocgenMacroFunction macro);
 
 /* Documentation generation */
 void docgen_macros_generate(struct DocgenArguments arguments, FILE *file);
