@@ -272,7 +272,6 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             }
             carray_append(new_function.embeds, new_embed, EMBED);
         }
-
         else {
             fprintf(stderr, "docgen: unknown tag '%s' in function extractor on line %i (%s)\n",
                     tag_name.name, cursor->line, new_tag.line);
@@ -331,6 +330,9 @@ void docgen_extract_functions_free(struct DocgenFunctions *functions) {
 
         free(function.inclusions->contents);
         free(function.inclusions);
+
+        free(function.embeds->contents);
+        free(function.embeds);
     }
 
     free(functions->contents);

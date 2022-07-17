@@ -52,6 +52,8 @@
 #define DOCGEN_MACRO_FUNCTION_PARAMETER_DESCRIPTION_LENGTH     128
 #define DOCGEN_MACRO_FUNCTION_ERROR_DESCRIPTION_LENGTH         128
 
+#define DOCGEN_MACRO_FUNCTION_SETTING_LENGTH                    32
+
 /* Data structure properties */
 #define MACRO_FUNCTION_PARAMETER_TYPE          struct DocgenMacroFunctionParameter
 #define MACRO_FUNCTION_PARAMETER_HEAP          1
@@ -115,6 +117,11 @@ struct DocgenMacroFunction {
     struct DocgenMacroFunctionParameters *parameters;
     struct References *references;
     struct Inclusions *inclusions;
+    struct Embeds *embeds;
+
+    /* Function documentation settings */
+    int function_briefs;
+    int macro_function_briefs;
 };
 
 /*

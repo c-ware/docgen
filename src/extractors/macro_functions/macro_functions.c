@@ -155,6 +155,50 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
                                           cursor->line, new_tag.line);
 
             carray_append(new_macro_function.parameters, new_parameter, MACRO_FUNCTION_PARAMETER);
+        }
+
+        else if(strcmp(tag_name.name, "setting") == 0) {
+            char setting_name[DOCGEN_MACRO_FUNCTION_SETTING_LENGTH + 1];
+
+            memset(setting_name, 0, sizeof(setting_name));
+            docgen_extract_field_line("setting", setting_name, DOCGEN_MACRO_FUNCTION_SETTING_LENGTH,
+                                      cursor->line, new_tag.line);
+
+            if(strcmp(setting_name, "func-briefs") == 0)
+                new_macro_function.function_briefs = 1;
+            else if(strcmp(setting_name, "mfunc-briefs") == 0)
+                new_macro_function.macro_function_briefs = 1;
+            else {
+                fprintf(stderr, "docgen: unknown setting '%s' on line %i\n", setting_name, cursor->line);
+                exit(EXIT_FAILURE);
+            }
+        }
+
+        else if(strcmp(tag_name.name, "embed") == 0) {
+            struct Embed new_embed;
+            char embed_type[DOCGEN_EMBED_TYPE_LENGTH + 1];
+
+            memset(embed_type, 0, sizeof(embed_type));
+            memset(&new_embed, 0, sizeof(struct Embed));
+
+            docgen_extract_field_line_arg("embed", embed_type, DOCGEN_EMBED_TYPE_LENGTH,
+                                   new_embed.name, DOCGEN_EMBED_NAME_LENGTH,
+                                   cursor->line, new_tag.line);
+
+            if(strcmp(embed_type, "structure") == 0)
+                new_embed.type = DOCGEN_EMBED_STRUCTURE;
+            else if(strcmp(embed_type, "function") == 0)
+                new_embed.type = DOCGEN_EMBED_FUNCTION;
+            else if(strcmp(embed_type, "constant") == 0)
+                new_embed.type = DOCGEN_EMBED_CONSTANT;
+            else if(strcmp(embed_type, "macro_function") == 0)
+                new_embed.type = DOCGEN_EMBED_MACRO_FUNCTION;
+            else {
+                fprintf(stderr, "docgen: unknown embed type '%s' at line %i\n", embed_type, cursor->line);
+                exit(EXIT_FAILURE);
+            }
+
+            carray_append(new_macro_function.embeds, new_embed, EMBED);
         } else {
             fprintf(stderr, "docgen: unknown tag '%s' in function extractor on line %i (%s)\n",
                     tag_name.name, cursor->line, new_tag.line);
@@ -213,6 +257,9 @@ void docgen_extract_macro_functions_free(struct DocgenMacroFunctions *macro_func
 
         free(macro_function.inclusions->contents);
         free(macro_function.inclusions);
+
+        free(macro_function.embeds->contents);
+        free(macro_function.embeds);
     }
 
     free(macro_functions->contents);
