@@ -367,8 +367,8 @@ static void synopsis(struct DocgenArguments arguments,
 
     embed_constants(function, macros, location);
     embed_structures(function, structures, location);
-    embed_functions(function, functions, location);
     embed_macro_functions(function, macro_functions, location);
+    embed_functions(function, functions, location);
 
     docgen_extract_macros_free(macros);
     docgen_extract_functions_free(functions);

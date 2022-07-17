@@ -219,7 +219,6 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             memset(setting_name, 0, sizeof(setting_name));
             docgen_extract_field_line("setting", setting_name, DOCGEN_FUNCTION_SETTING_LENGTH,
                                       cursor->line, new_tag.line);
-
             if(strcmp(setting_name, "func-briefs") == 0)
                 new_function.function_briefs = 1;
             else if(strcmp(setting_name, "mfunc-briefs") == 0)

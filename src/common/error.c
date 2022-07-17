@@ -115,7 +115,7 @@ void field_line_arg_error_check(const char *line, int line_number) {
     /* First thing to enforce: first non-alphabetical character after the
      * name of the tag must be a space. */
     while(cursor.cursor < cursor.length) {
-        int character = libmatch_cursor_getch(&cursor);
+        character = libmatch_cursor_getch(&cursor);
 
         /* This is an alphabetical character */
         if(strchr(LIBMATCH_ALPHA, character) != NULL)
@@ -147,7 +147,7 @@ void field_line_arg_error_check(const char *line, int line_number) {
 
     /* Is every character until the colon not whitespace? */
     while(cursor.cursor < cursor.length) {
-        int character = libmatch_cursor_getch(&cursor);
+        character = libmatch_cursor_getch(&cursor);
 
         if(character == ':')
             break;

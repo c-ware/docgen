@@ -4,7 +4,14 @@
  * @name: test_function
  *
  * @embed function: foo_function
+ * @embed function: foo_function
+ * @embed structure: SomeStructure
+ * @embed macro_function: foobar_baz_function
+ * @embed macro_function: foobar_baz_function
+ * @embed constant: MY_CONSTANT
  *
+ * @setting: func-briefs
+ * @setting: mfunc-briefs
  * @include: foo.h
  *
  * @description
@@ -49,4 +56,50 @@
  *
  * @return: some value
  * @type: int
+*/
+
+/*
+ * @docgen: structure
+ * @brief: this is a structure
+ * @name: SomeStructure
+ *
+ * @field foo: bar
+ * @type: int
+ *
+ * @field baz: tuna
+ * @type: const char *
+ *
+ * @struct_start
+ * @brief: some nested one
+ * @name: NestedSomeStructure
+ *
+ * @field thud: waldo
+ * @type: struct SomeStructure *
+ *
+ * @field foobar: quz
+ * @type: void *
+ *
+ * @struct_end
+*/
+
+/*
+ * @docgen: macro_function
+ * @brief: this is macro function
+ * @name: foobar_baz_function
+ *
+ * @description
+ * @This is a macro function.
+ * @description
+ *
+ * @param foo: this is the foo parameter
+ * @param bar: this is the bar parameter
+*/
+
+/*
+ * @docgen: constant
+ * @brief: this is a constant
+ * @name: MY_CONSTANT
+ * @value: "foo"
+ *
+ * @setting: ifndef
 */
