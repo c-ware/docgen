@@ -52,9 +52,9 @@ static void embed_constants(struct DocgenProject project,
     for(index = 0; index < carray_length(project.embeds); index++) {
         int macro_index = 0;
         struct DocgenMacro macro;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_CONSTANT)
+        if(embed.type != DOCGEN_EMBED_CONSTANT)
             continue;
 
         macro_index = carray_find(macros, embed.name, macro_index, MACRO);
@@ -89,9 +89,9 @@ static void embed_macro_functions(struct DocgenProject project,
         int parameter_index = 0;
         int macro_function_index = 0;
         struct DocgenMacroFunction macro_function;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_MACRO_FUNCTION)
+        if(embed.type != DOCGEN_EMBED_MACRO_FUNCTION)
             continue;
 
         macro_function_index = carray_find(macro_functions, embed.name, macro_function_index, MACRO_FUNCTION);
@@ -144,9 +144,9 @@ static void embed_functions(struct DocgenProject project,
         int function_index = 0;
         int parameter_index = 0;
         struct DocgenFunction function;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_FUNCTION)
+        if(embed.type != DOCGEN_EMBED_FUNCTION)
             continue;
 
         function_index = carray_find(functions, embed.name, function_index, FUNCTION);
@@ -275,9 +275,9 @@ static void embed_structures(struct DocgenProject project,
         int field_index = 0;
         int structure_index = 0;
         struct DocgenStructure structure;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_STRUCTURE)
+        if(embed.type != DOCGEN_EMBED_STRUCTURE)
             continue;
 
         structure_index = carray_find(structures, embed.name, structure_index, STRUCTURE);

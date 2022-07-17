@@ -50,9 +50,9 @@ void docgen_project_helpcms_embed_constants(struct DocgenProject project, struct
     for(index = 0; index < carray_length(project.embeds); index++) {
         int macro_index = 0;
         struct DocgenMacro macro;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_CONSTANT)
+        if(embed.type != DOCGEN_EMBED_CONSTANT)
             continue;
 
         macro_index = carray_find(macros, embed.name, macro_index, MACRO);
@@ -122,9 +122,9 @@ void docgen_project_helpcms_embed_structures(struct DocgenProject project, struc
         int field_index = 0;
         int structure_index = 0;
         struct DocgenStructure structure;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_STRUCTURE)
+        if(embed.type != DOCGEN_EMBED_STRUCTURE)
             continue;
 
         structure_index = carray_find(structures, embed.name, structure_index, STRUCTURE);

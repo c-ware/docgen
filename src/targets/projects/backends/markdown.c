@@ -62,7 +62,7 @@ do {                                                                       \
     }                                                                      \
 } while(0)
 
-static int number_of_embedded_types(struct DocgenProjectEmbeds *embeds, int type) {
+static int number_of_embedded_types(struct Embeds *embeds, int type) {
     int index = 0;
     int counted = 0;
 
@@ -87,7 +87,7 @@ static void embed_constants(struct DocgenProject project,
                             FILE *location) {
     int index = 0;
     int embeds = 0;
-    int number_of_embeds = number_of_embedded_types(project.embeds, DOCGEN_PROJECT_EMBED_CONSTANT);
+    int number_of_embeds = number_of_embedded_types(project.embeds, DOCGEN_EMBED_CONSTANT);
 
     fprintf(location, "```c\n");
 
@@ -95,9 +95,9 @@ static void embed_constants(struct DocgenProject project,
     for(index = 0; index < carray_length(project.embeds); index++) {
         int macro_index = 0;
         struct DocgenMacro macro;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_CONSTANT)
+        if(embed.type != DOCGEN_EMBED_CONSTANT)
             continue;
 
         embeds++;
@@ -138,9 +138,9 @@ static void embed_macro_functions(struct DocgenProject project,
         int parameter_index = 0;
         int macro_function_index = 0;
         struct DocgenMacroFunction macro_function;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_MACRO_FUNCTION)
+        if(embed.type != DOCGEN_EMBED_MACRO_FUNCTION)
             continue;
 
         macro_function_index = carray_find(macro_functions, embed.name, macro_function_index, MACRO_FUNCTION);
@@ -191,9 +191,9 @@ static void embed_functions(struct DocgenProject project,
         int function_index = 0;
         int parameter_index = 0;
         struct DocgenFunction function;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_FUNCTION)
+        if(embed.type != DOCGEN_EMBED_FUNCTION)
             continue;
 
         function_index = carray_find(functions, embed.name, function_index, FUNCTION);
@@ -325,7 +325,7 @@ static void embed_structures(struct DocgenProject project,
                              FILE *location) {
     int index = 0;
     int embeds = 0;
-    int number_of_embeds = number_of_embedded_types(project.embeds, DOCGEN_PROJECT_EMBED_STRUCTURE);
+    int number_of_embeds = number_of_embedded_types(project.embeds, DOCGEN_EMBED_STRUCTURE);
     int longest_field = docgen_get_longest_field(structures, 0);
 
     fprintf(location, "%s", "```c\n");
@@ -334,9 +334,9 @@ static void embed_structures(struct DocgenProject project,
         int field_index = 0;
         int structure_index = 0;
         struct DocgenStructure structure;
-        struct DocgenProjectEmbed embed = project.embeds->contents[index];
+        struct Embed embed = project.embeds->contents[index];
 
-        if(embed.type != DOCGEN_PROJECT_EMBED_STRUCTURE)
+        if(embed.type != DOCGEN_EMBED_STRUCTURE)
             continue;
 
         embeds++;
@@ -404,7 +404,6 @@ static void head(FILE *location, struct DocgenArguments arguments, struct Docgen
 
 static void synopsis(FILE *location, struct LibmatchCursor cursor,
                      struct DocgenArguments arguments, struct DocgenProject project) {
-    int index = 0;
     struct DocgenMacros *macros = NULL;
     struct DocgenFunctions *functions = NULL;
     struct DocgenStructures *structures = NULL;
@@ -553,7 +552,6 @@ static void see_also(FILE *location, struct DocgenArguments arguments, struct Do
 }
 
 void docgen_project_markdown(struct DocgenArguments arguments, struct LibmatchCursor cursor, struct DocgenProject project) {
-    int index = 0;
     FILE *location = NULL;
     char file_path[LIBPATH_MAX_PATH + 1];
 

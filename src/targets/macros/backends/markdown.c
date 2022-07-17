@@ -92,7 +92,6 @@ void docgen_macros_markdown(struct DocgenArguments arguments, struct DocgenMacro
 
     /* Generate the arguments and parameters */
     for(index = 0; index < carray_length(macro.parameters); index++) {
-        int is_ptr = 0;
         struct DocgenMacroFunctionParameter parameter;
 
         parameter = macro.parameters->contents[index];

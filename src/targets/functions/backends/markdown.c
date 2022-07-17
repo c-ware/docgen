@@ -92,7 +92,7 @@ static void synopsis(FILE *location, struct DocgenArguments arguments, struct Do
         else
             fprintf(location, "%s%s", parameter.type, parameter.name);
 
-        // Do not output a comma
+        /* Do not output a comma */
         if(index == (carray_length(function.parameters) - 1))
             continue;
         
@@ -166,7 +166,6 @@ static void see_also(FILE *location, struct DocgenArguments arguments, struct Do
 }
 
 void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
-    int index = 0;
     FILE *location = NULL;
     char file_path[LIBPATH_MAX_PATH + 1];
 

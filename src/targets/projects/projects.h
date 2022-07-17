@@ -51,9 +51,6 @@
 
 #define DOCGEN_PROJECT_DESCRIPTION_LENGTH           8192 + 1
 
-#define DOCGEN_PROJECT_EMBED_NAME_LENGTH            128
-#define DOCGEN_PROJECT_EMBED_TYPE_LENGTH            32
-
 #define DOCGEN_PROJECT_CATEGORY_DESCRIPTION_LENGTH  128
 #define DOCGEN_PROJECT_CATEGORY_NAME_LENGTH         128
 
@@ -65,17 +62,6 @@
 #define CATEGORY_TYPE   struct DocgenProjectCategory
 #define CATEGORY_HEAP   1
 #define CATEGORY_FREE(value)
-
-#define EMBED_TYPE struct DocgenProjectEmbed
-#define EMBED_HEAP 1
-#define EMBED_FREE(value)
-
-/* Enumerations */
-#define DOCGEN_PROJECT_EMBED_UNKNOWN        0
-#define DOCGEN_PROJECT_EMBED_FUNCTION       1
-#define DOCGEN_PROJECT_EMBED_STRUCTURE      2
-#define DOCGEN_PROJECT_EMBED_CONSTANT       3
-#define DOCGEN_PROJECT_EMBED_MACRO_FUNCTION 4
 
 /*
  * An array of categories in the project comment.
@@ -95,24 +81,6 @@ struct DocgenProjectCategory {
 };
 
 /*
- * Represents a token to load into the manual page. This could
- * be a function, structure, constant, etc.
-*/
-struct DocgenProjectEmbed {
-    char name[DOCGEN_PROJECT_EMBED_NAME_LENGTH + 1];
-    int type;
-};
-
-/*
- * An array of embeds.
-*/
-struct DocgenProjectEmbeds {
-    CARRAY_COUNTER_TYPE length;
-    CARRAY_COUNTER_TYPE capacity;
-    struct DocgenProjectEmbed *contents;
-};
-
-/*
  * Represents an abstract view of a 'project.'
 */
 struct DocgenProject {
@@ -127,7 +95,7 @@ struct DocgenProject {
 
     /* Arrays */
     struct DocgenProjectCategorys *categories;
-    struct DocgenProjectEmbeds *embeds;
+    struct Embeds *embeds;
     struct References *references;
 };
 

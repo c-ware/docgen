@@ -65,6 +65,9 @@
 #define DOCGEN_INCLUSION_TYPE_LENGTH    32 + 1
 #define DOCGEN_INCLUSION_PATH_LENGTH    128 + 1
 
+#define DOCGEN_EMBED_NAME_LENGTH            128
+#define DOCGEN_EMBED_TYPE_LENGTH            32
+
 /* Categories to parse */
 #define DOCGEN_CATEGORY_UNKOWN      0
 #define DOCGEN_CATEGORY_FUNCTION    1
@@ -80,9 +83,16 @@
 #define DOCGEN_LANGUAGE_PY      1
 */
 
-/* Enumerations */
+/* The types of inclusions available */
 #define DOCGEN_INCLUSION_LOCAL      0
 #define DOCGEN_INCLUSION_SYSTEM     1
+
+/* The types of data that can be embedded in an output file */
+#define DOCGEN_EMBED_UNKNOWN        0
+#define DOCGEN_EMBED_FUNCTION       1
+#define DOCGEN_EMBED_STRUCTURE      2
+#define DOCGEN_EMBED_CONSTANT       3
+#define DOCGEN_EMBED_MACRO_FUNCTION 4
 
 /* Data structure properties */
 #define INCLUDE_TYPE            struct Inclusion
@@ -92,6 +102,10 @@
 #define REFERENCE_TYPE          struct Reference
 #define REFERENCE_HEAP          1
 #define REFERENCE_FREE(value)
+
+#define EMBED_TYPE struct Embed
+#define EMBED_HEAP 1
+#define EMBED_FREE(value)
 
 /* Configuration */
 #define DOCGEN_INDENTATION  4
@@ -129,6 +143,24 @@ struct References {
     int length;
     int capacity;
     struct Reference *contents;
+};
+
+/*
+ * Represents a token to load into the manual page. This could
+ * be a function, structure, constant, etc.
+*/
+struct Embed {
+    char name[DOCGEN_EMBED_NAME_LENGTH + 1];
+    int type;
+};
+
+/*
+ * An array of embeds.
+*/
+struct Embeds {
+    CARRAY_COUNTER_TYPE length;
+    CARRAY_COUNTER_TYPE capacity;
+    struct Embed *contents;
 };
 
 /*

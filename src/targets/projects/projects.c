@@ -147,24 +147,24 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
         }
 
         else if(strcmp(tag_name.name, "embed") == 0) {
-            struct DocgenProjectEmbed new_embed;
-            char embed_type[DOCGEN_PROJECT_EMBED_TYPE_LENGTH + 1];
+            struct Embed new_embed;
+            char embed_type[DOCGEN_EMBED_TYPE_LENGTH + 1];
 
             memset(embed_type, 0, sizeof(embed_type));
-            memset(&new_embed, 0, sizeof(struct DocgenProjectEmbed));
+            memset(&new_embed, 0, sizeof(struct Embed));
 
-            docgen_extract_field_line_arg("embed", embed_type, DOCGEN_PROJECT_EMBED_TYPE_LENGTH,
-                                   new_embed.name, DOCGEN_PROJECT_EMBED_NAME_LENGTH,
+            docgen_extract_field_line_arg("embed", embed_type, DOCGEN_EMBED_TYPE_LENGTH,
+                                   new_embed.name, DOCGEN_EMBED_NAME_LENGTH,
                                    cursor.line, new_tag.line);
 
             if(strcmp(embed_type, "structure") == 0)
-                new_embed.type = DOCGEN_PROJECT_EMBED_STRUCTURE;
+                new_embed.type = DOCGEN_EMBED_STRUCTURE;
             else if(strcmp(embed_type, "function") == 0)
-                new_embed.type = DOCGEN_PROJECT_EMBED_FUNCTION;
+                new_embed.type = DOCGEN_EMBED_FUNCTION;
             else if(strcmp(embed_type, "constant") == 0)
-                new_embed.type = DOCGEN_PROJECT_EMBED_CONSTANT;
+                new_embed.type = DOCGEN_EMBED_CONSTANT;
             else if(strcmp(embed_type, "macro_function") == 0)
-                new_embed.type = DOCGEN_PROJECT_EMBED_MACRO_FUNCTION;
+                new_embed.type = DOCGEN_EMBED_MACRO_FUNCTION;
             else {
                 fprintf(stderr, "docgen: unknown embed type '%s' at line %i\n", embed_type, cursor.line);
                 exit(EXIT_FAILURE);
