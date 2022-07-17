@@ -104,32 +104,26 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
         }
 
         /* Handle the tags */
-        if(strcmp(tag_name.name, "name") == 0)
+        if(strcmp(tag_name.name, "name") == 0) {
             docgen_extract_field_line("name", new_project.name, DOCGEN_PROJECT_NAME_LENGTH,
                                       cursor.line, new_tag.line);
-
-        else if(strcmp(tag_name.name, "brief") == 0)
+        } else if(strcmp(tag_name.name, "brief") == 0) {
             docgen_extract_field_line("brief", new_project.brief, DOCGEN_PROJECT_BRIEF_LENGTH,
                                       cursor.line, new_tag.line);
-
-        else if(strcmp(tag_name.name, "arguments") == 0)
+        } else if(strcmp(tag_name.name, "arguments") == 0) {
             docgen_extract_field_block("arguments", new_project.arguments,
                                        DOCGEN_PROJECT_ARGUMENTS_LENGTH, &cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "description") == 0)
+        } else if(strcmp(tag_name.name, "description") == 0) {
             docgen_extract_field_block("description", new_project.description,
                                        DOCGEN_PROJECT_DESCRIPTION_LENGTH, &cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "reference") == 0) {
+        } else if(strcmp(tag_name.name, "reference") == 0) {
             struct Reference new_reference;
 
             memset(&new_reference, 0, sizeof(struct Reference));
             new_reference = docgen_extract_reference(&cursor, new_tag);
 
             carray_append(new_project.references, new_reference, REFERENCE);
-        }
-
-        else if(strcmp(tag_name.name, "setting") == 0) {
+        } else if(strcmp(tag_name.name, "setting") == 0) {
             char setting_name[DOCGEN_PROJECT_SETTING_LENGTH + 1];
 
             memset(setting_name, 0, sizeof(setting_name));
@@ -144,9 +138,7 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
                 fprintf(stderr, "docgen: unknown setting '%s' on line %i\n", setting_name, cursor.line);
                 exit(EXIT_FAILURE);
             }
-        }
-
-        else if(strcmp(tag_name.name, "embed") == 0) {
+        } else if(strcmp(tag_name.name, "embed") == 0) {
             struct Embed new_embed;
             char embed_type[DOCGEN_EMBED_TYPE_LENGTH + 1];
 

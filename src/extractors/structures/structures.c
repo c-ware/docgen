@@ -105,15 +105,13 @@ struct DocgenStructure docgen_extract_parse_structure(struct LibmatchCursor *cur
                 exit(EXIT_FAILURE);
         }
 
-        if(strcmp(tag_name.name, "name") == 0)
+        if(strcmp(tag_name.name, "name") == 0) {
             docgen_extract_field_line("name", new_structure.name, DOCGEN_STRUCTURE_NAME_LENGTH,
                                       cursor->line, new_tag.line);
-
-        else if(strcmp(tag_name.name, "brief") == 0)
+        } else if(strcmp(tag_name.name, "brief") == 0) {
             docgen_extract_field_line("brief", new_structure.brief, DOCGEN_STRUCTURE_BRIEF_LENGTH,
                                       cursor->line, new_tag.line);
-
-        else if(strcmp(tag_name.name, "field") == 0) {
+        } else if(strcmp(tag_name.name, "field") == 0) {
             struct DocgenTag type_tag;
             struct DocgenTagName type_tag_name;
             struct DocgenStructureField new_field;
@@ -149,9 +147,7 @@ struct DocgenStructure docgen_extract_parse_structure(struct LibmatchCursor *cur
 
             /* Continue-- to reset new_tag.line */
             continue;
-        }
-
-        else if(strcmp(tag_name.name, "struct_start") == 0) {
+        } else if(strcmp(tag_name.name, "struct_start") == 0) {
             struct DocgenStructure nested_structure;
 
             memset(&nested_structure, 0, sizeof(struct DocgenStructure));
@@ -161,6 +157,7 @@ struct DocgenStructure docgen_extract_parse_structure(struct LibmatchCursor *cur
             carray_append(new_structure.nested, nested_structure, STRUCTURE);
         } else if(strcmp(tag_name.name, "struct_end") == 0) {
             goto break_loop;
+
         } else {
             fprintf(stderr, "docgen: unknown tag '%s' in structure extractor on line %i\n",
                     tag_name.name, cursor->line);

@@ -53,6 +53,7 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
     new_macro_function.parameters = carray_init(new_macro_function.parameters, MACRO_FUNCTION_PARAMETER);
     new_macro_function.references = carray_init(new_macro_function.references, REFERENCE);
     new_macro_function.inclusions = carray_init(new_macro_function.inclusions, INCLUDE);
+    new_macro_function.embeds = carray_init(new_macro_function.embeds, EMBED);
 
     while(1) {
         struct DocgenTagName tag_name;
@@ -78,27 +79,22 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
         }
 
         /* Handle the tags */
-        if(strcmp(tag_name.name, "name") == 0)
+        if(strcmp(tag_name.name, "name") == 0) {
             docgen_extract_field_line("name", new_macro_function.name, DOCGEN_MACRO_FUNCTION_NAME_LENGTH,
                                       cursor->line, new_tag.line);
-
-        else if(strcmp(tag_name.name, "brief") == 0)
+        } else if(strcmp(tag_name.name, "brief") == 0) {
             docgen_extract_field_line("brief", new_macro_function.brief, DOCGEN_MACRO_FUNCTION_BRIEF_LENGTH,
                                       cursor->line, new_tag.line);
-
-        else if(strcmp(tag_name.name, "description") == 0)
+        } else if(strcmp(tag_name.name, "description") == 0) {
             docgen_extract_field_block("description", new_macro_function.description,
                                        DOCGEN_MACRO_FUNCTION_DESCRIPTION_LENGTH, cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "notes") == 0)
+        } else if(strcmp(tag_name.name, "notes") == 0) {
             docgen_extract_field_block("notes", new_macro_function.notes,
                                        DOCGEN_MACRO_FUNCTION_NOTES_LENGTH, cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "example") == 0)
+        } else if(strcmp(tag_name.name, "example") == 0) {
             docgen_extract_field_block("example", new_macro_function.example,
                                        DOCGEN_MACRO_FUNCTION_EXAMPLE_LENGTH, cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "include") == 0) {
+        } else if(strcmp(tag_name.name, "include") == 0) {
             struct Inclusion new_inclusion;
 
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
@@ -108,9 +104,7 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
                                       cursor->line, new_tag.line);
 
             carray_append(new_macro_function.inclusions, new_inclusion, INCLUDE);
-        }
-
-        else if(strcmp(tag_name.name, "isystem") == 0) {
+        } else if(strcmp(tag_name.name, "isystem") == 0) {
             struct Inclusion new_inclusion;
 
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
@@ -120,9 +114,7 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
                                       cursor->line, new_tag.line);
 
             carray_append(new_macro_function.inclusions, new_inclusion, INCLUDE);
-        }
-
-        else if(strcmp(tag_name.name, "error") == 0) {
+        } else if(strcmp(tag_name.name, "error") == 0) {
             struct DocgenMacroFunctionError new_error;
 
             memset(&new_error, 0, sizeof(struct DocgenMacroFunctionError));
@@ -130,18 +122,14 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
                                       cursor->line, new_tag.line);
 
             carray_append(new_macro_function.errors, new_error, MACRO_FUNCTION_ERROR);
-        }
-
-        else if(strcmp(tag_name.name, "reference") == 0) {
+        } else if(strcmp(tag_name.name, "reference") == 0) {
             struct Reference new_reference;
 
             memset(&new_reference, 0, sizeof(struct Reference));
             new_reference = docgen_extract_reference(cursor, new_tag);
 
             carray_append(new_macro_function.references, new_reference, REFERENCE);
-        }
-
-        else if(strcmp(tag_name.name, "param") == 0) {
+        } else if(strcmp(tag_name.name, "param") == 0) {
             struct DocgenTag type_tag;
             struct DocgenTagName type_tag_name;
             struct DocgenMacroFunctionParameter new_parameter;
@@ -155,9 +143,7 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
                                           cursor->line, new_tag.line);
 
             carray_append(new_macro_function.parameters, new_parameter, MACRO_FUNCTION_PARAMETER);
-        }
-
-        else if(strcmp(tag_name.name, "setting") == 0) {
+        } else if(strcmp(tag_name.name, "setting") == 0) {
             char setting_name[DOCGEN_MACRO_FUNCTION_SETTING_LENGTH + 1];
 
             memset(setting_name, 0, sizeof(setting_name));
@@ -172,9 +158,7 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
                 fprintf(stderr, "docgen: unknown setting '%s' on line %i\n", setting_name, cursor->line);
                 exit(EXIT_FAILURE);
             }
-        }
-
-        else if(strcmp(tag_name.name, "embed") == 0) {
+        } else if(strcmp(tag_name.name, "embed") == 0) {
             struct Embed new_embed;
             char embed_type[DOCGEN_EMBED_TYPE_LENGTH + 1];
 

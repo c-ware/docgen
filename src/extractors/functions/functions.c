@@ -79,27 +79,22 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
         }
 
         /* Handle the tags */
-        if(strcmp(tag_name.name, "name") == 0)
+        if(strcmp(tag_name.name, "name") == 0) {
             docgen_extract_field_line("name", new_function.name, DOCGEN_FUNCTION_NAME_LENGTH, cursor->line,
                                       new_tag.line);
-
-        else if(strcmp(tag_name.name, "brief") == 0)
+        } else if(strcmp(tag_name.name, "brief") == 0) {
             docgen_extract_field_line("brief", new_function.brief, DOCGEN_FUNCTION_BRIEF_LENGTH,
                                       cursor->line, new_tag.line);
-
-        else if(strcmp(tag_name.name, "description") == 0)
+        } else if(strcmp(tag_name.name, "description") == 0) {
             docgen_extract_field_block("description", new_function.description,
                                        DOCGEN_FUNCTION_DESCRIPTION_LENGTH, cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "notes") == 0)
+        } else if(strcmp(tag_name.name, "notes") == 0) {
             docgen_extract_field_block("notes", new_function.notes,
                                        DOCGEN_FUNCTION_NOTES_LENGTH, cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "example") == 0)
+        } else if(strcmp(tag_name.name, "example") == 0) {
             docgen_extract_field_block("example", new_function.example,
                                        DOCGEN_FUNCTION_EXAMPLE_LENGTH, cursor, new_tag.line);
-
-        else if(strcmp(tag_name.name, "include") == 0) {
+        } else if(strcmp(tag_name.name, "include") == 0) {
             struct Inclusion new_inclusion;
 
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
@@ -109,9 +104,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                                       cursor->line, new_tag.line);
 
             carray_append(new_function.inclusions, new_inclusion, INCLUDE);
-        }
-
-        else if(strcmp(tag_name.name, "isystem") == 0) {
+        } else if(strcmp(tag_name.name, "isystem") == 0) {
             struct Inclusion new_inclusion;
 
             memset(&new_inclusion, 0, sizeof(struct Inclusion));
@@ -121,9 +114,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                                       cursor->line, new_tag.line);
 
             carray_append(new_function.inclusions, new_inclusion, INCLUDE);
-        }
-
-        else if(strcmp(tag_name.name, "error") == 0) {
+        } else if(strcmp(tag_name.name, "error") == 0) {
             struct DocgenFunctionError new_error;
 
             memset(&new_error, 0, sizeof(struct DocgenFunctionError));
@@ -131,18 +122,14 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                                       cursor->line, new_tag.line);
 
             carray_append(new_function.errors, new_error, ERROR);
-        }
-
-        else if(strcmp(tag_name.name, "reference") == 0) {
+        } else if(strcmp(tag_name.name, "reference") == 0) {
             struct Reference new_reference;
 
             memset(&new_reference, 0, sizeof(struct Reference));
             new_reference = docgen_extract_reference(cursor, new_tag);
 
             carray_append(new_function.references, new_reference, REFERENCE);
-        }
-
-        else if(strcmp(tag_name.name, "param") == 0) {
+        } else if(strcmp(tag_name.name, "param") == 0) {
             struct DocgenTag type_tag;
             struct DocgenTagName type_tag_name;
             struct DocgenFunctionParameter new_parameter;
@@ -174,9 +161,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             /* Parse the type */
             docgen_extract_field_line("type", new_parameter.type, DOCGEN_TYPE_LENGTH, cursor->line, type_tag.line);
             carray_append(new_function.parameters, new_parameter, PARAMETER);
-        }
-
-        else if(strcmp(tag_name.name, "return") == 0) {
+        } else if(strcmp(tag_name.name, "return") == 0) {
             struct DocgenTag type_tag;
             struct DocgenTagName return_tag_name;
 
@@ -228,9 +213,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
             /* Parse the type */
             docgen_extract_field_line("type", new_function.return_data.return_type, DOCGEN_TYPE_LENGTH,
                                       cursor->line, type_tag.line);
-        }
-
-        else if(strcmp(tag_name.name, "setting") == 0) {
+        } else if(strcmp(tag_name.name, "setting") == 0) {
             char setting_name[DOCGEN_FUNCTION_SETTING_LENGTH + 1];
 
             memset(setting_name, 0, sizeof(setting_name));
@@ -245,9 +228,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                 fprintf(stderr, "docgen: unknown setting '%s' on line %i\n", setting_name, cursor->line);
                 exit(EXIT_FAILURE);
             }
-        }
-
-        else if(strcmp(tag_name.name, "embed") == 0) {
+        } else if(strcmp(tag_name.name, "embed") == 0) {
             struct Embed new_embed;
             char embed_type[DOCGEN_EMBED_TYPE_LENGTH + 1];
 
@@ -271,8 +252,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                 exit(EXIT_FAILURE);
             }
             carray_append(new_function.embeds, new_embed, EMBED);
-        }
-        else {
+        } else {
             fprintf(stderr, "docgen: unknown tag '%s' in function extractor on line %i (%s)\n",
                     tag_name.name, cursor->line, new_tag.line);
             exit(EXIT_FAILURE);
