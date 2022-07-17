@@ -54,6 +54,8 @@
 #define DOCGEN_PARAMETER_DESCRIPTION_LENGTH     128
 #define DOCGEN_ERROR_DESCRIPTION_LENGTH         128
 
+#define DOCGEN_FUNCTION_SETTING_LENGTH          32
+
 /* Data structure properties */
 #define PARAMETER_TYPE          struct DocgenFunctionParameter
 #define PARAMETER_HEAP          1
@@ -123,6 +125,11 @@ struct DocgenFunction {
     struct DocgenFunctionParameters *parameters;
     struct References *references;
     struct Inclusions *inclusions;
+    struct Embeds *embeds;
+
+    /* Function documentation settings */
+    int function_briefs;
+    int macro_function_briefs;
 };
 
 /*
