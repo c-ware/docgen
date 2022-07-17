@@ -209,16 +209,9 @@
 
 #include "docgen.h"
 
-#include "targets/macros/macros.h"
-#include "targets/projects/projects.h"
-#include "targets/functions/functions.h"
-
 int main(int argc, char **argv) {
-    int category = 0;
     FILE *source_file = stdin;
     struct DocgenArguments arguments = main_parse(argc, argv);
-
-    category = main_enumerate(arguments.category);
 
     if(libpath_exists("doc") == 0) {
         fprintf(stderr, "%s", "docgen: could not find doc directory\n");
@@ -235,22 +228,6 @@ int main(int argc, char **argv) {
                 arguments.source, strerror(errno));
 
         exit(EXIT_FAILURE);
-    }
-
-    /* Invoke the correct category generator */
-    switch(category) {
-        case DOCGEN_CATEGORY_FUNCTION:
-            docgen_functions_generate(arguments, source_file);
-            break;
-        case DOCGEN_CATEGORY_PROJECT:
-            docgen_project_generate(arguments, source_file);
-            break;
-        case DOCGEN_CATEGORY_CATEGORY:
-            docgen_project_category_generate(arguments, source_file);
-            break;
-        case DOCGEN_CATEGORY_MACROS:
-            docgen_macros_generate(arguments, source_file);
-            break;
     }
 
     fclose(source_file);

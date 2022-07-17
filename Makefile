@@ -1,5 +1,5 @@
-OBJS=src/arguments.o src/main.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/tags/tags.o src/targets/projects/projects.o src/targets/projects/backends/markdown.o src/targets/projects/backends/manpage.o src/targets/projects/backends/helpcms.o src/targets/projects/backends/dcfscript.o src/targets/macros/macros.o src/targets/macros/backends/markdown.o src/targets/macros/backends/manpage.o src/targets/functions/functions.o src/targets/functions/backends/markdown.o src/targets/functions/backends/manpage.o src/extractors/structures/structures.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
-TESTOBJS=src/arguments.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/tags/tags.o src/targets/projects/projects.o src/targets/projects/backends/markdown.o src/targets/projects/backends/manpage.o src/targets/projects/backends/helpcms.o src/targets/projects/backends/dcfscript.o src/targets/macros/macros.o src/targets/macros/backends/markdown.o src/targets/macros/backends/manpage.o src/targets/functions/functions.o src/targets/functions/backends/markdown.o src/targets/functions/backends/manpage.o src/extractors/structures/structures.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
+OBJS=src/arguments.o src/main.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
+TESTOBJS=src/arguments.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
 TESTS=
 CC=cc
 PREFIX=/usr/local
@@ -26,7 +26,7 @@ uninstall:
 src/arguments.o: src/arguments.c src/docgen.h
 	$(CC) -c $(CFLAGS) src/arguments.c -o src/arguments.o
 
-src/main.o: src/main.c src/docgen.h src/targets/macros/macros.h src/targets/projects/projects.h src/targets/functions/functions.h
+src/main.o: src/main.c src/docgen.h
 	$(CC) -c $(CFLAGS) src/main.c -o src/main.o
 
 src/libarg/libarg.o: src/libarg/libarg.c src/libarg/libarg.h
@@ -76,39 +76,6 @@ src/common/common.o: src/common/common.c src/docgen.h src/common/common.h src/ex
 
 src/tags/tags.o: src/tags/tags.c src/tags/tags.h src/docgen.h
 	$(CC) -c $(CFLAGS) src/tags/tags.c -o src/tags/tags.o
-
-src/targets/projects/projects.o: src/targets/projects/projects.c src/targets/projects/projects.h
-	$(CC) -c $(CFLAGS) src/targets/projects/projects.c -o src/targets/projects/projects.o
-
-src/targets/projects/backends/markdown.o: src/targets/projects/backends/markdown.c src/targets/projects/projects.h
-	$(CC) -c $(CFLAGS) src/targets/projects/backends/markdown.c -o src/targets/projects/backends/markdown.o
-
-src/targets/projects/backends/manpage.o: src/targets/projects/backends/manpage.c src/targets/projects/projects.h
-	$(CC) -c $(CFLAGS) src/targets/projects/backends/manpage.c -o src/targets/projects/backends/manpage.o
-
-src/targets/projects/backends/helpcms.o: src/targets/projects/backends/helpcms.c src/targets/projects/projects.h
-	$(CC) -c $(CFLAGS) src/targets/projects/backends/helpcms.c -o src/targets/projects/backends/helpcms.o
-
-src/targets/projects/backends/dcfscript.o: src/targets/projects/backends/dcfscript.c src/targets/projects/projects.h
-	$(CC) -c $(CFLAGS) src/targets/projects/backends/dcfscript.c -o src/targets/projects/backends/dcfscript.o
-
-src/targets/macros/macros.o: src/targets/macros/macros.c src/targets/macros/macros.h
-	$(CC) -c $(CFLAGS) src/targets/macros/macros.c -o src/targets/macros/macros.o
-
-src/targets/macros/backends/markdown.o: src/targets/macros/backends/markdown.c src/targets/macros/macros.h
-	$(CC) -c $(CFLAGS) src/targets/macros/backends/markdown.c -o src/targets/macros/backends/markdown.o
-
-src/targets/macros/backends/manpage.o: src/targets/macros/backends/manpage.c src/targets/macros/macros.h
-	$(CC) -c $(CFLAGS) src/targets/macros/backends/manpage.c -o src/targets/macros/backends/manpage.o
-
-src/targets/functions/functions.o: src/targets/functions/functions.c src/targets/functions/functions.h
-	$(CC) -c $(CFLAGS) src/targets/functions/functions.c -o src/targets/functions/functions.o
-
-src/targets/functions/backends/markdown.o: src/targets/functions/backends/markdown.c src/targets/functions/functions.h
-	$(CC) -c $(CFLAGS) src/targets/functions/backends/markdown.c -o src/targets/functions/backends/markdown.o
-
-src/targets/functions/backends/manpage.o: src/targets/functions/backends/manpage.c src/targets/functions/functions.h
-	$(CC) -c $(CFLAGS) src/targets/functions/backends/manpage.c -o src/targets/functions/backends/manpage.o
 
 src/extractors/structures/structures.o: src/extractors/structures/structures.c src/extractors/structures/structures.h
 	$(CC) -c $(CFLAGS) src/extractors/structures/structures.c -o src/extractors/structures/structures.o

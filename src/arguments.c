@@ -178,46 +178,6 @@ void main_extract_inclusions(int argc, char **argv,
     }
 }
 
-int main_enumerate(const char *category) {
-    liberror_is_null(main_enumerate, category);
-
-    if(strcmp(category, "functions") == 0)
-        return DOCGEN_CATEGORY_FUNCTION;
-
-    if(strcmp(category, "project") == 0)
-        return DOCGEN_CATEGORY_PROJECT;
-
-    if(strcmp(category, "category") == 0)
-        return DOCGEN_CATEGORY_CATEGORY;
-
-    if(strcmp(category, "macros") == 0)
-        return DOCGEN_CATEGORY_MACROS;
-
-    fprintf(stderr, "docgen: unknown category '%s'\n", category);
-    fprintf(stderr, "%s", "Try 'docgen --help' for more information.\n");
-
-    exit(EXIT_FAILURE);
-
-    return -1;
-}
-
-int main_enumerate_language(const char *language) {
-    liberror_is_null(main_enumerate_language, language);
-
-    if(strcmp(language, "c") == 0)
-        return DOCGEN_LANGUAGE_C;
-
-    /* From: single comment mode attempt
-    if(strcmp(language, "py") == 0)
-        return DOCGEN_LANGUAGE_PY;
-    */
-
-    fprintf(stderr, "docgen: unsupported language '%s'\n", language);
-    fprintf(stderr, "%s", "Try 'docgen --help' for more information.\n");
-
-    exit(EXIT_FAILURE);
-}
-
 int main_parameters(const char *option) {
     liberror_is_null(main_parameters, option);
 

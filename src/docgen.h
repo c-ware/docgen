@@ -68,21 +68,6 @@
 #define DOCGEN_EMBED_NAME_LENGTH            128
 #define DOCGEN_EMBED_TYPE_LENGTH            32
 
-/* Categories to parse */
-#define DOCGEN_CATEGORY_UNKOWN      0
-#define DOCGEN_CATEGORY_FUNCTION    1
-#define DOCGEN_CATEGORY_PROJECT     2
-#define DOCGEN_CATEGORY_CATEGORY    3
-#define DOCGEN_CATEGORY_MACROS      4
-
-/* Supported languages */
-#define DOCGEN_LANGUAGE_UNKNOWN 0
-#define DOCGEN_LANGUAGE_C       1
-
-/* From: single comment mode attempt
-#define DOCGEN_LANGUAGE_PY      1
-*/
-
 /* The types of inclusions available */
 #define DOCGEN_INCLUSION_LOCAL      0
 #define DOCGEN_INCLUSION_SYSTEM     1
