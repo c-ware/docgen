@@ -209,9 +209,20 @@
 
 #include "docgen.h"
 
+/* Extractors */
+#include "extractors/macros/macros.h"
+#include "extractors/functions/functions.h"
+#include "extractors/structures/structures.h"
+#include "extractors/macro_functions/macro_functions.h"
+
 int main(int argc, char **argv) {
     FILE *source_file = stdin;
+    struct LibmatchCursor cursor;
+    struct GeneratorParams generator_parameters;
     struct DocgenArguments arguments = main_parse(argc, argv);
+
+    INIT_VARIABLE(cursor);
+    INIT_VARIABLE(generator_parameters);
 
     if(libpath_exists("doc") == 0) {
         fprintf(stderr, "%s", "docgen: could not find doc directory\n");
@@ -230,8 +241,33 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+
+    /* Extract all potentially necessary tokens from the source file.
+     * Remember that extractor functions will actually make a copy of
+     * the cursor we pass to it. */
+    cursor = libmatch_cursor_from_stream(source_file);
+    generator_parameters.macros = docgen_extract_macros(&cursor, "/*", "*/");
+    generator_parameters.functions = docgen_extract_functions(&cursor, "/*", "*/");
+    generator_parameters.structures = docgen_extract_structures(&cursor, "/*", "*/");
+    generator_parameters.macro_functions = docgen_extract_macro_functions(&cursor, "/*", "*/");
+
+    /* Determine which thing to generate documentation for */
+    if(strcmp(arguments.category, "functions") == 0) {
+
+    } else if(strcmp(arguments.category, "macro_functions") == 0) {
+        
+    } else if(strcmp(arguments.category, "projects") == 0) {
+        
+    }
+
     fclose(source_file);
+    libmatch_cursor_free(&cursor);
     carray_free(arguments.inclusions, INCLUDE);
+
+    docgen_extract_macros_free(generator_parameters.macros);
+    docgen_extract_functions_free(generator_parameters.functions);
+    docgen_extract_structures_free(generator_parameters.structures);
+    docgen_extract_macro_functions_free(generator_parameters.macro_functions);
 
     return EXIT_SUCCESS;
 }

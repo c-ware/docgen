@@ -43,13 +43,13 @@
 #include <string.h>
 
 #include "tags/tags.h"
+#include "common/common.h"
 #include "libstr/libstr.h"
 #include "carray/carray.h"
 #include "libarg/libarg.h"
 #include "libpath/libpath.h"
 #include "liberror/liberror.h"
 #include "libmatch/libmatch.h"
-#include "common/common.h"
 
 #define CWARE_DOCGEN_VERSION    "1.0.2"
 
@@ -91,6 +91,9 @@
 #define EMBED_TYPE struct Embed
 #define EMBED_HEAP 1
 #define EMBED_FREE(value)
+
+#define INIT_VARIABLE(v) \
+    memset(&(v), 0, sizeof((v)))
 
 /* Configuration */
 #define DOCGEN_INDENTATION  4
@@ -166,9 +169,17 @@ struct DocgenArguments {
     struct Inclusions *inclusions;
 };
 
+/*
+ * Parameters for a generator function.
+*/
+struct GeneratorParams {
+    struct DocgenFunctions *functions;
+    struct DocgenMacroFunctions *macro_functions;
+    struct DocgenStructures *structures;
+    struct DocgenMacros *macros;
+};
+
 /* Argument parsing and setup */
-int main_enumerate(const char *category);
-int main_enumerate_language(const char *language);
 int main_parameters(const char *option);
 void main_error(const char *option, int type, int expected, int got);
 void main_extract_inclusions(int argc, char **argv, struct DocgenArguments *arguments);
