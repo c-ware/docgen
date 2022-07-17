@@ -42,11 +42,12 @@
 #include "functions.h"
 
 void docgen_functions_format(struct DocgenArguments arguments,
-                            struct DocgenFunction function) {
+                             struct LibmatchCursor cursor,
+                             struct DocgenFunction function) {
     if(strcmp(arguments.format, "manpage") == 0)
-        docgen_functions_manpage(arguments, function);
+        docgen_functions_manpage(arguments, cursor, function);
     else if(strcmp(arguments.format, "markdown") == 0)
-        docgen_functions_markdown(arguments, function);
+        docgen_functions_markdown(arguments, cursor, function);
     else
         fprintf(stderr, "docgen: unknown format for functions '%s'\n", arguments.format);
 }
@@ -60,13 +61,17 @@ void docgen_functions_generate(struct DocgenArguments arguments, FILE *file) {
     const char *comment_start = docgen_get_comment_start(arguments);
     const char *comment_end = docgen_get_comment_end(arguments);
 
+    /* Extract the functions from this file, and reset the cursor
+     * position so that each function that has manuals generated
+     * for it can have an umodified view of everything in the file. */
     functions = docgen_extract_functions(&cursor, comment_start, comment_end);
+    cursor.cursor = 0;
 
     for(index = 0; index < carray_length(functions); index++) {
         struct DocgenFunction function = functions->contents[index];
 
         /* Generate this function manual */
-        docgen_functions_format(arguments, function);
+        docgen_functions_format(arguments, cursor, function);
     }
 
     libmatch_cursor_free(&cursor);

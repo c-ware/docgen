@@ -39,14 +39,17 @@
 #define CWARE_DOCGEN_FUNCTIONS_H
 
 #include "../../docgen.h"
+#include "../../extractors/macros/macros.h"
 #include "../../extractors/functions/functions.h"
+#include "../../extractors/structures/structures.h"
+#include "../../extractors/macro_functions/macro_functions.h"
 
 /* Backend selectors */
-void docgen_functions_format(struct DocgenArguments arguments, struct DocgenFunction function);
+void docgen_functions_format(struct DocgenArguments arguments, struct LibmatchCursor cursor, struct DocgenFunction function);
 
 /* Backends */
-void docgen_functions_manpage(struct DocgenArguments arguments, struct DocgenFunction function);
-void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function);
+void docgen_functions_manpage(struct DocgenArguments arguments, struct LibmatchCursor cursor, struct DocgenFunction function);
+void docgen_functions_markdown(struct DocgenArguments arguments, struct LibmatchCursor cursor, struct DocgenFunction function);
 
 /* Documentation generation */
 void docgen_functions_generate(struct DocgenArguments arguments, FILE *file);

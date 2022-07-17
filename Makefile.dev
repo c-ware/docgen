@@ -5,7 +5,7 @@ CC=cc
 PREFIX=/usr/local
 LDFLAGS=
 LDLIBS=
-CFLAGS=-Wall -Werror -Wextra -Wpedantic -Wno-unused-parameter -ansi -g
+CFLAGS=-Wall -Wextra -Wpedantic -Wshadow -Wno-unused-parameter -ansi -g
 
 all: $(OBJS) $(TESTS) docgen
 

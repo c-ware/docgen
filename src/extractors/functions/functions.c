@@ -251,6 +251,7 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                 fprintf(stderr, "docgen: unknown embed type '%s' at line %i\n", embed_type, cursor->line);
                 exit(EXIT_FAILURE);
             }
+
             carray_append(new_function.embeds, new_embed, EMBED);
         } else {
             fprintf(stderr, "docgen: unknown tag '%s' in function extractor on line %i (%s)\n",

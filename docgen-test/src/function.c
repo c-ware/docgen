@@ -3,7 +3,9 @@
  * @brief: this is a test function
  * @name: test_function
  *
- * @include foo.h
+ * @embed function: foo_function
+ *
+ * @include: foo.h
  *
  * @description
  * @This is a description.
@@ -28,4 +30,23 @@
  *
  * @return: some data
  * @type: struct pollfd
+*/
+
+/*
+ * @docgen: function
+ * @brief: foo bar baz
+ * @name: foo_function
+ *
+ * @description
+ * @foo bar baz
+ * @description
+ *
+ * @param x: the x parameter
+ * @type: int
+ * 
+ * @param y: the y parameter
+ * @type: int
+ *
+ * @return: some value
+ * @type: int
 */

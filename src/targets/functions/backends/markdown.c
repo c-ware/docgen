@@ -165,7 +165,7 @@ static void see_also(FILE *location, struct DocgenArguments arguments, struct Do
     fprintf(location, "%c", '\n');
 }
 
-void docgen_functions_markdown(struct DocgenArguments arguments, struct DocgenFunction function) {
+void docgen_functions_markdown(struct DocgenArguments arguments, struct LibmatchCursor cursor, struct DocgenFunction function) {
     FILE *location = NULL;
     char file_path[LIBPATH_MAX_PATH + 1];
 
