@@ -7,7 +7,6 @@
  * @embed function: foo_function
  * @embed structure: SomeStructure
  * @embed macro_function: foobar_baz_function
- * @embed macro_function: foobar_baz_function
  * @embed constant: MY_CONSTANT
  *
  * @setting: func-briefs
@@ -99,15 +98,6 @@
  * @docgen: constant
  * @brief: this is a constant
  * @name: MY_CONSTANT
- * @value: "foo"
- *
- * @setting: ifndef
-*/
-
-/*
- * @docgen: constant
- * @brief: this is a constant
- * @name: MY_CONSTANT_2
  * @value: "foo"
  *
  * @setting: ifndef

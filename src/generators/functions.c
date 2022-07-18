@@ -47,6 +47,7 @@
 #include "../extractors/macros/macros.h"
 #include "../extractors/functions/functions.h"
 #include "../extractors/structures/structures.h"
+#include "../extractors/macro_functions/macro_functions.h"
 
 struct PostprocessorData docgen_generate_functions(struct DocgenFunction function,
                                                    struct GeneratorParams parameters) {
@@ -66,7 +67,10 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
      * might (command line arguments). */
     data.arguments = data.arguments;
     data.embedded_macros = make_embedded_macros(function.function_briefs, *(parameters.macros), *(function.embeds));
-    data.embedded_structures = make_embedded_structures(*(parameters.structures), *(function.embeds));
+    data.embedded_structures = make_embedded_structures(*(parameters.structures),*(function.embeds));
+    data.embedded_macro_functions = make_embedded_macro_functions(function.macro_function_briefs,
+                                                                  *(parameters.macro_functions),
+                                                                  *(function.embeds));
 
     return data;
 }

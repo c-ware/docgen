@@ -45,73 +45,68 @@
 #include "../extractors/macros/macros.h"
 #include "../extractors/functions/functions.h"
 #include "../extractors/structures/structures.h"
+#include "../extractors/macro_functions/macro_functions.h"
 
 #include "generators.h"
 
+/*
+ * @docgen: function
+ * @brief: add spaces to a cstring
+ * @name add_offset
+ *
+ * @description
+ * @This function will add an OFFSET number of spaces to a CString. Useful
+ * @for lining text up.
+ * @description
+ *
+ * @error: string is NULL
+ * @error: offset is negative
+ *
+ * @param string: the string to add to
+ * @type: struct CString
+ *
+ * @param offset: the number of spaces to add
+ * @type: int
+*/
 static void add_offset(struct CString *string, int offset) {
     int index = 0;
+
+    liberror_is_null(add_offset, string);
+    liberror_is_negative(add_offset, offset);
 
     /* Add a bunch of spaces :) */
     for(index = 0; index < offset; index++)
         cstring_concats(string, " ");
 }
 
-struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macros,
-                                      struct Embeds embeds) {
-    int index = 0;
-    struct CStrings *macro_buffer = carray_init(macro_buffer, CSTRING);
-
-    /* For each embedded macro (constant) make a new CString to represent it. */
-    for(index = 0; index < carray_length(&embeds); index++) {
-        int macro_index = 0;
-        struct CString new_macro_string;
-        struct DocgenMacro target_macro;
-        struct Embed requested_embed = embeds.contents[index];
-
-        /* This is not an embedded macro we are looking at */
-        if(requested_embed.type != DOCGEN_EMBED_CONSTANT)
-            continue;
-
-        /* Get the requested macro's data and continue initialization.
-         * Search is performed by comparing each macro in the array of
-         * macros passed to this function against the embed we are looking at. */
-        INIT_VARIABLE(target_macro);
-        INIT_VARIABLE(new_macro_string);
-
-        macro_index = carray_find(&macros, requested_embed.name, macro_index, MACRO);
-        target_macro = macros.contents[macro_index];
-        new_macro_string = cstring_init("");
- 
-        if(allow_briefs == 1) {
-            cstring_concats(&new_macro_string, "/* ");
-            cstring_concats(&new_macro_string, target_macro.brief);
-            cstring_concats(&new_macro_string, " */\n");
-        }
-
-        if(target_macro.ifndef) {
-            cstring_concats(&new_macro_string, "#ifndef ");
-            cstring_concats(&new_macro_string, target_macro.name);
-            cstring_concats(&new_macro_string, "\n");
-        }
-
-        cstring_concats(&new_macro_string, "#define ");
-        cstring_concats(&new_macro_string, target_macro.name);
-        cstring_concats(&new_macro_string, " ");
-        cstring_concats(&new_macro_string, target_macro.value);
-        cstring_concats(&new_macro_string, "\n");
-
-        if(target_macro.ifndef) {
-            cstring_concats(&new_macro_string, "#endif\n");
-        }
-
-        carray_append(macro_buffer, new_macro_string, CSTRING);
-    }
-
-    return macro_buffer;
-}
-
-
-void make_embedded_structures_recursive(int depth, int longest_line,
+/*
+ * @docgen: function
+ * @brief: continue recursively expanding nested structures
+ * @name: make_embedded_structures_recursive
+ *
+ * @description
+ * @This function is used by the make_embedded_structures(cware) function as
+ * @the recursive component of generating nested structures.
+ * @description
+ *
+ * @error: structures is NULL
+ * @error: string is NULL
+ * @error: depth is negative
+ * @error: longest_line is negative
+ *
+ * @param depth: how deep we are in recursion
+ * @type: int
+ *
+ * @param longest_line: the longest line in the structure-- used for alignment
+ * @type: int
+ *
+ * @param structures: the structures to iterate through
+ * @type: struct DocgenStructures
+ *
+ * @param string: the string to write into
+ * @type: struct CString
+*/
+static void make_embedded_structures_recursive(int depth, int longest_line,
                                         struct DocgenStructures *structures,
                                         struct CString *string) {
     int index = 0; 
@@ -171,6 +166,95 @@ void make_embedded_structures_recursive(int depth, int longest_line,
     }
 }
 
+/*
+ * @docgen: function
+ * @brief: handles an unrecognized index by producing an error
+ * @name: handle_unrecognized_embed
+ *
+ * @description
+ * @This function will report an error for when carray_find(cware) fails due to
+ * @the embed request not matching any of the tokens found in the source file.
+ * @description
+ *
+ * @param name: the name of embed request
+ * @type: const char *
+ *
+ * @param target: the token type
+ * @type: const char *
+ *
+ * @param position: the index of the token
+ * @type: int
+*/
+void handle_unrecognized_embed(const char *name, const char *target, int position) {
+    if(position >= 0)
+        return;
+
+    fprintf(stderr, "docgen: failed to find '%s' named '%s' to embed\n", target, name);
+    exit(EXIT_FAILURE);
+}
+
+
+
+
+
+
+
+struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macros,
+                                      struct Embeds embeds) {
+    int index = 0;
+    struct CStrings *macro_buffer = carray_init(macro_buffer, CSTRING);
+
+    /* For each embedded macro (constant) make a new CString to represent it. */
+    for(index = 0; index < carray_length(&embeds); index++) {
+        int macro_index = 0;
+        struct CString new_macro_string;
+        struct DocgenMacro target_macro;
+        struct Embed requested_embed = embeds.contents[index];
+
+        /* This is not an embedded macro we are looking at */
+        if(requested_embed.type != DOCGEN_EMBED_CONSTANT)
+            continue;
+
+        /* Get the requested macro's data and continue initialization.
+         * Search is performed by comparing each macro in the array of
+         * macros passed to this function against the embed we are looking at. */
+        INIT_VARIABLE(target_macro);
+        INIT_VARIABLE(new_macro_string);
+
+        macro_index = carray_find(&macros, requested_embed.name, macro_index, MACRO);
+        target_macro = macros.contents[macro_index];
+        new_macro_string = cstring_init("");
+
+        handle_unrecognized_embed(requested_embed.name, "macro", macro_index);
+ 
+        if(allow_briefs == 1) {
+            cstring_concats(&new_macro_string, "/* ");
+            cstring_concats(&new_macro_string, target_macro.brief);
+            cstring_concats(&new_macro_string, " */\n");
+        }
+
+        if(target_macro.ifndef) {
+            cstring_concats(&new_macro_string, "#ifndef ");
+            cstring_concats(&new_macro_string, target_macro.name);
+            cstring_concats(&new_macro_string, "\n");
+        }
+
+        cstring_concats(&new_macro_string, "#define ");
+        cstring_concats(&new_macro_string, target_macro.name);
+        cstring_concats(&new_macro_string, " ");
+        cstring_concats(&new_macro_string, target_macro.value);
+        cstring_concats(&new_macro_string, "\n");
+
+        if(target_macro.ifndef) {
+            cstring_concats(&new_macro_string, "#endif\n");
+        }
+
+        carray_append(macro_buffer, new_macro_string, CSTRING);
+    }
+
+    return macro_buffer;
+}
+
 struct CStrings *make_embedded_structures(struct DocgenStructures structures,
                                           struct Embeds embeds) {
     int index = 0;
@@ -201,6 +285,8 @@ struct CStrings *make_embedded_structures(struct DocgenStructures structures,
         /* FWIW, we increment the "longest field" by this amount because
          * it just makes the final string look cleaner. */
         longest_field += 4;
+
+        handle_unrecognized_embed(embed.name, "structure", structure_index);
 
         cstring_concats(&new_structure_string, "struct ");
         cstring_concats(&new_structure_string, target_structure.name);
@@ -251,6 +337,72 @@ struct CStrings *make_embedded_structures(struct DocgenStructures structures,
         carray_append(structure_buffer, new_structure_string, STRUCTURE);
     }
 
-
     return structure_buffer;
+}
+
+struct CStrings *make_embedded_macro_functions(int allow_briefs,
+                                               struct DocgenMacroFunctions macro_functions,
+                                               struct Embeds embeds) {
+    int index = 0;
+    int iter_index = 0;
+    struct CStrings *macro_function_buffer = carray_init(macro_function_buffer, CSTRING);
+
+    /* For each embedded macro (constant) make a new CString to represent it. */
+    for(index = 0; index < carray_length(&embeds); index++) {
+        int macro_function_index = 0;
+        struct CString new_macro_function_string;
+        struct DocgenMacroFunction target_macro_function;
+        struct Embed requested_embed = embeds.contents[index];
+
+        /* This is not an embedded macro_function we are looking at */
+        if(requested_embed.type != DOCGEN_EMBED_MACRO_FUNCTION)
+            continue;
+
+        /* Get the requested macro_function's data and continue initialization.
+         * Search is performed by comparing each macro_function in the array of
+         * macro_functions passed to this function against the embed we are looking at. */
+        INIT_VARIABLE(target_macro_function);
+        INIT_VARIABLE(new_macro_function_string);
+
+        macro_function_index = carray_find(&macro_functions, requested_embed.name, macro_function_index, MACRO);
+        target_macro_function = macro_functions.contents[macro_function_index];
+        new_macro_function_string = cstring_init("");
+
+        handle_unrecognized_embed(requested_embed.name, "macro_function", macro_function_index);
+ 
+        if(allow_briefs == 1) {
+            cstring_concats(&new_macro_function_string, "/* ");
+            cstring_concats(&new_macro_function_string, target_macro_function.brief);
+            cstring_concats(&new_macro_function_string, " */\n");
+        }
+
+        cstring_concats(&new_macro_function_string, "#define ");
+        cstring_concats(&new_macro_function_string, target_macro_function.name);
+        cstring_concats(&new_macro_function_string, "(");
+
+        /* Dump the parameters */
+        for(iter_index = 0; iter_index < carray_length(target_macro_function.parameters); iter_index++) {
+            struct DocgenMacroFunctionParameter parameter = target_macro_function.parameters->contents[iter_index];
+
+            cstring_concats(&new_macro_function_string, parameter.name);
+
+            /* Only add a comma if we are the last element in the list */
+            if(iter_index < (carray_length(target_macro_function.parameters) - 1))
+                cstring_concats(&new_macro_function_string, ", ");
+        }
+
+        cstring_concats(&new_macro_function_string, ");");
+        printf("%s\n", new_macro_function_string.contents);
+
+        carray_append(macro_function_buffer, new_macro_function_string, CSTRING);
+    }
+
+    return macro_function_buffer;
+}
+
+struct CStrings *make_embedded_functions(int allow_briefs,
+                                         struct DocgenFunctions functions, struct Embeds embeds) {
+    int index = 0;
+    int iter_index =0;
+
 }

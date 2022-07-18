@@ -99,5 +99,32 @@ struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macr
 */
 struct CStrings *make_embedded_structures(struct DocgenStructures structures,
                                           struct Embeds embeds);
+/*
+ * @docgen: function
+ * @brief: generate a string of each embedded macro function request
+ * @name: make_embedded_macro_functions
+ *
+ * @include: generators.h
+ *
+ * @description
+ * @This function will generate an array of CStrings that represent all the
+ * @macro functions that were requested by the target.
+ * @description
+ *
+ * @param allow_briefs: whether or not briefs should be allowed
+ * @type: int
+ *
+ * @param macro_functions: an array of macro_functions in the source file
+ * @type: struct DocgenMacroFunctions
+ *
+ * @param embeds: an array of embeds that something requests
+ * @type: struct Embeds
+ *
+ * @return: an array of CStrings
+ * @struct CStrings *
+*/
+struct CStrings *make_embedded_macro_functions(int allow_briefs,
+                                               struct DocgenMacroFunctions macro_functions,
+                                               struct Embeds embeds);
 
 #endif
