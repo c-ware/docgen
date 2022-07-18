@@ -40,8 +40,64 @@
 
 struct DocgenFunction;
 struct GeneratorParams;
+struct DocgenStructures;
 struct PostprocessorData;
 
 struct PostprocessorData docgen_generate_functions(struct DocgenFunction function, struct GeneratorParams parameters);
+
+/*
+ * common.c logic
+*/
+
+/*
+ * @docgen: function
+ * @brief: generate a string of each embedded macro request
+ * @name: make_embedded_macros
+ *
+ * @include: generators.h
+ *
+ * @description
+ * @This function will generate an array of CStrings that represent all the
+ * @macros that can be embedded.
+ * @description
+ *
+ * @param allow_briefs: whether or not briefs are allowed
+ * @type: int
+ *
+ * @param macros: an array of macros in the source file
+ * @type: struct DocgenMacros
+ *
+ * @param embeds: an array of embeds that something requests
+ * @type: struct Embeds
+ *
+ * @return: an array of CStrings
+ * @struct CStrings *
+*/
+struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macros,
+                                      struct Embeds embeds);
+
+/*
+ * @docgen: function
+ * @brief: generate a string of each embedded structure request
+ * @name: make_embedded_structures
+ *
+ * @include: generators.h
+ *
+ * @description
+ * @This function will generate an array of CStrings that represent all the
+ * @structures that were requested by the target.
+ * @description
+ *
+ * @param structures: an array of structures in the source file
+ * @type: struct DocgenStructures
+ *
+ * @param embeds: an array of embeds that something requests
+ * @type: struct Embeds
+ *
+ * @return: an array of CStrings
+ * @struct CStrings *
+*/
+struct CStrings *make_embedded_structures(struct DocgenStructures structures,
+                                          struct Embeds embeds);
 
 #endif

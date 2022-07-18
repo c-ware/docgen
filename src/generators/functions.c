@@ -42,62 +42,11 @@
 
 #include "../docgen.h"
 
+#include "generators.h"
+
 #include "../extractors/macros/macros.h"
 #include "../extractors/functions/functions.h"
-
-struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macros,
-                                      struct Embeds embeds) {
-    int index = 0;
-    struct CStrings *macro_buffer = carray_init(macro_buffer, CSTRING);
-
-    /* For each embedded macro (constant) make a new CString to represent it. */
-    for(index = 0; index < carray_length(&embeds); index++) {
-        int macro_index = 0;
-        struct CString new_macro_string;
-        struct DocgenMacro target_macro;
-        struct Embed requested_embed = embeds.contents[index];
-
-        /* This is not an embedded macro we are looking at */
-        if(requested_embed.type != DOCGEN_EMBED_CONSTANT)
-            continue;
-
-        /* Get the requested macro's data and continue initialization.
-         * Search is performed by comparing each macro in the array of
-         * macros passed to this function against the embed we are looking at. */
-        INIT_VARIABLE(target_macro);
-        INIT_VARIABLE(new_macro_string);
-
-        macro_index = carray_find(&macros, requested_embed.name, macro_index, MACRO);
-        target_macro = macros.contents[macro_index];
-        new_macro_string = cstring_init("");
- 
-        if(allow_briefs == 1) {
-            cstring_concats(&new_macro_string, "/* ");
-            cstring_concats(&new_macro_string, target_macro.brief);
-            cstring_concats(&new_macro_string, " */\n");
-        }
-
-        if(target_macro.ifndef) {
-            cstring_concats(&new_macro_string, "#ifndef ");
-            cstring_concats(&new_macro_string, target_macro.name);
-            cstring_concats(&new_macro_string, "\n");
-        }
-
-        cstring_concats(&new_macro_string, "#define ");
-        cstring_concats(&new_macro_string, target_macro.name);
-        cstring_concats(&new_macro_string, " ");
-        cstring_concats(&new_macro_string, target_macro.value);
-        cstring_concats(&new_macro_string, "\n");
-
-        if(target_macro.ifndef) {
-            cstring_concats(&new_macro_string, "#endif\n");
-        }
-
-        carray_append(macro_buffer, new_macro_string, CSTRING);
-    }
-
-    return macro_buffer;
-}
+#include "../extractors/structures/structures.h"
 
 struct PostprocessorData docgen_generate_functions(struct DocgenFunction function,
                                                    struct GeneratorParams parameters) {
@@ -116,7 +65,8 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     /* Synopsis setup-- Functions have no 'arguments' like a project
      * might (command line arguments). */
     data.arguments = data.arguments;
-    data.embedded_macros = make_embedded_macros(function.function_briefs,*(parameters.macros), *(function.embeds));
+    data.embedded_macros = make_embedded_macros(function.function_briefs, *(parameters.macros), *(function.embeds));
+    data.embedded_structures = make_embedded_structures(*(parameters.structures), *(function.embeds));
 
     return data;
 }

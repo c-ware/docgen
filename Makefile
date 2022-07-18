@@ -77,10 +77,10 @@ src/common/error.o: src/common/error.c src/docgen.h src/common/common.h
 src/common/common.o: src/common/common.c src/docgen.h src/common/common.h src/extractors/structures/structures.h
 	$(CC) -c $(CFLAGS) src/common/common.c -o src/common/common.o
 
-src/generators/functions.o: src/generators/functions.c src/docgen.h src/extractors/functions/functions.h
+src/generators/functions.o: src/generators/functions.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h
 	$(CC) -c $(CFLAGS) src/generators/functions.c -o src/generators/functions.o
 
-src/generators/common.o: src/generators/common.c src/docgen.h src/generators/generators.h
+src/generators/common.o: src/generators/common.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/generators/generators.h
 	$(CC) -c $(CFLAGS) src/generators/common.c -o src/generators/common.o
 
 src/tags/tags.o: src/tags/tags.c src/tags/tags.h src/docgen.h

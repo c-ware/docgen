@@ -217,7 +217,7 @@ struct PostprocessorData {
     struct Inclusions *cli_inclusions;
 
     struct CStrings *embedded_macros;
-    struct CStrings *embedded_structure;
+    struct CStrings *embedded_structures;
     struct CStrings *embedded_functions;
     struct CStrings *embedded_macro_functions;
 
