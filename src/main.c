@@ -215,6 +215,29 @@
 #include "extractors/structures/structures.h"
 #include "extractors/macro_functions/macro_functions.h"
 
+/*
+ * @docgen: function
+ * @brief: invoke the function generation on each function
+ * @name: generate_functions
+ *
+ * @description
+ * @This function is the front end for generating documentation for each
+ * @function in the selected source file.
+ * @description
+ *
+ * @param parameters: the generator parameters
+ * @type: struct GeneratorParams
+*/
+void generate_functions(struct GeneratorParams parameters) {
+    int func_index = 0;
+
+    while(func_index < carray_length(parameters.functions)) {
+        
+
+        func_index++;
+    }
+}
+
 int main(int argc, char **argv) {
     FILE *source_file = stdin;
     struct LibmatchCursor cursor;
@@ -241,7 +264,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-
     /* Extract all potentially necessary tokens from the source file.
      * Remember that extractor functions will actually make a copy of
      * the cursor we pass to it. */
@@ -253,7 +275,7 @@ int main(int argc, char **argv) {
 
     /* Determine which thing to generate documentation for */
     if(strcmp(arguments.category, "functions") == 0) {
-        
+        generate_functions(generator_parameters);
     } else if(strcmp(arguments.category, "macro_functions") == 0) {
         
     } else if(strcmp(arguments.category, "projects") == 0) {

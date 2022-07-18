@@ -69,6 +69,8 @@
 #define DOCGEN_EMBED_NAME_LENGTH            128
 #define DOCGEN_EMBED_TYPE_LENGTH            32
 
+#define DOCGEN_SECTION_NAME_LENGTH          128
+
 /* The types of inclusions available */
 #define DOCGEN_INCLUSION_LOCAL      0
 #define DOCGEN_INCLUSION_SYSTEM     1
@@ -168,6 +170,54 @@ struct DocgenArguments {
 
     /* Inclusions to load into each manual */
     struct Inclusions *inclusions;
+};
+
+/*
+ * A section in the documentation.
+*/
+struct Section {
+    char name[DOCGEN_SECTION_NAME_LENGTH + 1];
+    struct CString body;
+};
+
+/*
+ * An array of sections.
+*/
+struct Sections {
+    int length;
+    int capacity;
+    struct Section *contents;
+};
+
+/*
+ * Parameters for a post processor.
+*/
+struct PostprocessorParams {
+
+};
+
+/*
+ * Data to pass to a post processor to generate a CString
+*/
+struct PostprocessorData {
+    int target;
+    void *target_structure;
+
+    /* Synopsis data */
+    struct CString arguments;
+    struct Inclusions *cli_inclusions;
+
+    struct CStrings *embedded_constants;
+    struct CStrings *embedded_macros;
+    struct CStrings *embedded_structure;
+    struct CStrings *embedded_functions;
+
+    /* Sections */
+    struct Section description;
+    struct Section examples;
+    struct Section return_value;
+
+    struct CStrings *see_also;
 };
 
 /*

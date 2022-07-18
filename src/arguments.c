@@ -70,6 +70,8 @@ void main_load_defaults(struct DocgenArguments *arguments,
     callbacks->error = main_error;
     callbacks->parameters = main_parameters;
     callbacks->is_option = libarg_is_unix_option;
+
+    arguments->inclusions = carray_init(arguments->inclusions, INCLUDE);
 }
 
 void main_error_check(int argc, char **argv, struct LibargCallbacks libarg_callbacks) {
