@@ -253,7 +253,7 @@ int main(int argc, char **argv) {
 
     /* Determine which thing to generate documentation for */
     if(strcmp(arguments.category, "functions") == 0) {
-
+        
     } else if(strcmp(arguments.category, "macro_functions") == 0) {
         
     } else if(strcmp(arguments.category, "projects") == 0) {

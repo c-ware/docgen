@@ -47,6 +47,7 @@
 #include "libstr/libstr.h"
 #include "carray/carray.h"
 #include "libarg/libarg.h"
+#include "cstring/cstring.h"
 #include "libpath/libpath.h"
 #include "liberror/liberror.h"
 #include "libmatch/libmatch.h"
