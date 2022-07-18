@@ -103,3 +103,12 @@
  *
  * @setting: ifndef
 */
+
+/*
+ * @docgen: constant
+ * @brief: this is a constant
+ * @name: MY_CONSTANT_2
+ * @value: "foo"
+ *
+ * @setting: ifndef
+*/

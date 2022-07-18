@@ -92,6 +92,11 @@ struct DocgenMacro docgen_extract_parse_macro(struct LibmatchCursor *cursor,
 
                 new_macro.ifndef = 1;
 
+                /* Expect function did not go past the end of the line. Go
+                 * past it so we can probably respond to the end of a comment
+                 * potentially */
+                libmatch_cursor_getch(cursor);
+
                 break;
         }
     }

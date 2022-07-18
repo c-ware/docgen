@@ -215,6 +215,9 @@
 #include "extractors/structures/structures.h"
 #include "extractors/macro_functions/macro_functions.h"
 
+/* Generator logic */
+#include "generators/generators.h"
+
 /*
  * @docgen: function
  * @brief: invoke the function generation on each function
@@ -232,7 +235,8 @@ void generate_functions(struct GeneratorParams parameters) {
     int func_index = 0;
 
     while(func_index < carray_length(parameters.functions)) {
-        
+        struct DocgenFunction function = parameters.functions->contents[func_index];
+        struct PostprocessorData representation = docgen_generate_functions(function, parameters);
 
         func_index++;
     }
@@ -268,10 +272,11 @@ int main(int argc, char **argv) {
      * Remember that extractor functions will actually make a copy of
      * the cursor we pass to it. */
     cursor = libmatch_cursor_from_stream(source_file);
-    generator_parameters.macros = docgen_extract_macros(&cursor, "/*", "*/");
+    generator_parameters.macros = docgen_extract_macros(&cursor, "/*", "*/");;
     generator_parameters.functions = docgen_extract_functions(&cursor, "/*", "*/");
     generator_parameters.structures = docgen_extract_structures(&cursor, "/*", "*/");
     generator_parameters.macro_functions = docgen_extract_macro_functions(&cursor, "/*", "*/");
+    generator_parameters.inclusions = arguments.inclusions;
 
     /* Determine which thing to generate documentation for */
     if(strcmp(arguments.category, "functions") == 0) {

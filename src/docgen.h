@@ -82,6 +82,11 @@
 #define DOCGEN_EMBED_CONSTANT       3
 #define DOCGEN_EMBED_MACRO_FUNCTION 4
 
+/* Types of target generators */
+#define DOCGEN_TARGET_FUNCTION          0
+#define DOCGEN_TARGET_MACRO_FUNCTION    1
+#define DOCGEN_TARGET_PROJECT           2
+
 /* Data structure properties */
 #define INCLUDE_TYPE            struct Inclusion
 #define INCLUDE_HEAP            1
@@ -91,9 +96,13 @@
 #define REFERENCE_HEAP          1
 #define REFERENCE_FREE(value)
 
+
 #define EMBED_TYPE struct Embed
 #define EMBED_HEAP 1
 #define EMBED_FREE(value)
+
+#define EMBED_COMPARE(cmp_a, cmp_b) \
+    strcmp((cmp_a).name, (cmp_b).name) == 0
 
 #define INIT_VARIABLE(v) \
     memset(&(v), 0, sizeof((v)))
@@ -193,7 +202,7 @@ struct Sections {
  * Parameters for a post processor.
 */
 struct PostprocessorParams {
-
+    int x;
 };
 
 /*
@@ -207,10 +216,10 @@ struct PostprocessorData {
     struct CString arguments;
     struct Inclusions *cli_inclusions;
 
-    struct CStrings *embedded_constants;
     struct CStrings *embedded_macros;
     struct CStrings *embedded_structure;
     struct CStrings *embedded_functions;
+    struct CStrings *embedded_macro_functions;
 
     /* Sections */
     struct Section description;
@@ -228,6 +237,8 @@ struct GeneratorParams {
     struct DocgenMacroFunctions *macro_functions;
     struct DocgenStructures *structures;
     struct DocgenMacros *macros;
+
+    struct Inclusions *inclusions;
 };
 
 /* Argument parsing and setup */
