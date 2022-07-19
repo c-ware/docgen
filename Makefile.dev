@@ -1,5 +1,5 @@
-OBJS=src/arguments.o src/main.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/projects/projects.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
-TESTOBJS=src/arguments.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/projects/projects.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
+OBJS=src/arguments.o src/main.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/postprocessors/postprocessors.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/projects/projects.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
+TESTOBJS=src/arguments.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/postprocessors/postprocessors.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/projects/projects.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
 TESTS=
 CC=cc
 PREFIX=/usr/local
@@ -26,7 +26,7 @@ uninstall:
 src/arguments.o: src/arguments.c src/docgen.h
 	$(CC) -c $(CFLAGS) src/arguments.c -o src/arguments.o
 
-src/main.o: src/main.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/generators/generators.h
+src/main.o: src/main.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/generators/generators.h src/postprocessors/postprocessors.h
 	$(CC) -c $(CFLAGS) src/main.c -o src/main.o
 
 src/libarg/libarg.o: src/libarg/libarg.c src/libarg/libarg.h
@@ -61,6 +61,9 @@ src/libstr/reverse.o: src/libstr/reverse.c src/libstr/libstr.h
 
 src/libstr/count.o: src/libstr/count.c src/libstr/libstr.h
 	$(CC) -c $(CFLAGS) src/libstr/count.c -o src/libstr/count.o
+
+src/postprocessors/postprocessors.o: src/postprocessors/postprocessors.c src/docgen.h src/postprocessors/postprocessors.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
+	$(CC) -c $(CFLAGS) src/postprocessors/postprocessors.c -o src/postprocessors/postprocessors.o
 
 src/libpath/exists.o: src/libpath/exists.c src/libpath/libpath.h
 	$(CC) -c $(CFLAGS) src/libpath/exists.c -o src/libpath/exists.o

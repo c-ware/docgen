@@ -7,7 +7,7 @@
 CC=cl
 LINK=link
 CFLAGS=
-OBJS=src\extractors\functions\functions.obj src\extractors\macro_functions\macro_functions.obj src\extractors\macros\macros.obj src\extractors\projects\projects.obj src\extractors\structures\structures.obj src\arguments.obj src\tags\tags.obj src\generators\functions.obj src\generators\common.obj src\common\error.obj src\common\common.obj src\libpath\exists.obj src\libpath\mkdir.obj src\libpath\join_path.obj src\libstr\starts.obj src\libstr\replace.obj src\libstr\strip.obj src\libstr\reverse.obj src\libstr\count.obj src\libmatch\read.obj src\libmatch\cond.obj src\libmatch\cursor.obj src\libmatch\match.obj src\cstring\cstring.obj src\libarg\libarg.obj src\main.obj 
+OBJS=src\extractors\functions\functions.obj src\extractors\macro_functions\macro_functions.obj src\extractors\macros\macros.obj src\extractors\projects\projects.obj src\extractors\structures\structures.obj src\arguments.obj src\tags\tags.obj src\generators\functions.obj src\generators\common.obj src\common\error.obj src\common\common.obj src\libpath\exists.obj src\libpath\mkdir.obj src\libpath\join_path.obj src\postprocessors\postprocessors.obj src\libstr\starts.obj src\libstr\replace.obj src\libstr\strip.obj src\libstr\reverse.obj src\libstr\count.obj src\libmatch\read.obj src\libmatch\cond.obj src\libmatch\cursor.obj src\libmatch\match.obj src\cstring\cstring.obj src\libarg\libarg.obj src\main.obj 
 
 .c.obj:
 	$(CC) /c $(CFLAGS) /Fo$@ $<

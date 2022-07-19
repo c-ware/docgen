@@ -149,8 +149,6 @@ void main_extract_inclusions(int argc, char **argv,
     liberror_is_null(main_extract_inclusions, arguments);
     liberror_is_negative(main_extract_inclusions, argc);
 
-    arguments->inclusions = carray_init(arguments->inclusions, INCLUDE);
-
     for(index = 0; index < argc; index++) {
         char *argument = argv[index];
         struct Inclusion new_inclusion;

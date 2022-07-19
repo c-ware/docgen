@@ -215,8 +215,9 @@
 #include "extractors/structures/structures.h"
 #include "extractors/macro_functions/macro_functions.h"
 
-/* Generator logic */
+/* Pipeline logic */
 #include "generators/generators.h"
+#include "postprocessors/postprocessors.h"
 
 /*
  * @docgen: function
@@ -228,15 +229,38 @@
  * @function in the selected source file.
  * @description
  *
+ * @param arguments: the parsed command line arguments
+ * @type: struct DocgenArguments
+ *
  * @param parameters: the generator parameters
  * @type: struct GeneratorParams
 */
-void generate_functions(struct GeneratorParams parameters) {
+void generate_functions(struct GeneratorParams parameters, struct DocgenArguments arguments) {
     int func_index = 0;
 
     while(func_index < carray_length(parameters.functions)) {
-        struct DocgenFunction function = parameters.functions->contents[func_index];
-        struct PostprocessorData representation = docgen_generate_functions(function, parameters);
+        struct CString output;
+        struct DocgenFunction function;
+        struct PostprocessorParams params;
+        struct PostprocessorData representation;
+
+        INIT_VARIABLE(output);
+        INIT_VARIABLE(params);
+        INIT_VARIABLE(function);
+        INIT_VARIABLE(representation);
+
+        params.arguments = arguments;
+        function = parameters.functions->contents[func_index];
+        representation = docgen_generate_functions(function, parameters);
+        output = docgen_postprocess_manual(representation, params);
+
+        printf("Final: '%s'\n", output.contents);
+
+        cstring_free(output);
+        carray_free(representation.embedded_functions, CSTRING);
+        carray_free(representation.embedded_macro_functions, CSTRING);
+        carray_free(representation.embedded_structures, CSTRING);
+        carray_free(representation.embedded_macros, CSTRING);
 
         func_index++;
     }
@@ -280,7 +304,7 @@ int main(int argc, char **argv) {
 
     /* Determine which thing to generate documentation for */
     if(strcmp(arguments.category, "functions") == 0) {
-        generate_functions(generator_parameters);
+        generate_functions(generator_parameters, arguments);
     } else if(strcmp(arguments.category, "macro_functions") == 0) {
         
     } else if(strcmp(arguments.category, "projects") == 0) {

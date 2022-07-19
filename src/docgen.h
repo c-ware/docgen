@@ -186,7 +186,7 @@ struct DocgenArguments {
 */
 struct Section {
     char name[DOCGEN_SECTION_NAME_LENGTH + 1];
-    struct CString body;
+    const char *body;
 };
 
 /*
@@ -202,7 +202,7 @@ struct Sections {
  * Parameters for a post processor.
 */
 struct PostprocessorParams {
-    int x;
+    struct DocgenArguments arguments;
 };
 
 /*
@@ -213,8 +213,9 @@ struct PostprocessorData {
     void *target_structure;
 
     /* Synopsis data */
-    struct CString arguments;
+    const char *arguments;
     struct Inclusions *cli_inclusions;
+    struct Inclusions *comment_inclusions;
 
     struct CStrings *embedded_macros;
     struct CStrings *embedded_structures;
@@ -222,11 +223,12 @@ struct PostprocessorData {
     struct CStrings *embedded_macro_functions;
 
     /* Sections */
-    struct Section description;
-    struct Section examples;
-    struct Section return_value;
+    const char *examples;
+    const char *description;
+    const char *return_value;
+    const char *notes;
 
-    struct CStrings *see_also;
+    struct References *see_also;
 };
 
 /*

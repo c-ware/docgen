@@ -42,44 +42,16 @@
 
 #include "../docgen.h"
 
-#include "generators.h"
+#include "postprocessors.h"
 
 #include "../extractors/macros/macros.h"
 #include "../extractors/functions/functions.h"
 #include "../extractors/structures/structures.h"
 #include "../extractors/macro_functions/macro_functions.h"
 
-struct PostprocessorData docgen_generate_functions(struct DocgenFunction function,
-                                                   struct GeneratorParams parameters) {
-    int index = 0;
-    struct CString buffer_string;
-    struct PostprocessorData data;
+struct CString docgen_postprocess_manual(struct PostprocessorData data,
+                                         struct PostprocessorParams params) {
+    struct CString output = cstring_init("");
 
-    INIT_VARIABLE(data);
-    INIT_VARIABLE(buffer_string);
-
-    /* Metadata data-- the target_structure field will be filled
-     * in by the caller. */
-    data.target = DOCGEN_TARGET_FUNCTION;
-    data.target_structure = NULL; 
-
-    /* Synopsis setup-- Functions have no 'arguments' like a project
-     * might (command line arguments). */
-    data.cli_inclusions = NULL;
-    data.arguments = data.arguments;
-    data.comment_inclusions = function.inclusions;
-    data.embedded_macros = make_embedded_macros(function.macro_briefs, *parameters.macros, *function.embeds);
-    data.embedded_structures = make_embedded_structures(function.structure_briefs, *parameters.structures, *function.embeds);
-    data.embedded_macro_functions = make_embedded_macro_functions(function.macro_function_briefs, *parameters.macro_functions, *function.embeds);
-    data.embedded_functions = make_embedded_functions(function.function_briefs, *parameters.functions, *function.embeds);
-
-    /* Transfer sections (Functions have no arguments in their synopsis in the
-     * same sense as a command line program project manual) */
-    data.arguments = NULL;
-    data.examples = function.example;
-    data.description = function.description;
-    data.return_value = function.return_data.return_value;
-    data.notes = function.notes;
-
-    return data;
+    return output;
 }
