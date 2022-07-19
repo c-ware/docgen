@@ -81,6 +81,40 @@ static void add_offset(struct CString *string, int offset) {
 
 /*
  * @docgen: function
+ * @brief: format a type with a space if there is no pointer
+ * @name: format_pointer
+ *
+ * @description
+ * @Docgen uses the x *y pointer style rather than the x* y style, so
+ * @variables without a pointer require a space to separate the type and
+ * @the identifier.
+ * @description
+ *
+ * @error: string is NULL
+ * @error: type is NULL
+ *
+ * @param string: the cstring to write the type to
+ * @type: struct CString *
+ *
+ * @param type: the string containing the type
+ * @type: const char *
+*/
+static void format_pointer(struct CString *string, const char *type) {
+    liberror_is_null(format_pointer, string);
+    liberror_is_null(format_pointer, type);
+
+    cstring_concats(string, type);
+
+    /* Formatting is pretty much already done if there is a pointer,
+     * as docgen does x *y, rather than x* y pointer style */
+    if(strchr(type, '*') != NULL)
+        return;
+
+    cstring_concats(string, " ");
+}
+
+/*
+ * @docgen: function
  * @brief: continue recursively expanding nested structures
  * @name: make_embedded_structures_recursive
  *
@@ -94,6 +128,9 @@ static void add_offset(struct CString *string, int offset) {
  * @error: depth is negative
  * @error: longest_line is negative
  *
+ * @param allow_briefs: whether or not briefs are allowed
+ * @type: int
+ *
  * @param depth: how deep we are in recursion
  * @type: int
  *
@@ -106,14 +143,21 @@ static void add_offset(struct CString *string, int offset) {
  * @param string: the string to write into
  * @type: struct CString
 */
-static void make_embedded_structures_recursive(int depth, int longest_line,
-                                        struct DocgenStructures *structures,
-                                        struct CString *string) {
+static void make_embedded_structures_recursive(int allow_briefs, int depth, int longest_line,
+                                               struct DocgenStructures *structures,
+                                               struct CString *string) {
     int index = 0; 
     int field_index = 0;
 
     for(index = 0; index < carray_length(structures); index++) {
         struct DocgenStructure structure = structures->contents[index];
+
+        if(allow_briefs == 1) {
+            add_offset(string, (DOCGEN_INDENTATION * (depth - 1)));
+            cstring_concats(string, "/* ");
+            cstring_concats(string, structure.brief);
+            cstring_concats(string, " /*\n");
+        }
 
         add_offset(string, (DOCGEN_INDENTATION * (depth - 1)));
         cstring_concats(string, "struct {\n");
@@ -124,6 +168,9 @@ static void make_embedded_structures_recursive(int depth, int longest_line,
         for(field_index = 0; field_index < carray_length(structure.fields); field_index++) {
             int field_offset = 0;
             struct DocgenStructureField field = structure.fields->contents[field_index];
+
+            /* Add a new line to separate the above fields and this structure
+             * if there ARE fields, and this is the first nested structure */
 
             /* Add the offset for the field, and write the field. Docgen
              * favors x *y rather than x* y, so if there is no pointer in
@@ -153,16 +200,25 @@ static void make_embedded_structures_recursive(int depth, int longest_line,
             cstring_concats(string, " */\n");
         }
 
+        /* Separate fields and nested structures with a new line (if there is
+         * any nested structures and fields */
+        if(allow_briefs == 1 && carray_length(structure.fields) > 0 && carray_length(structure.nested) > 0)
+            cstring_concats(string, "\n");
+
         /* Added nested structure declarations */
-        for(field_index = 0; field_index < carray_length(structure.nested); field_index++) {
-            make_embedded_structures_recursive(depth + 1, longest_line, structure.nested,
-                                               string);
-        }
+        if(carray_length(structure.nested) > 0)
+            make_embedded_structures_recursive(allow_briefs, depth + 1, longest_line, structure.nested, string);
+
 
         add_offset(string, (DOCGEN_INDENTATION * (depth - 1)));
         cstring_concats(string, "} ");
         cstring_concats(string, structure.name);
         cstring_concats(string, ";\n");
+
+        /* Add an extra new line for the next nested structure in the parent
+         * structure if we are not the last one */
+        if((carray_length(structures) > 0) && (index < (carray_length(structures) - 1)))
+            cstring_concats(string, "\n");
     }
 }
 
@@ -255,7 +311,8 @@ struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macr
     return macro_buffer;
 }
 
-struct CStrings *make_embedded_structures(struct DocgenStructures structures,
+struct CStrings *make_embedded_structures(int allow_briefs,
+                                          struct DocgenStructures structures,
                                           struct Embeds embeds) {
     int index = 0;
     struct CStrings *structure_buffer = carray_init(structure_buffer, CSTRING);
@@ -287,6 +344,12 @@ struct CStrings *make_embedded_structures(struct DocgenStructures structures,
         longest_field += 4;
 
         handle_unrecognized_embed(embed.name, "structure", structure_index);
+
+        if(allow_briefs == 1) {
+            cstring_concats(&new_structure_string, "/* ");
+            cstring_concats(&new_structure_string, target_structure.brief);
+            cstring_concats(&new_structure_string, " */\n");
+        }
 
         cstring_concats(&new_structure_string, "struct ");
         cstring_concats(&new_structure_string, target_structure.name);
@@ -328,9 +391,11 @@ struct CStrings *make_embedded_structures(struct DocgenStructures structures,
         }
 
         /* Added nested structure declarations */
-        for(field_index = 0; field_index < carray_length(target_structure.nested); field_index++) {
-            make_embedded_structures_recursive(2, longest_field, target_structure.nested,
-                                               &new_structure_string);
+        if(carray_length(target_structure.nested) > 0) {
+            if(carray_length(target_structure.fields) > 0)
+                cstring_concats(&new_structure_string, "\n");
+
+            make_embedded_structures_recursive(allow_briefs, 2, longest_field, target_structure.nested, &new_structure_string);
         }
 
         cstring_concats(&new_structure_string, "};\n");
@@ -433,6 +498,26 @@ struct CStrings *make_embedded_functions(int allow_briefs,
             cstring_concats(&new_function_string, " */\n");
         }
 
+        /* Base signature */
+        format_pointer(&new_function_string, target_function.return_data.return_type);
+        cstring_concats(&new_function_string, target_function.name);
+        cstring_concats(&new_function_string, "(");
+
+        /* Write the parameters */
+        for(iter_index = 0; iter_index < carray_length(target_function.parameters); iter_index++) {
+            struct DocgenFunctionParameter parameter = target_function.parameters->contents[iter_index];
+
+            format_pointer(&new_function_string, parameter.type);
+            cstring_concats(&new_function_string, parameter.name);
+
+            /* Only add a comma if this is NOT the last item */
+            if(iter_index == (carray_length(target_function.parameters) - 1)) 
+                continue;
+
+            cstring_concats(&new_function_string, ", ");
+        }
+
+        cstring_concats(&new_function_string, ");");
         carray_append(function_buffer, new_function_string, CSTRING);
     }
 

@@ -88,6 +88,9 @@ struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macr
  * @structures that were requested by the target.
  * @description
  *
+ * @param allow_briefs: whether or not briefs should be displayed
+ * @type: int
+ *
  * @param structures: an array of structures in the source file
  * @type: struct DocgenStructures
  *
@@ -97,7 +100,8 @@ struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macr
  * @return: an array of CStrings
  * @struct CStrings *
 */
-struct CStrings *make_embedded_structures(struct DocgenStructures structures,
+struct CStrings *make_embedded_structures(int allow_briefs,
+                                          struct DocgenStructures structures,
                                           struct Embeds embeds);
 /*
  * @docgen: function

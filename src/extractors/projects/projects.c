@@ -130,6 +130,7 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
                 fprintf(stderr, "docgen: unknown setting '%s' on line %i\n", setting_name, cursor.line);
                 exit(EXIT_FAILURE);
             }
+
         } else if(strcmp(tag_name.name, "embed") == 0) {
             struct Embed new_embed;
             char embed_type[DOCGEN_EMBED_TYPE_LENGTH + 1];

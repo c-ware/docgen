@@ -11,6 +11,7 @@
  *
  * @setting: func-briefs
  * @setting: mfunc-briefs
+ * @setting: struct-briefs
  * @include: foo.h
  *
  * @description
@@ -77,6 +78,42 @@
  *
  * @field foobar: quz
  * @type: void *
+ *
+ * @struct_end
+ *
+ * @struct_start
+ * @brief: some nested one
+ * @name: Beep
+ *
+ * @field thud: waldo
+ * @type: struct SomeStructure *
+ *
+ * @field foobar: quz
+ * @type: void *
+ *
+ * @struct_start
+ * @brief: some nested one
+ * @name: Boop
+ *
+ * @field thud: waldo
+ * @type: struct SomeStructure *
+ *
+ * @field foobar: quz
+ * @type: void *
+ *
+ * @struct_start
+ * @brief: some nested one
+ * @name: Bop
+ *
+ * @field thud: waldo
+ * @type: struct SomeStructure *
+ *
+ * @field foobar: quz
+ * @type: void *
+ *
+ * @struct_end
+ *
+ * @struct_end
  *
  * @struct_end
 */

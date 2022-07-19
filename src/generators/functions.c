@@ -66,10 +66,10 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     /* Synopsis setup-- Functions have no 'arguments' like a project
      * might (command line arguments). */
     data.arguments = data.arguments;
-    data.embedded_macros = make_embedded_macros(function.function_briefs, *(parameters.macros), *(function.embeds));
-    data.embedded_structures = make_embedded_structures(*(parameters.structures),*(function.embeds));
-    data.embedded_macro_functions = make_embedded_macro_functions(function.macro_function_briefs,
-                                                                  *(parameters.macro_functions),
-                                                                  *(function.embeds));
+    data.embedded_macros = make_embedded_macros(function.macro_briefs, *parameters.macros, *function.embeds);
+    data.embedded_structures = make_embedded_structures(function.structure_briefs, *parameters.structures, *function.embeds);
+    data.embedded_macro_functions = make_embedded_macro_functions(function.macro_function_briefs, *parameters.macro_functions, *function.embeds);
+    data.embedded_functions = make_embedded_functions(function.function_briefs, *parameters.functions, *function.embeds);
+
     return data;
 }
