@@ -130,6 +130,8 @@ struct DocgenFunction {
     /* Function documentation settings */
     int function_briefs;
     int macro_function_briefs;
+    int structure_briefs;
+    int macro_briefs;
 };
 
 /*

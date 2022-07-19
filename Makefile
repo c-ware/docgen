@@ -1,5 +1,5 @@
-OBJS=src/arguments.o src/main.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
-TESTOBJS=src/arguments.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
+OBJS=src/arguments.o src/main.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/projects/projects.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
+TESTOBJS=src/arguments.o src/libarg/libarg.o src/cstring/cstring.o src/libmatch/read.o src/libmatch/cond.o src/libmatch/cursor.o src/libmatch/match.o src/libstr/starts.o src/libstr/replace.o src/libstr/strip.o src/libstr/reverse.o src/libstr/count.o src/libpath/exists.o src/libpath/mkdir.o src/libpath/join_path.o src/common/error.o src/common/common.o src/generators/functions.o src/generators/common.o src/tags/tags.o src/extractors/structures/structures.o src/extractors/projects/projects.o src/extractors/macros/macros.o src/extractors/macro_functions/macro_functions.o src/extractors/functions/functions.o 
 TESTS=
 CC=cc
 PREFIX=/usr/local
@@ -77,10 +77,10 @@ src/common/error.o: src/common/error.c src/docgen.h src/common/common.h
 src/common/common.o: src/common/common.c src/docgen.h src/common/common.h src/extractors/structures/structures.h
 	$(CC) -c $(CFLAGS) src/common/common.c -o src/common/common.o
 
-src/generators/functions.o: src/generators/functions.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h
+src/generators/functions.o: src/generators/functions.c src/docgen.h src/generators/generators.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
 	$(CC) -c $(CFLAGS) src/generators/functions.c -o src/generators/functions.o
 
-src/generators/common.o: src/generators/common.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/generators/generators.h
+src/generators/common.o: src/generators/common.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/generators/generators.h
 	$(CC) -c $(CFLAGS) src/generators/common.c -o src/generators/common.o
 
 src/tags/tags.o: src/tags/tags.c src/tags/tags.h src/docgen.h
@@ -88,6 +88,9 @@ src/tags/tags.o: src/tags/tags.c src/tags/tags.h src/docgen.h
 
 src/extractors/structures/structures.o: src/extractors/structures/structures.c src/extractors/structures/structures.h
 	$(CC) -c $(CFLAGS) src/extractors/structures/structures.c -o src/extractors/structures/structures.o
+
+src/extractors/projects/projects.o: src/extractors/projects/projects.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/extractors/projects/projects.h
+	$(CC) -c $(CFLAGS) src/extractors/projects/projects.c -o src/extractors/projects/projects.o
 
 src/extractors/macros/macros.o: src/extractors/macros/macros.c src/extractors/macros/macros.h
 	$(CC) -c $(CFLAGS) src/extractors/macros/macros.c -o src/extractors/macros/macros.o

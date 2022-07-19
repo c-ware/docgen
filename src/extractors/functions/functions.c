@@ -223,6 +223,10 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
                 new_function.function_briefs = 1;
             else if(strcmp(setting_name, "mfunc-briefs") == 0)
                 new_function.macro_function_briefs = 1;
+            else if(strcmp(setting_name, "struct-briefs") == 0)
+                new_function.structure_briefs = 1;
+            else if(strcmp(setting_name, "macro-briefs") == 0)
+                new_function.macro_briefs = 1;
             else {
                 fprintf(stderr, "docgen: unknown setting '%s' on line %i\n", setting_name, cursor->line);
                 exit(EXIT_FAILURE);

@@ -71,6 +71,5 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     data.embedded_macro_functions = make_embedded_macro_functions(function.macro_function_briefs,
                                                                   *(parameters.macro_functions),
                                                                   *(function.embeds));
-
     return data;
 }

@@ -391,9 +391,7 @@ struct CStrings *make_embedded_macro_functions(int allow_briefs,
                 cstring_concats(&new_macro_function_string, ", ");
         }
 
-        cstring_concats(&new_macro_function_string, ");");
-        printf("%s\n", new_macro_function_string.contents);
-
+        cstring_concats(&new_macro_function_string, ");\n");
         carray_append(macro_function_buffer, new_macro_function_string, CSTRING);
     }
 
@@ -401,8 +399,42 @@ struct CStrings *make_embedded_macro_functions(int allow_briefs,
 }
 
 struct CStrings *make_embedded_functions(int allow_briefs,
-                                         struct DocgenFunctions functions, struct Embeds embeds) {
+                                         struct DocgenFunctions functions,
+                                         struct Embeds embeds) {
     int index = 0;
-    int iter_index =0;
+    int iter_index = 0;
+    struct CStrings *function_buffer = carray_init(function_buffer, CSTRING);
 
+    for(index = 0; index < carray_length(&embeds); index++) {
+        int function_index = 0;
+        struct CString new_function_string;
+        struct DocgenFunction target_function;
+        struct Embed requested_embed = embeds.contents[index];
+
+        /* This is not an embedded function we are looking at */
+        if(requested_embed.type != DOCGEN_EMBED_FUNCTION)
+            continue;
+
+        /* Get the requested function's data and continue initialization.
+         * Search is performed by comparing each function in the array of
+         * functions passed to this function against the embed we are looking at. */
+        INIT_VARIABLE(target_function);
+        INIT_VARIABLE(new_function_string);
+
+        function_index = carray_find(&functions, requested_embed.name, function_index, MACRO);
+        target_function = functions.contents[function_index];
+        new_function_string = cstring_init("");
+
+        handle_unrecognized_embed(requested_embed.name, "function", function_index);
+
+        if(allow_briefs == 1) {
+            cstring_concats(&new_function_string, "/* ");
+            cstring_concats(&new_function_string, target_function.brief);
+            cstring_concats(&new_function_string, " */\n");
+        }
+
+        carray_append(function_buffer, new_function_string, CSTRING);
+    }
+
+    return function_buffer;
 }
