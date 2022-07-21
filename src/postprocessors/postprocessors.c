@@ -119,6 +119,7 @@ static void name(struct CString *string, struct PostprocessorData data,
 static void display_embeds(struct CString *string, int length, ...) {
     int index = 0;
     int written = 0;
+    int iter = 0;
     va_list embeds;
     struct CStrings *filtered_embeds[EMBED_TYPES];
 
@@ -135,8 +136,10 @@ static void display_embeds(struct CString *string, int length, ...) {
         liberror_is_number(display_embeds, length, "%d", length);
 
     /* Determine which embeds have stuff-- we only want to display them */
-    while(index < length) {
+    while(iter < length) {
         struct CStrings *array = va_arg(embeds, struct CStrings *);
+
+        iter++;
 
         if(carray_length(array) == 0)
             continue;

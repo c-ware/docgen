@@ -5,12 +5,10 @@
  *
  * @embed function: foo_function
  * @embed structure: SomeStructure
- * @embed macro_function: foobar_baz_function
+ * @embed structure: SomeStructure
  * @embed constant: MY_CONSTANT
  *
  * @setting: func-briefs
- * @setting: mfunc-briefs
- * @setting: struct-briefs
  * @include: foo.h
  *
  * @description
