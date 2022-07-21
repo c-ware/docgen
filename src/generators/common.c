@@ -517,7 +517,7 @@ struct CStrings *make_embedded_functions(int allow_briefs,
             cstring_concats(&new_function_string, ", ");
         }
 
-        cstring_concats(&new_function_string, ");");
+        cstring_concats(&new_function_string, ");\n");
         carray_append(function_buffer, new_function_string, CSTRING);
     }
 

@@ -202,6 +202,8 @@ struct Sections {
  * Parameters for a post processor.
 */
 struct PostprocessorParams {
+    int target;
+    void *target_structure;
     struct DocgenArguments arguments;
 };
 
@@ -209,9 +211,6 @@ struct PostprocessorParams {
  * Data to pass to a post processor to generate a CString
 */
 struct PostprocessorData {
-    int target;
-    void *target_structure;
-
     /* Synopsis data */
     const char *arguments;
     struct Inclusions *cli_inclusions;
@@ -222,7 +221,9 @@ struct PostprocessorData {
     struct CStrings *embedded_functions;
     struct CStrings *embedded_macro_functions;
 
-    /* Sections */
+    /* Section data */
+    const char *name;
+    const char *brief;
     const char *examples;
     const char *description;
     const char *return_value;

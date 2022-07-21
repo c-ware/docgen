@@ -250,11 +250,14 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
         INIT_VARIABLE(representation);
 
         params.arguments = arguments;
+        params.target = DOCGEN_TARGET_FUNCTION;
+        params.target_structure = (void *) (&function);
+
         function = parameters.functions->contents[func_index];
         representation = docgen_generate_functions(function, parameters);
         output = docgen_postprocess_manual(representation, params);
 
-        printf("Final: '%s'\n", output.contents);
+        printf("%s", output.contents);
 
         cstring_free(output);
         carray_free(representation.embedded_functions, CSTRING);
@@ -263,6 +266,7 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
         carray_free(representation.embedded_macros, CSTRING);
 
         func_index++;
+        break;
     }
 }
 
@@ -311,10 +315,10 @@ int main(int argc, char **argv) {
         
     }
 
+    /* Program resource cleanup */
     fclose(source_file);
     libmatch_cursor_free(&cursor);
     carray_free(arguments.inclusions, INCLUDE);
-
     docgen_extract_macros_free(generator_parameters.macros);
     docgen_extract_functions_free(generator_parameters.functions);
     docgen_extract_structures_free(generator_parameters.structures);

@@ -38,6 +38,11 @@
 #ifndef CWARE_DOCGEN_POSTPROCESSORS_H
 #define CWARE_DOCGEN_POSTPROCESSORS_H
 
+#define EMBED_TYPES 4
+
+#define GET_TARGET_FIELD(type, name) \
+    ((type *) params.target_structure)->name
+
 struct CString;
 struct DocgenFunction;
 struct GeneratorParams;

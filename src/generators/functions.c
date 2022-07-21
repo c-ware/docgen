@@ -60,8 +60,8 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
 
     /* Metadata data-- the target_structure field will be filled
      * in by the caller. */
-    data.target = DOCGEN_TARGET_FUNCTION;
-    data.target_structure = NULL; 
+    data.brief = function.brief;
+    data.name = function.name;
 
     /* Synopsis setup-- Functions have no 'arguments' like a project
      * might (command line arguments). */
