@@ -74,19 +74,22 @@
 */
 static void add_breaks(struct CString *string, const char *input) {
     int cindex = 0;
+    int input_length = 0;
 
     liberror_is_null(add_breaks, string);
     liberror_is_null(add_breaks, input);
 
+    input_length = strlen(input);
+
     /* For each newline character we find, output an extra string
      * '.br' to the cstring. */
-    for(cindex = 0; cindex < string->length; cindex++) {
+    for(cindex = 0; cindex < input_length; cindex++) {
         char append_string[2] = "";
 
-        append_string[0] = string->contents[cindex];
-        append_string[1] = string->contents[cindex];
+        append_string[0] = input[cindex];
+        append_string[1] = 0x00;
 
-        if(string->contents[cindex] == '\n')
+        if(input[cindex] == '\n')
             cstring_concats(string, "\n.br");
 
         /* In the case of newlines, the fallthrough will cause
@@ -203,7 +206,7 @@ static void display_embeds(struct CString *string, int length, ...) {
         for(embed_index = 0; embed_index < carray_length(filtered_embed); embed_index++) {
             struct CString embed_string = filtered_embed->contents[embed_index];
 
-            cstring_concats(string, embed_string.contents);
+            add_breaks(string, embed_string.contents);
 
             /* Only add a new line if this is not the last embed */
             if(embed_index == (carray_length(filtered_embed) - 1))
@@ -240,7 +243,7 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
     /* Projects can have an arguments string, while nothing else
      * can. */
     if(params.target == DOCGEN_TARGET_PROJECT) {
-        cstring_concats(string, data.arguments);
+        add_breaks(string, data.arguments);
         cstring_concats(string, "\n");
     }
 
@@ -251,7 +254,7 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
 static void description(struct CString *string, struct PostprocessorData data,
                         struct PostprocessorParams params) {
     cstring_concats(string, ".SH DESCRIPTION\n");
-    cstring_concats(string, data.description);
+    add_breaks(string, data.description);
 }
 
 struct CString docgen_postprocess_manual(struct PostprocessorData data,

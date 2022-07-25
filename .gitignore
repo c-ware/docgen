@@ -53,3 +53,8 @@ dkms.conf
 
 # Misc
 docgen
+
+# Vim files
+*.swp
+*.swo
+
