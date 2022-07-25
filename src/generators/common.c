@@ -523,3 +523,15 @@ struct CStrings *make_embedded_functions(int allow_briefs,
 
     return function_buffer;
 }
+
+char *duplicate_string(const char *string) {
+    char *new_string = NULL;
+
+    liberror_is_null(duplicate_string, string);
+
+    new_string = malloc(sizeof(char) * (strlen(string) + 1));
+    new_string[0] = 0x00;
+    strncat(new_string, string, strlen(string));
+
+    return new_string;
+}

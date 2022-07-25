@@ -84,10 +84,10 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     /* Transfer sections (Functions have no arguments in their synopsis in the
      * same sense as a command line program project manual) */
     data.arguments = NULL;
-    data.examples = function.example;
-    data.description = function.description;
-    data.return_value = function.return_data.return_value;
-    data.notes = function.notes;
+    data.examples = duplicate_string(function.example);
+    data.description = duplicate_string(function.description);
+    data.return_value = duplicate_string(function.return_data.return_value);
+    data.notes = duplicate_string(function.notes);
 
     return data;
 }

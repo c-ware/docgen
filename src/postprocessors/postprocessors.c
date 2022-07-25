@@ -251,10 +251,18 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
                    data.embedded_functions, data.embedded_macro_functions);
 }
 
-static void description(struct CString *string, struct PostprocessorData data,
-                        struct PostprocessorParams params) {
-    cstring_concats(string, ".SH DESCRIPTION\n");
-    add_breaks(string, data.description);
+static void print_section(struct CString *string, const char *section,
+                          const char *section_text) {
+    /* Do not produce a section for an empty seciton */
+    if(strlen(section_text) == 0)
+        return;
+
+    cstring_concats(string, ".SH ");
+    cstring_concats(string, section);
+    cstring_concats(string, "\n");
+
+    /* If this section has no text, notify the user of this. */
+    add_breaks(string, section_text);
 }
 
 struct CString docgen_postprocess_manual(struct PostprocessorData data,
@@ -264,7 +272,21 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
     header(&output, data, params);
     name(&output, data, params);
     synopsis(&output, data, params);
-    description(&output, data, params);
+
+    print_section(&output, "DESCRIPTION", data.description);
+    print_section(&output, "RETURN VALUE", data.return_value);
+
+    /* The return value field, which is just a description of what
+     * the function returns. is parsed as a single line unlike the
+     * description, which is parsed as a paragraph. This causes the
+     * description to have a newline at the end of it, but not t the
+     * return value. Let's fix this as long as there is actually
+     * return value information. */
+    if(strlen(data.return_value) != 0)
+        add_breaks(&output, "\n");
+
+    print_section(&output, "EXAMPLES", data.examples);
+    print_section(&output, "NOTES", data.notes);
 
     return output;
 }

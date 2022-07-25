@@ -159,4 +159,27 @@ struct CStrings *make_embedded_functions(int allow_briefs,
                                          struct DocgenFunctions functions,
                                          struct Embeds embeds);
 
+/*
+ * @docgen: function
+ * @brief: duplicate a string into a malloc'd buffer
+ * @name: duplicate_string
+ *
+ * @include: generators.h
+ *
+ * @description
+ * @This function will duplicate a string into a malloc'd, NUL terminated buffer
+ * @that has a length of (strlen(string) + 1). The buffer must be released after
+ * @the string is no longer needed.
+ * @description
+ *
+ * @error: string is NULL
+ *
+ * @param string: the string to duplicate
+ * @type: const char *
+ *
+ * @return: the new string
+ * @type: char
+*/
+char *duplicate_string(const char *string);
+
 #endif
