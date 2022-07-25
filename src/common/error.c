@@ -130,12 +130,12 @@ void field_line_arg_error_check(const char *line, int line_number) {
     }
 
     /* After the space that separates the tag from the argument, and the
-     * field, there must be an alphabetical character. */
+     * field, there must be an alphabetical character or an underscore. */
     character = libmatch_cursor_getch(&cursor);
 
-    if(character == LIBMATCH_EOF || strchr(LIBMATCH_ALPHA, character) == NULL) {
+    if(character == LIBMATCH_EOF || strchr(LIBMATCH_ALPHA "_", character) == NULL) {
         fprintf(stderr, "docgen: space after tag name on line %i must have an alphabetical "
-                "character immediately after, got '%c'\n", line_number, character);
+                "character or underscore immediately after, got '%c'\n", line_number, character);
         exit(EXIT_FAILURE);
     }
 
@@ -145,14 +145,22 @@ void field_line_arg_error_check(const char *line, int line_number) {
         exit(EXIT_FAILURE);
     }
 
-    /* Is every character until the colon not whitespace? */
+    /* Is every character until the colon printable, or a space?
+     * Honestly, the only reason we have this is because of this
+     * kind of pattern:
+     *
+     * @param foo[SOME_CONSTANT + 1]: bar
+     *
+     * This might be a bit hacky honestly. Might be best to actually parse
+     * this kind of this to verify correctness.
+    */
     while(cursor.cursor < cursor.length) {
         character = libmatch_cursor_getch(&cursor);
 
         if(character == ':')
             break;
         
-        if(strchr(LIBMATCH_PRINTABLE, character) != NULL)
+        if(strchr(LIBMATCH_PRINTABLE " ", character) != NULL)
             continue;
 
         fprintf(stderr, "docgen: argument to tag on line %i has whitespace before colon\n",

@@ -50,7 +50,7 @@
 
 #define DOCGEN_TYPE_LENGTH                      64
 #define DOCGEN_INCLUSION_LENGTH                 128
-#define DOCGEN_PARAMETER_NAME_LENGTH            32
+#define DOCGEN_PARAMETER_NAME_LENGTH            64
 #define DOCGEN_PARAMETER_DESCRIPTION_LENGTH     128
 #define DOCGEN_ERROR_DESCRIPTION_LENGTH         128
 
