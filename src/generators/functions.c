@@ -88,6 +88,7 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     data.description = duplicate_string(function.description);
     data.return_value = duplicate_string(function.return_data.return_value);
     data.notes = duplicate_string(function.notes);
+    data.see_also = function.references;
 
     return data;
 }

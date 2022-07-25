@@ -14,6 +14,7 @@
  * @setting: struct-briefs
  * @setting: macro-briefs
  *
+ *
  * @description
  * @This is a description.
  * @description
@@ -37,6 +38,8 @@
  *
  * @return: some data
  * @type: struct pollfd
+ *
+ * @reference: foo(bar)
 */
 
 /*

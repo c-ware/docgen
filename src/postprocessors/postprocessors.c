@@ -160,6 +160,35 @@ static void name(struct CString *string, struct PostprocessorData data,
     cstring_concats(string, "\n");
 }
 
+static void see_also(struct CString *string, struct PostprocessorData data,
+                     struct PostprocessorParams params) {
+    int ref_index = 0;
+
+    if(carray_length(data.see_also) == 0)
+        return;
+
+    cstring_concats(string, ".SH SEE ALSO\n");
+
+    /* Add each reference in the form of 'manual(section)' and add a comma
+     * between each one except for the last */
+    for(ref_index = 0; ref_index < carray_length(data.see_also); ref_index++) {
+        struct Reference reference = data.see_also->contents[ref_index];
+
+        cstring_concats(string, reference.manual);
+        cstring_concats(string, "(");
+        cstring_concats(string, reference.section);
+        cstring_concats(string, ")");
+
+        if(ref_index == (carray_length(data.see_also) - 1)) {
+            cstring_concats(string, "\n");
+
+            break;
+        }
+
+        cstring_concats(string, ", ");
+    }
+}
+
 /*
  * Synopsis logic. Yes, this really does need its own section, as the synopsis
  * is probably the most mind-numbing part of this entire file.
@@ -332,7 +361,6 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
     if(NUMBER_OF_EMBEDS(data) > 0 && NUMBER_OF_INCLUSIONS(data) > 0)
         cstring_concats(string, "\n");
 
-
     /* Projects can have an arguments string, while nothing else
      * can. */
     if(params.target == DOCGEN_TARGET_PROJECT) {
@@ -380,6 +408,8 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
 
     print_section(&output, "EXAMPLES", data.examples);
     print_section(&output, "NOTES", data.notes);
+
+    see_also(&output, data, params);
 
     return output;
 }
