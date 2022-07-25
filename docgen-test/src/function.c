@@ -4,11 +4,15 @@
  * @name: test_function
  *
  * @embed function: foo_function
+ * @embed function: foo_function
  * @embed structure: SomeStructure
  * @embed structure: SomeStructure
+ * @embed macro_function: foobar_baz_function
+ * @embed macro_function: foobar_baz_function
  * @embed constant: MY_CONSTANT
  *
- * @setting: func-briefs
+ * @setting: struct-briefs
+ * @setting: macro-briefs
  * @include: foo.h
  *
  * @description

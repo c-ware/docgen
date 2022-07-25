@@ -52,6 +52,50 @@
 #include "../extractors/structures/structures.h"
 #include "../extractors/macro_functions/macro_functions.h"
 
+/*
+ * @docgen: function
+ * @brief: add .br between each new line in a string and add it into a string
+ * @name: add_breaks
+ *
+ * @description
+ * @Troff requires a .br to signal a new line, so this function will add a  string
+ * @into a cstring and translating each newline character (0x0A) into a newline
+ * @and the '.br' string.
+ * @description
+ *
+ * @error: string is NULL
+ * @error: input is NULL
+ *
+ * @param string: the cstring to write the breaks to
+ * @type: struct CString *
+ *
+ * @param input: the input string to translate
+ * @type: const char *
+*/
+static void add_breaks(struct CString *string, const char *input) {
+    int cindex = 0;
+
+    liberror_is_null(add_breaks, string);
+    liberror_is_null(add_breaks, input);
+
+    /* For each newline character we find, output an extra string
+     * '.br' to the cstring. */
+    for(cindex = 0; cindex < string->length; cindex++) {
+        char append_string[2] = "";
+
+        append_string[0] = string->contents[cindex];
+        append_string[1] = string->contents[cindex];
+
+        if(string->contents[cindex] == '\n')
+            cstring_concats(string, "\n.br");
+
+        /* In the case of newlines, the fallthrough will cause
+         * the final string append operation to have written
+         * '\n.br\n' */
+        cstring_concats(string, append_string);
+    }
+}
+
 static void header(struct CString *string, struct PostprocessorData data,
                    struct PostprocessorParams params) {
 
@@ -169,8 +213,8 @@ static void display_embeds(struct CString *string, int length, ...) {
              * briefs, we should add another extra new line because having
              * comments directly before and after a function signature looks
              * weird. */
-            if(strstr(embed_string.contents, "/*") != NULL)
-                cstring_concats(string, "");
+            if(strstr(embed_string.contents, "/*") == NULL)
+                continue;
 
             cstring_concats(string, "\n");
         }
@@ -188,7 +232,6 @@ static void display_embeds(struct CString *string, int length, ...) {
 
 static void synopsis(struct CString *string, struct PostprocessorData data,
                      struct PostprocessorParams params) {
-
     liberror_is_null(synopsis, string);
     liberror_is_null(synopsis, params.target_structure);
 
@@ -205,6 +248,12 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
                    data.embedded_functions, data.embedded_macro_functions);
 }
 
+static void description(struct CString *string, struct PostprocessorData data,
+                        struct PostprocessorParams params) {
+    cstring_concats(string, ".SH DESCRIPTION\n");
+    cstring_concats(string, data.description);
+}
+
 struct CString docgen_postprocess_manual(struct PostprocessorData data,
                                          struct PostprocessorParams params) {
     struct CString output = cstring_init("");
@@ -212,6 +261,7 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
     header(&output, data, params);
     name(&output, data, params);
     synopsis(&output, data, params);
+    description(&output, data, params);
 
     return output;
 }

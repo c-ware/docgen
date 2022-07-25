@@ -52,16 +52,24 @@
 struct PostprocessorData docgen_generate_functions(struct DocgenFunction function,
                                                    struct GeneratorParams parameters) {
     int index = 0;
+    struct Embed function_embed;
     struct CString buffer_string;
     struct PostprocessorData data;
 
     INIT_VARIABLE(data);
     INIT_VARIABLE(buffer_string);
+    INIT_VARIABLE(function_embed);
 
     /* Metadata data-- the target_structure field will be filled
      * in by the caller. */
     data.brief = function.brief;
     data.name = function.name;
+
+    /* Let's add the function we are documenting as an embed so it will follow the
+     * same rules as the rest of the embeds! */
+    function_embed.type = DOCGEN_EMBED_FUNCTION;
+    strncat(function_embed.name, function.name, DOCGEN_EMBED_NAME_LENGTH);
+    carray_append(function.embeds, function_embed, EMBED);
 
     /* Synopsis setup-- Functions have no 'arguments' like a project
      * might (command line arguments). */
