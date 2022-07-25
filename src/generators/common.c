@@ -255,6 +255,15 @@ void handle_unrecognized_embed(const char *name, const char *target, int positio
 
 
 
+#define HANDLE_UNRECOGNIZED_EMBED(index, type, name)                                \
+do {                                                                                \
+    if(index != -1)                                                                 \
+        break;                                                                      \
+                                                                                    \
+    fprintf(stderr, "docgen: failed to recognize '%s' embed '%s'\n", #type, #name); \
+    exit(EXIT_FAILURE);                                                             \
+} while(0)
+
 struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macros,
                                       struct Embeds embeds) {
     int index = 0;
@@ -277,7 +286,10 @@ struct CStrings *make_embedded_macros(int allow_briefs, struct DocgenMacros macr
         INIT_VARIABLE(target_macro);
         INIT_VARIABLE(new_macro_string);
 
+        /* Attempt to find the embed's data, but make sure to handle the situation
+         * where it is NOT found (when the index is -1) */
         macro_index = carray_find(&macros, requested_embed.name, macro_index, MACRO);
+        HANDLE_UNRECOGNIZED_EMBED(macro_index, macro_function, embed.name);
         target_macro = macros.contents[macro_index];
         new_macro_string = cstring_init("");
 
@@ -334,8 +346,13 @@ struct CStrings *make_embedded_structures(int allow_briefs,
         INIT_VARIABLE(target_structure);
         INIT_VARIABLE(new_structure_string);
 
+        /* Attempt to find the embed's data, but make sure to handle the situation
+         * where it is NOT found (when the index is -1) */
         longest_field = docgen_get_longest_field(&structures, 0);
         structure_index = carray_find(&structures, embed.name, structure_index, STRUCTURE);
+
+        HANDLE_UNRECOGNIZED_EMBED(structure_index, structure, embed.name);
+
         target_structure = structures.contents[structure_index];
         new_structure_string = cstring_init("");
 
@@ -429,7 +446,12 @@ struct CStrings *make_embedded_macro_functions(int allow_briefs,
         INIT_VARIABLE(target_macro_function);
         INIT_VARIABLE(new_macro_function_string);
 
+        /* Attempt to find the embed's data, but make sure to handle the situation
+         * where it is NOT found (when the index is -1) */
         macro_function_index = carray_find(&macro_functions, requested_embed.name, macro_function_index, MACRO);
+
+        HANDLE_UNRECOGNIZED_EMBED(macro_function_index, macro_function, embed.name);
+
         target_macro_function = macro_functions.contents[macro_function_index];
         new_macro_function_string = cstring_init("");
 
@@ -486,7 +508,12 @@ struct CStrings *make_embedded_functions(int allow_briefs,
         INIT_VARIABLE(target_function);
         INIT_VARIABLE(new_function_string);
 
+        /* Attempt to find the embed's data, but make sure to handle the situation
+         * where it is NOT found (when the index is -1) */
         function_index = carray_find(&functions, requested_embed.name, function_index, MACRO);
+
+        HANDLE_UNRECOGNIZED_EMBED(function_index, macro_function, embed.name);
+
         target_function = functions.contents[function_index];
         new_function_string = cstring_init("");
 
