@@ -525,8 +525,13 @@ struct CStrings *make_embedded_functions(int allow_briefs,
             cstring_concats(&new_function_string, " */\n");
         }
 
-        /* Base signature */
-        format_pointer(&new_function_string, target_function.return_data.return_type);
+        /* Base signature of the function. If the function has no return type, then
+         * assume it is void. */
+        if(strlen(target_function.return_data.return_type) == 0)
+            format_pointer(&new_function_string, "void");
+        else
+            format_pointer(&new_function_string, target_function.return_data.return_type);
+
         cstring_concats(&new_function_string, target_function.name);
         cstring_concats(&new_function_string, "(");
 

@@ -36,9 +36,6 @@
  * @param bar: the bar parameter
  * @type: unsigned int
  *
- * @return: some data
- * @type: struct pollfd
- *
  * @reference: foo(bar)
 */
 
