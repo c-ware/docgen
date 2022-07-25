@@ -369,8 +369,16 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
         cstring_concats(string, "\n");
     }
 
-    display_embeds(string, 4, data.embedded_macros, data.embedded_structures,
-                   data.embedded_functions, data.embedded_macro_functions);
+    /* Different types of manuals should have a different order of embeds. */
+    if(params.target == DOCGEN_TARGET_FUNCTION)
+        display_embeds(string, 4, data.embedded_functions, data.embedded_structures,
+                       data.embedded_macros, data.embedded_macro_functions);
+    else if(params.target == DOCGEN_TARGET_MACRO_FUNCTION)
+        display_embeds(string, 4, data.embedded_macro_functions, data.embedded_functions,
+                       data.embedded_structures, data.embedded_macros);
+    else
+        display_embeds(string, 4, data.embedded_functions, data.embedded_structures,
+                       data.embedded_macro_functions, data.embedded_macros);
 }
 
 static void print_section(struct CString *string, const char *section,
@@ -414,13 +422,3 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
 
     return output;
 }
-
-
-
-
-
-
-
-
-
-

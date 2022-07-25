@@ -298,16 +298,83 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
 
         dump_cstring(output, output_file_path);
 
+        /* Resource cleanup. Yes, we cast away const for a reason. We all know that
+         * free(void *) should have actually been free(const void *). */
         cstring_free(output);
-        free((char  *) representation.brief);
-        free((char  *) representation.name);
-        free((char  *) representation.arguments);
-        free((char  *) representation.description);
-        free((char  *) representation.examples);
-        free((char  *) representation.return_value);
-        free((char  *) representation.notes);
+        free((char *) representation.brief);
+        free((char *) representation.name);
+        free((char *) representation.arguments);
+        free((char *) representation.description);
+        free((char *) representation.examples);
+        free((char *) representation.return_value);
+        free((char *) representation.notes);
         carray_free(representation.embedded_functions, CSTRING);
         carray_free(representation.embedded_macro_functions, CSTRING);
+        carray_free(representation.embedded_structures, CSTRING);
+        carray_free(representation.embedded_macros, CSTRING);
+    }
+}
+
+/*
+ * @docgen: function
+ * @brief: invoke the macro function generation on each macro function
+ * @name: generate_functions
+ *
+ * @description
+ * @This function is the front end for generating documentation for each
+ * @macro function in the selected source file.
+ * @description
+ *
+ * @param arguments: the parsed command line arguments
+ * @type: struct DocgenArguments
+ *
+ * @param parameters: the generator parameters
+ * @type: struct GeneratorParams
+*/
+void generate_macro_functions(struct GeneratorParams parameters, struct DocgenArguments arguments) {
+    int mfunc_index = 0;
+    char output_file_path[LIBPATH_MAX_PATH + 1] = "";
+
+    for(mfunc_index = 0; mfunc_index < carray_length(parameters.macro_functions); mfunc_index++) {
+        struct CString output;
+        struct DocgenMacroFunction macro_function;
+        struct PostprocessorParams params;
+        struct PostprocessorData representation;
+        FILE *output_file = NULL;
+
+        INIT_VARIABLE(output);
+        INIT_VARIABLE(params);
+        INIT_VARIABLE(macro_function);
+        INIT_VARIABLE(representation);
+
+        params.arguments = arguments;
+        params.target = DOCGEN_TARGET_MACRO_FUNCTION;
+        params.target_structure = (void *) (&macro_function);
+
+        macro_function = parameters.macro_functions->contents[mfunc_index];
+        representation = docgen_generate_macro_functions(macro_function, parameters);
+        output = docgen_postprocess_manual(representation, params);
+
+        /* Open the output file, and perform the last stage of preprocessing
+         * into the file. */
+        if(strcmp(arguments.format, "manpage") == 0)
+            libpath_join_path(output_file_path, LIBPATH_MAX_PATH, "doc", "/", macro_function.name, ".", arguments.section, NULL);
+        else
+            liberror_unhandled(generate_macro_functions);
+
+        dump_cstring(output, output_file_path);
+
+        /* Resource cleanup. Yes, we cast away const for a reason. We all know that
+         * free(void *) should have actually been free(const void *). */
+        cstring_free(output);
+        free((char *) representation.brief);
+        free((char *) representation.name);
+        free((char *) representation.arguments);
+        free((char *) representation.description);
+        free((char *) representation.examples);
+        free((char *) representation.notes);
+        carray_free(representation.embedded_macro_functions, CSTRING);
+        carray_free(representation.embedded_functions, CSTRING);
         carray_free(representation.embedded_structures, CSTRING);
         carray_free(representation.embedded_macros, CSTRING);
     }
@@ -358,10 +425,10 @@ void generate_project(struct GeneratorParams parameters, struct DocgenArguments 
 
     /* Resource cleanup. Yes, we cast away const for a reason. We all know that
      * free(void *) should have actually been free(const void *). */
-    free((char  *) representation.brief);
-    free((char  *) representation.name);
-    free((char  *) representation.arguments);
-    free((char  *) representation.description);
+    free((char *) representation.brief);
+    free((char *) representation.name);
+    free((char *) representation.arguments);
+    free((char *) representation.description);
 
     cstring_free(output);
     carray_free(representation.embedded_functions, CSTRING);
@@ -417,7 +484,7 @@ int main(int argc, char **argv) {
     if(strcmp(arguments.category, "functions") == 0) {
         generate_functions(generator_parameters, arguments);
     } else if(strcmp(arguments.category, "macro_functions") == 0) {
-        
+        generate_macro_functions(generator_parameters, arguments);
     } else if(strcmp(arguments.category, "project") == 0) {
         generate_project(generator_parameters, arguments);
     }

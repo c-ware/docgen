@@ -42,9 +42,11 @@ struct DocgenFunction;
 struct GeneratorParams;
 struct DocgenStructures;
 struct PostprocessorData;
+struct DocgenMacroFunction;
 
 struct PostprocessorData docgen_generate_functions(struct DocgenFunction function, struct GeneratorParams parameters);
 struct PostprocessorData docgen_generate_project(struct DocgenProject project, struct GeneratorParams parameters);
+struct PostprocessorData docgen_generate_macro_functions(struct DocgenMacroFunction function, struct GeneratorParams parameters);
 
 /*
  * common.c logic

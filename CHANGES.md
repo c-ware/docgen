@@ -1,30 +1,43 @@
 # CHANGELOG.md
 
-VERSION: 1.0.6
-DATE: June 26th, 2022
+VERSION: 2.0.0
+DATE: July 25, 2022
 
-## Features
-- You can now generate documentation for macro functions with the `macros`
-  category.
-- Added a Markdown backend for all types of documentation.
+This update is a fundamental change in how docgen works, and so it cannot really
+be summarized by a simple list of changes. Originally, docgen worked by having
+a functions which generated each type of token (macro functions, functions,
+projects, etc) for each target (manpages, markdown, etc).
 
-## Bug Fixes
-- No longer raises an EOF error for a file where the comment is the only
-  thing in the file. This was caused because the end of the C comment was
-  quite literally at the end of the file.
-- Closed files that were mistakenly not closed in Markdown backends.
+This was an absolute NIGHTMARE to maintain, and after struggling to make whitespace
+appear in correct locations (yes, really) in manuals, I decided to make a fundamental
+change in docgen's structure.
 
-## Misc
-- License changed-- now using the C-Ware License.
-- Complete overhaul of the internal functions for extracting individual tags
-  into usable buffers. Reformatted the parameter order for them, as well as
-  separated most of the error checking into their own functions to improve
-  code readability.
-- Removed `--md-mono` option.
+The extractors would remain the same, but the actual generation would be changed.
+Rather than have individual functions perform the formatting, and writing, we now
+have a sort of "pipeline" where different stages of generation are done. The pipeline
+looks like this:
 
-## Documentation
-- Added internal documentation for functions, albeit it is not generated
-  *yet*.
+Extractor functions -> Postprocessor data generation -> Postprocessor -> Writer
 
-## Work In Progress
-- Markdown generator
+The extractor functions are fundamentally the same as they were in the original docgen.
+Minimal changes have been made to them except for extracting more settings. but the
+introduction of a 'post processor' is what makes this such a massive change.
+
+The postprocessor is the thing that assembles input into a single string. It makes sure
+that the the format-specific quirks and formatting requirements are where they should be.
+It also makes sure the whitespace is correctly formatted!
+
+The postprocessor will however need input given to it, which is gathered by a generator
+function. Each generator function is given a 'thing' to generate data for. For example,
+a macro function. This macro function is assembled from a fully parsed structure from the
+extractor for macros. The generator will grab all the requested embeds in the macro function,
+invoke formatter functions to transform each embed of each type into a list of CStrings, and
+make sure all the data required for the final product is assembled for the postprocessor.
+
+As for the writer, it handles format-agnostic things like expanding tables, lists, and perform
+formatting like bolding and Italicizing text. It does this as it writes into the file, as to not
+use more memory than this program already uses.
+
+That is pretty much it.
+All this just to make whitespace appear correctly. Jesus christ.
+

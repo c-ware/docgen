@@ -40,6 +40,8 @@
  * fill up a data structure that is passed to the post processor.
 */
 
+#include <assert.h>
+
 #include "../docgen.h"
 
 #include "generators.h"
@@ -127,6 +129,51 @@ struct PostprocessorData docgen_generate_project(struct DocgenProject project,
     data.return_value = "";
     data.notes = "";
     data.see_also = project.references;
+
+    return data;
+}
+
+struct PostprocessorData docgen_generate_macro_functions(struct DocgenMacroFunction macro_function,
+                                                         struct GeneratorParams parameters) {
+    int index = 0;
+    struct Embed macro_function_embed;
+    struct CString buffer_string;
+    struct PostprocessorData data;
+
+    INIT_VARIABLE(data);
+    INIT_VARIABLE(buffer_string);
+    INIT_VARIABLE(macro_function_embed);
+
+    /* Metadata data-- the target_structure field will be filled
+     * in by the caller. */
+    data.brief = duplicate_string(macro_function.brief);
+    data.name = duplicate_string(macro_function.name);
+
+    /* Let's add the macro_function we are documenting as an embed so it will follow the
+     * same rules as the rest of the embeds! */
+    macro_function_embed.type = DOCGEN_EMBED_MACRO_FUNCTION;
+    strncat(macro_function_embed.name, macro_function.name, DOCGEN_EMBED_NAME_LENGTH);
+    carray_append(macro_function.embeds, macro_function_embed, EMBED);
+
+    /* Synopsis setup-- Functions have no 'arguments' like a project
+     * might (command line arguments). */
+    data.cli_inclusions = NULL;
+    data.arguments = data.arguments;
+    data.comment_inclusions = macro_function.inclusions;
+    data.embedded_macros = make_embedded_macros(macro_function.macro_briefs, *parameters.macros, *macro_function.embeds);
+    data.embedded_structures = make_embedded_structures(macro_function.structure_briefs, *parameters.structures, *macro_function.embeds);
+    data.embedded_macro_functions = make_embedded_macro_functions(macro_function.macro_function_briefs, *parameters.macro_functions, *macro_function.embeds);
+    data.embedded_functions = make_embedded_functions(macro_function.function_briefs, *parameters.functions, *macro_function.embeds);
+
+
+    /* Transfer sections (Functions have no arguments in their synopsis in the
+     * same sense as a command line program project manual) */
+    data.arguments = NULL;
+    data.examples = duplicate_string(macro_function.example);
+    data.description = duplicate_string(macro_function.description);
+    data.return_value = "";
+    data.notes = duplicate_string(macro_function.notes);
+    data.see_also = macro_function.references;
 
     return data;
 }
