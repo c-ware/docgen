@@ -53,6 +53,39 @@
 #include "../extractors/macro_functions/macro_functions.h"
 
 /*
+ * @docgen: macro_function
+ * @brief: calculate the number of embeds the postprocessor has access to
+ * @name: NUMBER_OF_EMBEDS
+ *
+ * @description
+ * @This macro function will calculate the number of embeds that the postprocessor
+ * @has access to through the PostprocessorData structure.
+ * @description
+ * 
+ * @param data: the postprocessor data
+*/
+#define NUMBER_OF_EMBEDS(data)                                                    \
+    ((data).embedded_macros->length + (data).embedded_structures->length +        \
+     (data).embedded_functions->length + (data).embedded_macro_functions->length)
+
+/*
+ * @docgen: macro_function
+ * @brief: calculate the number of inclusions the postprocessor has access to
+ * @name: NUMBER_OF_INCLUSIONS
+ *
+ * @description
+ * @This macro function will calculate the number of inclusions that the postprocessor
+ * @has access to through the PostprocessorData structure.
+ * @description
+ * 
+ * @param data: the postprocessor data
+*/
+#define NUMBER_OF_INCLUSIONS(data)                                                  \
+        ((data).cli_inclusions != NULL ? (data).cli_inclusions->length : 0) +       \
+        ((data).comment_inclusions != NULL ? (data).comment_inclusions->length : 0)
+
+
+/*
  * @docgen: function
  * @brief: add .br between each new line in a string and add it into a string
  * @name: add_breaks
@@ -162,6 +195,59 @@ static void name(struct CString *string, struct PostprocessorData data,
  * We then iterate through this array, adding an extra empty line for each
  * group that is not the last one. Quite simple.
 */
+static void inclusions(struct CString *string, struct PostprocessorData data,
+                       struct PostprocessorParams params) {
+    int inc_index = 0;    
+
+    /* Dump CLI inclusions if there are any */
+    for(inc_index = 0; data.cli_inclusions != NULL && inc_index <  carray_length(data.cli_inclusions); inc_index++) {
+        struct Inclusion inclusion = data.cli_inclusions->contents[inc_index];
+
+        cstring_concats(string, "#include ");
+
+        if(inclusion.type == DOCGEN_INCLUSION_LOCAL) {
+            cstring_concats(string, "\"");
+            cstring_concats(string, inclusion.path);
+            cstring_concats(string, "\"\n.br\n");
+
+            continue;
+
+        } else if(inclusion.type == DOCGEN_INCLUSION_SYSTEM) {
+            cstring_concats(string, "<");
+            cstring_concats(string, inclusion.path);
+            cstring_concats(string, ">.br\n");
+
+            continue;
+        }
+
+        liberror_unhandled(inclusions);
+    }
+
+
+    /* Dump comment inclusions if there are any */
+    for(inc_index = 0; data.comment_inclusions != NULL && inc_index <  carray_length(data.comment_inclusions); inc_index++) {
+        struct Inclusion inclusion = data.comment_inclusions->contents[inc_index];
+
+        cstring_concats(string, "#include ");
+
+        if(inclusion.type == DOCGEN_INCLUSION_LOCAL) {
+            cstring_concats(string, "\"");
+            cstring_concats(string, inclusion.path);
+            cstring_concats(string, "\"\n.br\n");
+
+            continue;
+
+        } else if(inclusion.type == DOCGEN_INCLUSION_SYSTEM) {
+            cstring_concats(string, "<");
+            cstring_concats(string, inclusion.path);
+            cstring_concats(string, ">.br\n");
+
+            continue;
+        }
+
+        liberror_unhandled(inclusions);
+    }
+}
 
 static void display_embeds(struct CString *string, int length, ...) {
     int index = 0;
@@ -239,6 +325,13 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
     liberror_is_null(synopsis, params.target_structure);
 
     cstring_concats(string, ".SH SYNOPSIS\n");
+    inclusions(string, data, params);
+
+    /* Only write the extra newline if there is stuff to embed, and there are inclusions so we do not
+     * have an awkward extra line. */
+    if(NUMBER_OF_EMBEDS(data) > 0 && NUMBER_OF_INCLUSIONS(data) > 0)
+        cstring_concats(string, "\n");
+
 
     /* Projects can have an arguments string, while nothing else
      * can. */

@@ -13,7 +13,6 @@
  *
  * @setting: struct-briefs
  * @setting: macro-briefs
- * @include: foo.h
  *
  * @description
  * @This is a description.
