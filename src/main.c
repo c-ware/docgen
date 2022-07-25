@@ -299,6 +299,13 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
         dump_cstring(output, output_file_path);
 
         cstring_free(output);
+        free((char  *) representation.brief);
+        free((char  *) representation.name);
+        free((char  *) representation.arguments);
+        free((char  *) representation.description);
+        free((char  *) representation.examples);
+        free((char  *) representation.return_value);
+        free((char  *) representation.notes);
         carray_free(representation.embedded_functions, CSTRING);
         carray_free(representation.embedded_macro_functions, CSTRING);
         carray_free(representation.embedded_structures, CSTRING);
@@ -348,6 +355,13 @@ void generate_project(struct GeneratorParams parameters, struct DocgenArguments 
         liberror_unhandled(generate_functions);
 
     dump_cstring(output, output_file_path);
+
+    /* Resource cleanup. Yes, we cast away const for a reason. We all know that
+     * free(void *) should have actually been free(const void *). */
+    free((char  *) representation.brief);
+    free((char  *) representation.name);
+    free((char  *) representation.arguments);
+    free((char  *) representation.description);
 
     cstring_free(output);
     carray_free(representation.embedded_functions, CSTRING);

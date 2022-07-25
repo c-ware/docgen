@@ -464,3 +464,237 @@ table
 .br
 .SH SEE ALSO
 foo(bar), baz(tuna)
+.TH "test_project" "cware" "Jul 25, 2022" "C-Ware Manuals"
+.SH NAME
+test_project - this is a test project
+.SH SYNOPSIS
+These are the arguments to the program.
+.br
+
+#define MY_CONSTANT 0
+.br
+#define MY_OTHER_CONSTANT 0
+.br
+
+struct MyStructure {
+.br
+    int foo;                    /* the foo field */
+.br
+    struct Foobar *bar;         /* the bar field */
+.br
+
+.br
+    struct {
+.br
+        int baz;                /* the baz field */
+.br
+        struct Foobar *tuna;    /* the tuna field */
+.br
+    } MySubStructure;
+.br
+};
+.br
+
+struct MyStructure {
+.br
+    int foo;                    /* the foo field */
+.br
+    struct Foobar *bar;         /* the bar field */
+.br
+
+.br
+    struct {
+.br
+        int baz;                /* the baz field */
+.br
+        struct Foobar *tuna;    /* the tuna field */
+.br
+    } MySubStructure;
+.br
+};
+.br
+
+struct pollfd test_function(const char *foo, unsigned int bar);
+.br
+struct pollfd test_function(const char *foo, unsigned int bar);
+.br
+
+#define test_macro(foo);
+.br
+.SH DESCRIPTION
+This is a description.
+.br
+This is another line
+.br
+This is also another line.
+.br
+table
+.br
+sep: ;
+.br
+a;b
+.br
+foo;bar
+.br
+baz;spam
+.br
+table
+.br
+.SH SEE ALSO
+foo(bar), baz(tuna)
+.TH "test_project" "cware" "Jul 25, 2022" "C-Ware Manuals"
+.SH NAME
+test_project - this is a test project
+.SH SYNOPSIS
+These are the arguments to the program.
+.br
+
+#define MY_CONSTANT 0
+.br
+#define MY_OTHER_CONSTANT 0
+.br
+
+struct MyStructure {
+.br
+    int foo;                    /* the foo field */
+.br
+    struct Foobar *bar;         /* the bar field */
+.br
+
+.br
+    struct {
+.br
+        int baz;                /* the baz field */
+.br
+        struct Foobar *tuna;    /* the tuna field */
+.br
+    } MySubStructure;
+.br
+};
+.br
+
+struct MyStructure {
+.br
+    int foo;                    /* the foo field */
+.br
+    struct Foobar *bar;         /* the bar field */
+.br
+
+.br
+    struct {
+.br
+        int baz;                /* the baz field */
+.br
+        struct Foobar *tuna;    /* the tuna field */
+.br
+    } MySubStructure;
+.br
+};
+.br
+
+struct pollfd test_function(const char *foo, unsigned int bar);
+.br
+struct pollfd test_function(const char *foo, unsigned int bar);
+.br
+
+#define test_macro(foo);
+.br
+.SH DESCRIPTION
+This is a description.
+.br
+This is another line
+.br
+This is also another line.
+.br
+table
+.br
+sep: ;
+.br
+a;b
+.br
+foo;bar
+.br
+baz;spam
+.br
+table
+.br
+.SH SEE ALSO
+foo(bar), baz(tuna)
+.TH "test_project" "cware" "Jul 25, 2022" "C-Ware Manuals"
+.SH NAME
+test_project - this is a test project
+.SH SYNOPSIS
+These are the arguments to the program.
+.br
+
+#define MY_CONSTANT 0
+.br
+#define MY_OTHER_CONSTANT 0
+.br
+
+struct MyStructure {
+.br
+    int foo;                    /* the foo field */
+.br
+    struct Foobar *bar;         /* the bar field */
+.br
+
+.br
+    struct {
+.br
+        int baz;                /* the baz field */
+.br
+        struct Foobar *tuna;    /* the tuna field */
+.br
+    } MySubStructure;
+.br
+};
+.br
+
+struct MyStructure {
+.br
+    int foo;                    /* the foo field */
+.br
+    struct Foobar *bar;         /* the bar field */
+.br
+
+.br
+    struct {
+.br
+        int baz;                /* the baz field */
+.br
+        struct Foobar *tuna;    /* the tuna field */
+.br
+    } MySubStructure;
+.br
+};
+.br
+
+struct pollfd test_function(const char *foo, unsigned int bar);
+.br
+struct pollfd test_function(const char *foo, unsigned int bar);
+.br
+
+#define test_macro(foo);
+.br
+.SH DESCRIPTION
+This is a description.
+.br
+This is another line
+.br
+This is also another line.
+.br
+table
+.br
+sep: ;
+.br
+a;b
+.br
+foo;bar
+.br
+baz;spam
+.br
+table
+.br
+.SH SEE ALSO
+foo(bar), baz(tuna)
