@@ -239,7 +239,7 @@
  *
 */
 static void dump_cstring(struct CString string, char output_path[LIBPATH_MAX_PATH + 1]) {
-    FILE *output_file = fopen(output_path, "a+");
+    FILE *output_file = fopen(output_path, "w");
 
     if(output_file == NULL)
         liberror_failure(dump_cstring, fopen); 
