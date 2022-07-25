@@ -53,6 +53,8 @@ dkms.conf
 
 # Misc
 docgen
+vgcore.*
+docgen-test/doc
 
 # Vim files
 *.swp

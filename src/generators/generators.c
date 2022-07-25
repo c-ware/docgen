@@ -63,8 +63,8 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
 
     /* Metadata data-- the target_structure field will be filled
      * in by the caller. */
-    data.brief = function.brief;
-    data.name = function.name;
+    data.brief = duplicate_string(function.brief);
+    data.name = duplicate_string(function.name);
 
     /* Let's add the function we are documenting as an embed so it will follow the
      * same rules as the rest of the embeds! */
@@ -105,14 +105,13 @@ struct PostprocessorData docgen_generate_project(struct DocgenProject project,
 
     /* Metadata data-- the target_structure field will be filled
      * in by the caller. */
-    data.brief = project.brief;
-    data.name = project.name;
+    data.brief = duplicate_string(project.brief);
+    data.name = duplicate_string(project.name);
 
     /* Synopsis setup-- projects have no in-comment inclusions like functions
      * and macro functions do. I really do not like this. Will have to make
      * them all be able to use both. */
     data.cli_inclusions = parameters.inclusions;
-    data.arguments = data.arguments;
     data.comment_inclusions = NULL;
     data.embedded_macros = make_embedded_macros(project.macro_briefs, *parameters.macros, *project.embeds);
     data.embedded_structures = make_embedded_structures(project.structure_briefs, *parameters.structures, *project.embeds);
@@ -122,7 +121,7 @@ struct PostprocessorData docgen_generate_project(struct DocgenProject project,
     /* Transfer sections. I really do not like how projects lack a lot of the same features
      * of the other targets. This is definitely something I will have to implement sooner
      * or later alongside in-comment inclusions. */
-    data.arguments = project.arguments;
+    data.arguments = duplicate_string(project.arguments);
     data.examples = "";
     data.description = duplicate_string(project.description);
     data.return_value = "";

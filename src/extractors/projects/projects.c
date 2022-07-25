@@ -174,6 +174,13 @@ struct DocgenProject docgen_extract_project(struct LibmatchCursor *cursor,
     struct DocgenProject project;
     struct LibmatchCursor cursor_copy = libmatch_cursor_init(cursor->buffer, cursor->length);    
 
+    /* Project might not be found, so let's initialize it here incase there is no
+     * project, as if we do not, the free function will try to release invalid
+     * memory. We should also initialize variables like arguments with default
+     * values, because when we go to write the contents, it might try to write
+     * NULL if there is no project. */
+    INIT_VARIABLE(project);
+
     /* Find comments */
     while(cursor_copy.cursor != cursor_copy.length) {
         if(libmatch_string_expect(&cursor_copy, comment_start) == 0)
@@ -185,12 +192,9 @@ struct DocgenProject docgen_extract_project(struct LibmatchCursor *cursor,
         break;
     }
 
-    /* No comment found-- produce an error */
-    if(cursor_copy.cursor == cursor_copy.length) {
-        fprintf(stderr, "%s", "docgen: could not find project comment in file.\n");
-        fprintf(stderr, "%s", "Try 'docgen --help' for more information.\n");
-        exit(EXIT_FAILURE);
-    }
+    /* No project was found. */
+    if(cursor_copy.cursor >= cursor_copy.length)
+        return project;
 
     project = docgen_parse_project_comment(cursor_copy, comment_start, comment_end);
 
@@ -198,7 +202,16 @@ struct DocgenProject docgen_extract_project(struct LibmatchCursor *cursor,
 }
 
 void docgen_extract_project_free(struct DocgenProject *project) {
-    carray_free(project->embeds, EMBED);
-    carray_free(project->categories, CATEGORY);
-    carray_free(project->references, REFERENCE);
+    /* So, just to clarify a bit, we have to make sure these are not NULL
+     * because a project very well might not be parsed. It's just too
+     * different from the other extracted components. */
+
+    if(project->embeds != NULL)
+        carray_free(project->embeds, EMBED);
+
+    if(project->categories != NULL)
+        carray_free(project->categories, CATEGORY);
+
+    if(project->references != NULL)
+        carray_free(project->references, REFERENCE);
 }

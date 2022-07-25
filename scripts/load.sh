@@ -13,4 +13,3 @@ makegen project unix --binary docgen --main src/main.c \
 
 m4 ./template/Makefile.mvc > ./Makefile.mvc
 m4 ./template/Makefile.wat > ./Makefile.wat
-

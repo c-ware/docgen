@@ -40,6 +40,7 @@
  * essentially fill up a data structure that is passed to the post processor.
 */
 
+#include <assert.h>
 #include <string.h>
 #include <stdarg.h>
 

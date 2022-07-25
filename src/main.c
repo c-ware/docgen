@@ -416,7 +416,7 @@ int main(int argc, char **argv) {
     docgen_extract_functions_free(generator_parameters.functions);
     docgen_extract_structures_free(generator_parameters.structures);
     docgen_extract_macro_functions_free(generator_parameters.macro_functions);
-    docgen_extract_project_free(generator_parameters.project);
+    docgen_extract_project_free(&project);
 
     return EXIT_SUCCESS;
 }
