@@ -44,6 +44,7 @@ struct DocgenStructures;
 struct PostprocessorData;
 
 struct PostprocessorData docgen_generate_functions(struct DocgenFunction function, struct GeneratorParams parameters);
+struct PostprocessorData docgen_generate_project(struct DocgenProject project, struct GeneratorParams parameters);
 
 /*
  * common.c logic

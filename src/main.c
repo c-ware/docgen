@@ -211,6 +211,7 @@
 
 /* Extractors */
 #include "extractors/macros/macros.h"
+#include "extractors/projects/projects.h"
 #include "extractors/functions/functions.h"
 #include "extractors/structures/structures.h"
 #include "extractors/macro_functions/macro_functions.h"
@@ -302,15 +303,63 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
         carray_free(representation.embedded_macro_functions, CSTRING);
         carray_free(representation.embedded_structures, CSTRING);
         carray_free(representation.embedded_macros, CSTRING);
-
-
-        break;
     }
+}
+
+/*
+ * @docgen: function
+ * @brief: invoke project generation on the file
+ * @name: generate_functions
+ *
+ * @description
+ * @This function is the front end for generating documentation for any project
+ * @in the selected source file.
+ * @description
+ *
+ * @param arguments: the parsed command line arguments
+ * @type: struct DocgenArguments
+ *
+ * @param parameters: the generator parameters
+ * @type: struct GeneratorParams
+*/
+void generate_project(struct GeneratorParams parameters, struct DocgenArguments arguments) {
+    struct CString output;
+    struct PostprocessorParams params;
+    struct PostprocessorData representation;
+    char output_file_path[LIBPATH_MAX_PATH + 1] = "";
+    FILE *output_file = NULL;
+
+    INIT_VARIABLE(output);
+    INIT_VARIABLE(params);
+    INIT_VARIABLE(representation);
+
+    params.arguments = arguments;
+    params.target = DOCGEN_TARGET_PROJECT;
+    params.target_structure = (void *) parameters.project;
+
+    representation = docgen_generate_project(*(parameters.project), parameters);
+    output = docgen_postprocess_manual(representation, params);
+
+    /* Open the output file, and perform the last stage of preprocessing
+     * into the file. */
+    if(strcmp(arguments.format, "manpage") == 0)
+        libpath_join_path(output_file_path, LIBPATH_MAX_PATH, "doc", "/", parameters.project->name, ".", arguments.section, NULL);
+    else
+        liberror_unhandled(generate_functions);
+
+    dump_cstring(output, output_file_path);
+
+    cstring_free(output);
+    carray_free(representation.embedded_functions, CSTRING);
+    carray_free(representation.embedded_macro_functions, CSTRING);
+    carray_free(representation.embedded_structures, CSTRING);
+    carray_free(representation.embedded_macros, CSTRING);
 }
 
 int main(int argc, char **argv) {
     FILE *source_file = stdin;
     struct LibmatchCursor cursor;
+    struct DocgenProject project;
     struct GeneratorParams generator_parameters;
     struct DocgenArguments arguments = main_parse(argc, argv);
 
@@ -338,19 +387,25 @@ int main(int argc, char **argv) {
      * Remember that extractor functions will actually make a copy of
      * the cursor we pass to it. */
     cursor = libmatch_cursor_from_stream(source_file);
-    generator_parameters.macros = docgen_extract_macros(&cursor, "/*", "*/");;
+    generator_parameters.macros = docgen_extract_macros(&cursor, "/*", "*/");
     generator_parameters.functions = docgen_extract_functions(&cursor, "/*", "*/");
     generator_parameters.structures = docgen_extract_structures(&cursor, "/*", "*/");
     generator_parameters.macro_functions = docgen_extract_macro_functions(&cursor, "/*", "*/");
     generator_parameters.inclusions = arguments.inclusions;
+
+    /* Extract the project. Unfortunately this cannot be put above since the project
+     * extractor returns a stack structure rather than a pointer to one, so it cannot
+     * be an opaque structure. This works OK, though.*/
+    project = docgen_extract_project(&cursor, "/*", "*/");
+    generator_parameters.project = &project;
 
     /* Determine which thing to generate documentation for */
     if(strcmp(arguments.category, "functions") == 0) {
         generate_functions(generator_parameters, arguments);
     } else if(strcmp(arguments.category, "macro_functions") == 0) {
         
-    } else if(strcmp(arguments.category, "projects") == 0) {
-        
+    } else if(strcmp(arguments.category, "project") == 0) {
+        generate_project(generator_parameters, arguments);
     }
 
     /* Program resource cleanup */
@@ -361,6 +416,7 @@ int main(int argc, char **argv) {
     docgen_extract_functions_free(generator_parameters.functions);
     docgen_extract_structures_free(generator_parameters.structures);
     docgen_extract_macro_functions_free(generator_parameters.macro_functions);
+    docgen_extract_project_free(generator_parameters.project);
 
     return EXIT_SUCCESS;
 }

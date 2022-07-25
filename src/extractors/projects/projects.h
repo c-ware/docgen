@@ -122,8 +122,11 @@ void docgen_project_helpcms(struct DocgenArguments arguments,
                             struct DocgenProject project);
 
 /* Documentation generation */
+void docgen_extract_project_free(struct DocgenProject *project);
 void docgen_project_generate(struct DocgenArguments arguments, FILE *file);
 void docgen_project_category_generate(struct DocgenArguments arguments, FILE *file);
-
+struct DocgenProject docgen_extract_project(struct LibmatchCursor *cursor,
+                                            const char *comment_start,
+                                            const char *comment_end);
 #endif
 

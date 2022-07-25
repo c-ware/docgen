@@ -236,10 +236,11 @@ struct PostprocessorData {
  * Parameters for a generator function.
 */
 struct GeneratorParams {
-    struct DocgenFunctions *functions;
-    struct DocgenMacroFunctions *macro_functions;
-    struct DocgenStructures *structures;
     struct DocgenMacros *macros;
+    struct DocgenProject *project;
+    struct DocgenFunctions *functions;
+    struct DocgenStructures *structures;
+    struct DocgenMacroFunctions *macro_functions;
 
     struct Inclusions *inclusions;
 };

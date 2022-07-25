@@ -196,3 +196,9 @@ struct DocgenProject docgen_extract_project(struct LibmatchCursor *cursor,
 
     return project;
 }
+
+void docgen_extract_project_free(struct DocgenProject *project) {
+    carray_free(project->embeds, EMBED);
+    carray_free(project->categories, CATEGORY);
+    carray_free(project->references, REFERENCE);
+}

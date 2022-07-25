@@ -26,7 +26,7 @@ uninstall:
 src/arguments.o: src/arguments.c src/docgen.h
 	$(CC) -c $(CFLAGS) src/arguments.c -o src/arguments.o
 
-src/main.o: src/main.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/generators/generators.h src/postprocessors/postprocessors.h
+src/main.o: src/main.c src/docgen.h src/extractors/macros/macros.h src/extractors/projects/projects.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/generators/generators.h src/postprocessors/postprocessors.h
 	$(CC) -c $(CFLAGS) src/main.c -o src/main.o
 
 src/libstr/replace.o: src/libstr/replace.c src/libstr/libstr.h
@@ -68,7 +68,7 @@ src/common/error.o: src/common/error.c src/docgen.h src/common/common.h
 src/generators/common.o: src/generators/common.c src/docgen.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/generators/generators.h
 	$(CC) -c $(CFLAGS) src/generators/common.c -o src/generators/common.o
 
-src/generators/generators.o: src/generators/generators.c src/docgen.h src/generators/generators.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
+src/generators/generators.o: src/generators/generators.c src/docgen.h src/generators/generators.h src/extractors/macros/macros.h src/extractors/projects/projects.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
 	$(CC) -c $(CFLAGS) src/generators/generators.c -o src/generators/generators.o
 
 src/libarg/libarg.o: src/libarg/libarg.c src/libarg/libarg.h

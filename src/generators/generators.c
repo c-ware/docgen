@@ -36,8 +36,8 @@
 */
 
 /*
- * This file works on generating functions for postprocessors. This will
- * essentially fill up a data structure that is passed to the post processor.
+ * This file works on generating data for postprocessors. This will essentially
+ * fill up a data structure that is passed to the post processor.
 */
 
 #include "../docgen.h"
@@ -45,6 +45,7 @@
 #include "generators.h"
 
 #include "../extractors/macros/macros.h"
+#include "../extractors/projects/projects.h"
 #include "../extractors/functions/functions.h"
 #include "../extractors/structures/structures.h"
 #include "../extractors/macro_functions/macro_functions.h"
@@ -89,6 +90,44 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     data.return_value = duplicate_string(function.return_data.return_value);
     data.notes = duplicate_string(function.notes);
     data.see_also = function.references;
+
+    return data;
+}
+
+struct PostprocessorData docgen_generate_project(struct DocgenProject project,
+                                                 struct GeneratorParams parameters) {
+    int index = 0;
+    struct CString buffer_string;
+    struct PostprocessorData data;
+
+    INIT_VARIABLE(data);
+    INIT_VARIABLE(buffer_string);
+
+    /* Metadata data-- the target_structure field will be filled
+     * in by the caller. */
+    data.brief = project.brief;
+    data.name = project.name;
+
+    /* Synopsis setup-- projects have no in-comment inclusions like functions
+     * and macro functions do. I really do not like this. Will have to make
+     * them all be able to use both. */
+    data.cli_inclusions = parameters.inclusions;
+    data.arguments = data.arguments;
+    data.comment_inclusions = NULL;
+    data.embedded_macros = make_embedded_macros(project.macro_briefs, *parameters.macros, *project.embeds);
+    data.embedded_structures = make_embedded_structures(project.structure_briefs, *parameters.structures, *project.embeds);
+    data.embedded_macro_functions = make_embedded_macro_functions(project.macro_function_briefs, *parameters.macro_functions, *project.embeds);
+    data.embedded_functions = make_embedded_functions(project.function_briefs, *parameters.functions, *project.embeds);
+
+    /* Transfer sections. I really do not like how projects lack a lot of the same features
+     * of the other targets. This is definitely something I will have to implement sooner
+     * or later alongside in-comment inclusions. */
+    data.arguments = project.arguments;
+    data.examples = "";
+    data.description = duplicate_string(project.description);
+    data.return_value = "";
+    data.notes = "";
+    data.see_also = project.references;
 
     return data;
 }
