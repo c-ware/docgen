@@ -371,14 +371,14 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
 
     /* Different types of manuals should have a different order of embeds. */
     if(params.target == DOCGEN_TARGET_FUNCTION)
-        display_embeds(string, 4, data.embedded_functions, data.embedded_structures,
-                       data.embedded_macros, data.embedded_macro_functions);
+        display_embeds(string, 4, data.embedded_structures,
+                       data.embedded_macros, data.embedded_macro_functions, data.embedded_functions);
     else if(params.target == DOCGEN_TARGET_MACRO_FUNCTION)
-        display_embeds(string, 4, data.embedded_macro_functions, data.embedded_functions,
-                       data.embedded_structures, data.embedded_macros);
+        display_embeds(string, 4, data.embedded_structures, data.embedded_macros,
+                       data.embedded_functions, data.embedded_macro_functions);
     else
-        display_embeds(string, 4, data.embedded_functions, data.embedded_structures,
-                       data.embedded_macro_functions, data.embedded_macros);
+        display_embeds(string, 4, data.embedded_structures, data.embedded_macros,
+                       data.embedded_functions, data.embedded_macro_functions);
 }
 
 static void print_section(struct CString *string, const char *section,

@@ -536,6 +536,10 @@ struct CStrings *make_embedded_functions(int allow_briefs,
         cstring_concats(&new_function_string, target_function.name);
         cstring_concats(&new_function_string, "(");
 
+        /* No parameters? Use `int x(void)` rather than `int x()` */
+        if(carray_length(target_function.parameters) == 0)
+        cstring_concats(&new_function_string, "void");
+
         /* Write the parameters */
         for(iter_index = 0; iter_index < carray_length(target_function.parameters); iter_index++) {
             struct DocgenFunctionParameter parameter = target_function.parameters->contents[iter_index];

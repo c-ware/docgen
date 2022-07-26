@@ -67,12 +67,6 @@
  * @error: you fail to use it
  * @error: foo bar
  *
- * @param foo: the foo parameter
- * @type: const char *
- *
- * @param bar: the bar parameter
- * @type: unsigned int
- *
  * @return: some data
  * @type: struct pollfd
 */
