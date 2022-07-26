@@ -245,6 +245,18 @@ struct GeneratorParams {
     struct Inclusions *inclusions;
 };
 
+/*
+ *  Settings that the writer will determine internally to
+ *  perform formatting.
+*/
+struct WriterParams {
+    const char *bold_start;
+    const char *bold_end;
+
+    const char *italics_start;
+    const char *italics_end;
+};
+
 /* Argument parsing and setup */
 int main_parameters(const char *option);
 void main_error(const char *option, int type, int expected, int got);

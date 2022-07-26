@@ -222,6 +222,43 @@
 
 /*
  * @docgen: function
+ * @brief: determine the formatting settings forr markers
+ * @name: select_format_settings
+ *
+ * @description
+ * @This function will fill a structure with settings like bold and italc
+ * @characters which are used by the writer.
+ * @description
+ * 
+ * @error: format is NULL
+ * @error: unknown format
+ *
+ * @param format: the format the writer is using
+ * @type: const char *
+ *
+ * @return: the writer settings
+ * @type: struct WriterParams
+*/
+struct WriterParams select_format_settings(const char *format) {
+    struct WriterParams settings;
+
+    INIT_VARIABLE(settings);
+    liberror_is_null(select_format_settings, format);
+
+    if(strcmp(format, "manpage") ==  0) {
+        settings.bold_start = "\\fB"; 
+        settings.italics_start = "\\fI"; 
+        settings.bold_end = "\\fR"; 
+        settings.italics_end = "\\fR"; 
+    } else {
+        liberror_unhandled(select_format_settings);
+    }
+
+    return settings;
+}
+
+/*
+ * @docgen: function
  * @brief: perform final steps of preprocessing and write the output
  * @name: dump_cstring
  *
@@ -242,7 +279,15 @@
 */
 static void dump_cstring(const char *format, struct CString string, char output_path[LIBPATH_MAX_PATH + 1]) {
     int cindex = 0;
-    FILE *output_file = fopen(output_path, "w");
+    FILE *output_file = NULL;
+    struct WriterParams settings;
+
+    liberror_is_null(dum_cstring, format);
+    INIT_VARIABLE(settings);
+
+    /* Determine the settings to use for interpretingg markers */
+    settings = select_format_settings(format);
+    output_file = fopen(output_path, "w");
 
     if(output_file == NULL)
         liberror_failure(dump_cstring, fopen); 
@@ -294,8 +339,10 @@ static struct CString select_postprocessor(const char *format, struct Postproces
     liberror_is_null(select_postprocessor, format);
     INIT_VARIABLE(postprocessor_output);;
 
-    if(strcmp(format, "manpages") == 0)
+    if(strcmp(format, "manpage") == 0)
         return docgen_postprocess_manual(data, params);
+
+    liberror_unhandled(select_postprocessor);
 
     return postprocessor_output;
 }
