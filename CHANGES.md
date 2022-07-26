@@ -20,7 +20,7 @@ looks like this:
 Extractor functions -> Postprocessor data generation -> Postprocessor -> Writer
 
 The extractor functions are fundamentally the same as they were in the original docgen.
-Minimal changes have been made to them except for extracting more settings. but the
+Minimal changes have been made to them except for extracting more settings, but the
 introduction of a 'post processor' is what makes this such a massive change.
 
 The postprocessor is the thing that assembles input into a single string. It makes sure
@@ -34,9 +34,18 @@ extractor for macros. The generator will grab all the requested embeds in the ma
 invoke formatter functions to transform each embed of each type into a list of CStrings, and
 make sure all the data required for the final product is assembled for the postprocessor.
 
-As for the writer, it handles format-agnostic things like expanding tables, lists, and perform
-formatting like bolding and Italicizing text. It does this as it writes into the file, as to not
+As for the writer, it handles format-agnostic things like expanding tables, lists, and performing
+formatting like bolding and italicizing text. It does this as it writes into the file, as to not
 use more memory than this program already uses.
+
+The writer uses certain markers to tell the writer to perform certainn formatting techniques.
+This could be something like bolding, italics, tables, lists, etc.
+\E    list element
+\S    table separator
+\L    start a list
+\B    start or end bold
+\I    start or end italics
+\T    start or end a table
 
 That is pretty much it.
 All this just to make whitespace appear correctly. Jesus christ.

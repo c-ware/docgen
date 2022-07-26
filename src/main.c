@@ -222,6 +222,43 @@
 
 /*
  * @docgen: function
+ * @brief: determine the formatting settings forr markers
+ * @name: select_format_settings
+ *
+ * @description
+ * @This function will fill a structure with settings like bold and italc
+ * @characters which are used by the writer.
+ * @description
+ * 
+ * @error: format is NULL
+ * @error: unknown format
+ *
+ * @param format: the format the writer is using
+ * @type: const char *
+ *
+ * @return: the writer settings
+ * @type: struct WriterParams
+*/
+struct WriterParams select_format_settings(const char *format) {
+    struct WriterParams settings;
+
+    INIT_VARIABLE(settings);
+    liberror_is_null(select_format_settings, format);
+
+    if(strcmp(format, "manpage") ==  0) {
+        settings.bold_start = "\\fB"; 
+        settings.italics_start = "\\fI"; 
+        settings.bold_end = "\\fR"; 
+        settings.italics_end = "\\fR"; 
+    } else {
+        liberror_unhandled(select_format_settings);
+    }
+
+    return settings;
+}
+
+/*
+ * @docgen: function
  * @brief: perform final steps of preprocessing and write the output
  * @name: dump_cstring
  *
@@ -231,22 +268,83 @@
  * @and more. Once this is all done, it is written to the file.
  * @description
  *
+ * @param format: what documentation format are we writing?
+ * @type: const char *
+ *
  * @param string: the cstring to write
  * @type: struct CString
  *
  * @param output_path[LIBPATH_MAX_PATH + 1]: the output path to write to
  * @type: char
- *
 */
-static void dump_cstring(struct CString string, char output_path[LIBPATH_MAX_PATH + 1]) {
-    FILE *output_file = fopen(output_path, "w");
+static void dump_cstring(const char *format, struct CString string, char output_path[LIBPATH_MAX_PATH + 1]) {
+    int cindex = 0;
+    FILE *output_file = NULL;
+    struct WriterParams settings;
+
+    liberror_is_null(dum_cstring, format);
+    INIT_VARIABLE(settings);
+
+    /* Determine the settings to use for interpretingg markers */
+    settings = select_format_settings(format);
+    output_file = fopen(output_path, "w");
 
     if(output_file == NULL)
         liberror_failure(dump_cstring, fopen); 
 
-    fwrite(string.contents, 1, string.length, output_file);
+    /* Write each character, and interpret marker sequences */
+    for(cindex = 0; cindex < string.length; cindex++) {
+        char first_character = string.contents[cindex];
+        char second_character = -1;
+
+        /* Also keep track of the next character, but it might be out
+         * of bounds, so make suure we do not index out of boundss. */
+        if((cindex + 1) < string.length)
+            second_character = string.contents[cindex + 1];
+    }
 
     fclose(output_file);
+}
+
+/*
+ * @docgen: function
+ * @brief: select a postprocessor to run based off the format
+ * @name: select_postprocessor
+ *
+ * @description
+ * @This function will select and run a postprocessor based off of the format that is
+ * @given to it. It will extract the output from the post processor and return it to
+ * @the caller who will then invoke the writer to do marker expansion.
+ * @description
+ *
+ * @erorr: format is NULL
+ *
+ * @param format: the format we are generating documentation in
+ * @type: const char *
+ *
+ * @param data: the data to past to the postprocessor
+ * @type: struct PostprocessorData
+ *
+ * @param params: the parameters to pass to the postprocessor
+ * @type: struct PostprocessorParams
+ *
+ * @return: the output from the postprocessor
+ * @type: struct CString
+*/
+static struct CString select_postprocessor(const char *format, struct PostprocessorData data,
+                                           struct PostprocessorParams params) {
+
+    struct CString postprocessor_output;
+
+    liberror_is_null(select_postprocessor, format);
+    INIT_VARIABLE(postprocessor_output);;
+
+    if(strcmp(format, "manpage") == 0)
+        return docgen_postprocess_manual(data, params);
+
+    liberror_unhandled(select_postprocessor);
+
+    return postprocessor_output;
 }
 
 /*
@@ -287,7 +385,7 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
 
         function = parameters.functions->contents[func_index];
         representation = docgen_generate_functions(function, parameters);
-        output = docgen_postprocess_manual(representation, params);
+        output = select_postprocessor(arguments.format, representation, params);
 
         /* Open the output file, and perform the last stage of preprocessing
          * into the file. */
@@ -296,7 +394,7 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
         else
             liberror_unhandled(generate_functions);
 
-        dump_cstring(output, output_file_path);
+        dump_cstring(arguments.format, output, output_file_path);
 
         /* Resource cleanup. Yes, we cast away const for a reason. We all know that
          * free(void *) should have actually been free(const void *). */
@@ -353,7 +451,7 @@ void generate_macro_functions(struct GeneratorParams parameters, struct DocgenAr
 
         macro_function = parameters.macro_functions->contents[mfunc_index];
         representation = docgen_generate_macro_functions(macro_function, parameters);
-        output = docgen_postprocess_manual(representation, params);
+        output = select_postprocessor(arguments.format, representation, params);
 
         /* Open the output file, and perform the last stage of preprocessing
          * into the file. */
@@ -362,7 +460,7 @@ void generate_macro_functions(struct GeneratorParams parameters, struct DocgenAr
         else
             liberror_unhandled(generate_macro_functions);
 
-        dump_cstring(output, output_file_path);
+        dump_cstring(arguments.format, output, output_file_path);
 
         /* Resource cleanup. Yes, we cast away const for a reason. We all know that
          * free(void *) should have actually been free(const void *). */
@@ -412,7 +510,7 @@ void generate_project(struct GeneratorParams parameters, struct DocgenArguments 
     params.target_structure = (void *) parameters.project;
 
     representation = docgen_generate_project(*(parameters.project), parameters);
-    output = docgen_postprocess_manual(representation, params);
+    output = select_postprocessor(arguments.format, representation, params);
 
     /* Open the output file, and perform the last stage of preprocessing
      * into the file. */
@@ -421,7 +519,7 @@ void generate_project(struct GeneratorParams parameters, struct DocgenArguments 
     else
         liberror_unhandled(generate_functions);
 
-    dump_cstring(output, output_file_path);
+    dump_cstring(arguments.format, output, output_file_path);
 
     /* Resource cleanup. Yes, we cast away const for a reason. We all know that
      * free(void *) should have actually been free(const void *). */
