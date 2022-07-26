@@ -220,6 +220,9 @@
 #include "generators/generators.h"
 #include "postprocessors/postprocessors.h"
 
+#define INVERT_BOOLEAN(x) \
+    ((x) = !(x))
+
 /*
  * @docgen: function
  * @brief: determine the formatting settings forr markers
@@ -279,6 +282,7 @@ struct WriterParams select_format_settings(const char *format) {
 */
 static void dump_cstring(const char *format, struct CString string, char output_path[LIBPATH_MAX_PATH + 1]) {
     int cindex = 0;
+    int parsing_marker = 0;
     FILE *output_file = NULL;
     struct WriterParams settings;
 
@@ -301,6 +305,45 @@ static void dump_cstring(const char *format, struct CString string, char output_
          * of bounds, so make suure we do not index out of boundss. */
         if((cindex + 1) < string.length)
             second_character = string.contents[cindex + 1];
+
+        /* Is this a match sequence? */
+        if(first_character == '\\') {
+            switch(second_character) {
+                case '\\':
+                    fputc('\\', output_file);
+
+                    break;
+
+                /* Start or end bold. */
+                case 'B':
+                    if(parsing_marker == 0)
+                        fputs(settings.bold_start, output_file);
+                    else
+                        fputs(settings.bold_end, output_file);
+
+                    INVERT_BOOLEAN(parsing_marker);
+
+                    break;
+
+                /* Start or end italics. */
+                case 'I':
+                    if(parsing_marker == 0)
+                        fputs(settings.italics_start, output_file);
+                    else
+                        fputs(settings.italics_end, output_file);
+
+                    INVERT_BOOLEAN(parsing_marker);
+
+                    break;
+            }
+
+            /* Consider two characters parsed, so add an extra offset */
+            cindex++;
+
+            continue;
+        }
+
+        fputc(first_character, output_file);
     }
 
     fclose(output_file);

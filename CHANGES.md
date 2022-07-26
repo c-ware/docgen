@@ -47,6 +47,9 @@ This could be something like bolding, italics, tables, lists, etc.
 \I    start or end italics
 \T    start or end a table
 
+Note, however, that docgen does NOT support nested formatters, like for example
+**foo**, or **__foo__** in Markdown.
+
 That is pretty much it.
 All this just to make whitespace appear correctly. Jesus christ.
 

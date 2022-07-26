@@ -124,7 +124,7 @@
  * @name: foobar_baz_function
  *
  * @description
- * @This is a macro function.
+ * @This is a \Imacro\I \Bfunction\B.
  * @description
  *
  * @param foo: this is the foo parameter
