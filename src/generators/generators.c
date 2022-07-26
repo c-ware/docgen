@@ -87,7 +87,7 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     /* Transfer sections (Functions have no arguments in their synopsis in the
      * same sense as a command line program project manual) */
     data.arguments = NULL;
-    data.examples = duplicate_string(function.example);
+    data.example = duplicate_string(function.example);
     data.description = duplicate_string(function.description);
     data.return_value = duplicate_string(function.return_data.return_value);
     data.notes = duplicate_string(function.notes);
@@ -129,7 +129,7 @@ struct PostprocessorData docgen_generate_project(struct DocgenProject project,
      * of the other targets. This is definitely something I will have to implement sooner
      * or later alongside in-comment inclusions. */
     data.arguments = duplicate_string(project.arguments);
-    data.examples = duplicate_string(project.example);
+    data.example = duplicate_string(project.example);
     data.description = duplicate_string(project.description);
     data.return_value = "";
     data.notes = duplicate_string(project.notes);
@@ -181,7 +181,7 @@ struct PostprocessorData docgen_generate_macro_functions(struct DocgenMacroFunct
     /* Transfer sections (Functions have no arguments in their synopsis in the
      * same sense as a command line program project manual) */
     data.arguments = NULL;
-    data.examples = duplicate_string(macro_function.example);
+    data.example = duplicate_string(macro_function.example);
     data.description = duplicate_string(macro_function.description);
     data.return_value = "";
     data.notes = duplicate_string(macro_function.notes);

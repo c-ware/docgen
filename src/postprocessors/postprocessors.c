@@ -516,7 +516,7 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
     if(strlen(data.return_value) != 0)
         add_breaks(&output, "\n");
 
-    print_section(&output, "EXAMPLES", data.examples);
+    print_section(&output, "EXAMPLES", data.example);
     print_section(&output, "NOTES", data.notes);
 
     see_also(&output, data, params);

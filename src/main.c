@@ -454,7 +454,7 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
         free((char *) representation.name);
         free((char *) representation.arguments);
         free((char *) representation.description);
-        free((char *) representation.examples);
+        free((char *) representation.example);
         free((char *) representation.return_value);
         free((char *) representation.notes);
         carray_free(representation.embedded_functions, CSTRING);
@@ -520,7 +520,7 @@ void generate_macro_functions(struct GeneratorParams parameters, struct DocgenAr
         free((char *) representation.name);
         free((char *) representation.arguments);
         free((char *) representation.description);
-        free((char *) representation.examples);
+        free((char *) representation.example);
         free((char *) representation.notes);
         carray_free(representation.embedded_macro_functions, CSTRING);
         carray_free(representation.embedded_functions, CSTRING);

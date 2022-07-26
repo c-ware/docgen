@@ -237,7 +237,7 @@ struct PostprocessorData {
      * order) */
     const char *name;
     const char *notes;
-    const char *examples;
+    const char *example;
     const char *description;
     const char *return_value;
     struct References *see_also;
