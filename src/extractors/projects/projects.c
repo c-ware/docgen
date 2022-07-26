@@ -104,6 +104,12 @@ struct DocgenProject docgen_parse_project_comment(struct LibmatchCursor cursor,
         } else if(strcmp(tag_name.name, "description") == 0) {
             docgen_extract_field_block("description", new_project.description,
                                        DOCGEN_PROJECT_DESCRIPTION_LENGTH, &cursor, new_tag.line);
+        } else if(strcmp(tag_name.name, "example") == 0) {
+            docgen_extract_field_block("example", new_project.example,
+                                       DOCGEN_PROJECT_EXAMPLE_LENGTH, &cursor, new_tag.line);
+        } else if(strcmp(tag_name.name, "notes") == 0) {
+            docgen_extract_field_block("notes", new_project.notes,
+                                       DOCGEN_PROJECT_NOTES_LENGTH, &cursor, new_tag.line);
         } else if(strcmp(tag_name.name, "reference") == 0) {
             struct Reference new_reference;
 

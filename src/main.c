@@ -199,6 +199,14 @@
  * @@embed macro_function: my_macro_function_name
  * @description
  *
+ * @notes
+ * @This is the notes section.
+ * @notes
+ *
+ * @example
+ * @This is the examples section.
+ * @example
+ *
  * @reference: cware(cware)
 */
 
@@ -360,7 +368,7 @@ static void dump_cstring(const char *format, struct CString string, char output_
  * @the caller who will then invoke the writer to do marker expansion.
  * @description
  *
- * @erorr: format is NULL
+ * @error: format is NULL
  *
  * @param format: the format we are generating documentation in
  * @type: const char *

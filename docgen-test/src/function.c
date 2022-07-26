@@ -127,7 +127,7 @@
  * @This is a \Imacro\I \Bfunction\B.
  * @description
  *
- * @error: foo
+ * @error: you \Ireally\I fucked up
 */
 
 /*

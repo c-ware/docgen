@@ -129,10 +129,10 @@ struct PostprocessorData docgen_generate_project(struct DocgenProject project,
      * of the other targets. This is definitely something I will have to implement sooner
      * or later alongside in-comment inclusions. */
     data.arguments = duplicate_string(project.arguments);
-    data.examples = "";
+    data.examples = duplicate_string(project.example);
     data.description = duplicate_string(project.description);
     data.return_value = "";
-    data.notes = "";
+    data.notes = duplicate_string(project.notes);
     data.see_also = project.references;
 
     /* Projects have no parameters or 'errors' (they have exit codes, but that is

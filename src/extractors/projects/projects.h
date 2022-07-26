@@ -44,6 +44,8 @@
 #define DOCGEN_PROJECT_CATEGORY_LENGTH              128
 
 #define DOCGEN_PROJECT_DESCRIPTION_LENGTH           8192 + 1
+#define DOCGEN_PROJECT_EXAMPLE_LENGTH               8192 + 1
+#define DOCGEN_PROJECT_NOTES_LENGTH                 2048 + 1
 
 #define DOCGEN_PROJECT_CATEGORY_DESCRIPTION_LENGTH  128
 #define DOCGEN_PROJECT_CATEGORY_NAME_LENGTH         128
@@ -82,6 +84,8 @@ struct DocgenProject {
     char brief[DOCGEN_PROJECT_BRIEF_LENGTH + 1];
     char description[DOCGEN_PROJECT_DESCRIPTION_LENGTH + 1];
     char arguments[DOCGEN_PROJECT_ARGUMENTS_LENGTH + 1];
+    char example[DOCGEN_PROJECT_EXAMPLE_LENGTH + 1];
+    char notes[DOCGEN_PROJECT_NOTES_LENGTH + 1];
 
     /* Configuration */
     int macro_briefs;
