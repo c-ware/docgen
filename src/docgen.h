@@ -55,21 +55,16 @@
 #define CWARE_DOCGEN_VERSION    "1.0.2"
 
 /* Limits */
+#define DOCGEN_INCLUSION_TYPE_LENGTH    32 + 1
+#define DOCGEN_EMBED_TYPE_LENGTH        32
 #define DOCGEN_MANUAL_NAME_LENGTH       64 + 1
 #define DOCGEN_MANUAL_SECTION_LENGTH    64 + 1
-
+#define DOCGEN_INCLUSION_PATH_LENGTH    128 + 1
+#define DOCGEN_EMBED_NAME_LENGTH        128
+#define DOCGEN_SECTION_NAME_LENGTH      128
 #define DOCGEN_TABLE_LENGTH             2048
 #define DOCGEN_LINE_LENGTH              1024
-
 #define DOCGEN_BLOCK_LINE_LENGTH        1024 + 1
-
-#define DOCGEN_INCLUSION_TYPE_LENGTH    32 + 1
-#define DOCGEN_INCLUSION_PATH_LENGTH    128 + 1
-
-#define DOCGEN_EMBED_NAME_LENGTH            128
-#define DOCGEN_EMBED_TYPE_LENGTH            32
-
-#define DOCGEN_SECTION_NAME_LENGTH          128
 
 /* The types of inclusions available */
 #define DOCGEN_INCLUSION_LOCAL      0
