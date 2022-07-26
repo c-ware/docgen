@@ -93,6 +93,11 @@ struct PostprocessorData docgen_generate_functions(struct DocgenFunction functio
     data.notes = duplicate_string(function.notes);
     data.see_also = function.references;
 
+    data.func_errors = function.errors;
+    data.func_parameters = function.parameters;
+    data.mfunc_errors = NULL;
+    data.mfunc_parameters = NULL;
+
     return data;
 }
 
@@ -129,6 +134,13 @@ struct PostprocessorData docgen_generate_project(struct DocgenProject project,
     data.return_value = "";
     data.notes = "";
     data.see_also = project.references;
+
+    /* Projects have no parameters or 'errors' (they have exit codes, but that is
+     * a different thing, honestly.) */
+    data.func_errors = NULL;
+    data.func_parameters = NULL;
+    data.mfunc_errors = NULL;
+    data.mfunc_parameters = NULL;
 
     return data;
 }
@@ -174,6 +186,11 @@ struct PostprocessorData docgen_generate_macro_functions(struct DocgenMacroFunct
     data.return_value = "";
     data.notes = duplicate_string(macro_function.notes);
     data.see_also = macro_function.references;
+
+    data.func_errors = NULL;
+    data.func_parameters = NULL;
+    data.mfunc_errors = macro_function.errors;
+    data.mfunc_parameters = macro_function.parameters;
 
     return data;
 }

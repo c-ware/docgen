@@ -127,8 +127,7 @@
  * @This is a \Imacro\I \Bfunction\B.
  * @description
  *
- * @param foo: this is the foo parameter
- * @param bar: this is the bar parameter
+ * @error: foo
 */
 
 /*

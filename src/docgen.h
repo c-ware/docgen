@@ -199,7 +199,8 @@ struct Sections {
 };
 
 /*
- * Parameters for a post processor.
+ * Parameters for a post processor that has data that only the caller
+ * should be able to access.
 */
 struct PostprocessorParams {
     int target;
@@ -211,24 +212,34 @@ struct PostprocessorParams {
  * Data to pass to a post processor to generate a CString
 */
 struct PostprocessorData {
-    /* Synopsis data */
+    /* Section metadata */
+    const char *brief;
     const char *arguments;
     struct Inclusions *cli_inclusions;
     struct Inclusions *comment_inclusions;
+
+    /* I really do not like this.
+     * Function and macro errors could easily be unified under a
+     * single banner (they are basically the exact samee structure),
+     * and macro parameters are just function parameters without
+     * a type. */
+    struct DocgenFunctionErrors *func_errors;
+    struct DocgenMacroFunctionErrors *mfunc_errors;
+    struct DocgenFunctionParameters *func_parameters;
+    struct DocgenMacroFunctionParameters *mfunc_parameters;
 
     struct CStrings *embedded_macros;
     struct CStrings *embedded_structures;
     struct CStrings *embedded_functions;
     struct CStrings *embedded_macro_functions;
 
-    /* Section data */
+    /* Every unique section in each type of manual (in no particular
+     * order) */
     const char *name;
-    const char *brief;
+    const char *notes;
     const char *examples;
     const char *description;
     const char *return_value;
-    const char *notes;
-
     struct References *see_also;
 };
 

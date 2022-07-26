@@ -395,6 +395,105 @@ static void print_section(struct CString *string, const char *section,
     add_breaks(string, section_text);
 }
 
+static void parameters(struct CString *string, struct PostprocessorData data,
+                       struct PostprocessorParams params) {
+    int pindex = 0;
+
+    /* If, for some reason, there is no description, do not add an extra new
+     * line to keep it clean. */
+    if(strlen(data.description) != 0)
+        cstring_concats(string, "\n.br\n"); 
+
+    if(params.target == DOCGEN_TARGET_FUNCTION && data.func_parameters != NULL) {
+        if(carray_length(data.func_parameters) == 0) {
+            add_breaks(string, "This function does not have any parameters.\n"); 
+
+            return;
+        }
+
+        /* There are parameters to write, so write them. */
+        for(pindex = 0; pindex < carray_length(data.func_parameters); pindex++) {
+            struct DocgenFunctionParameter parameter = data.func_parameters->contents[pindex];
+
+            cstring_concats(string, parameter.name); 
+            cstring_concats(string, " will be "); 
+            cstring_concats(string, parameter.description); 
+            cstring_concats(string, "\n.br\n"); 
+        }
+
+        return;
+    } else if(params.target == DOCGEN_TARGET_MACRO_FUNCTION && data.mfunc_parameters != NULL) {
+        if(carray_length(data.mfunc_parameters) == 0) {
+            add_breaks(string, "This macro function does not have any parameters.\n"); 
+
+            return;
+        }
+
+        /* There are parameters to write, so write them. */
+        for(pindex = 0; pindex < carray_length(data.mfunc_parameters); pindex++) {
+            struct DocgenMacroFunctionParameter parameter = data.mfunc_parameters->contents[pindex];
+
+            cstring_concats(string, parameter.name); 
+            cstring_concats(string, " will be "); 
+            cstring_concats(string, parameter.description); 
+            cstring_concats(string, "\n.br\n"); 
+        }
+
+        return;
+    }
+}
+
+static void errors(struct CString *string, struct PostprocessorData data,
+                       struct PostprocessorParams params) {
+    int eindex = 0;
+
+    /* Parameters
+     * <NEWLINE>
+     * Errors */
+    if(strlen(data.description) != 0)
+        cstring_concats(string, "\n.br\n"); 
+
+    if(params.target == DOCGEN_TARGET_FUNCTION && data.func_errors != NULL) {
+        if(carray_length(data.func_errors) == 0) {
+            add_breaks(string, "This function does not raise any errors.\n"); 
+
+            return;
+        }
+
+        add_breaks(string, "This function will raise an error when any of the following conditions are met.\n"); 
+
+        /* There are errors to write, so write them. */
+        for(eindex = 0; eindex < carray_length(data.func_errors); eindex++) {
+            struct DocgenFunctionError error = data.func_errors->contents[eindex];
+
+            cstring_concats(string, "    - "); 
+            cstring_concats(string, error.description); 
+            cstring_concats(string, "\n.br\n"); 
+        }
+
+        return;
+    } else if(params.target == DOCGEN_TARGET_MACRO_FUNCTION && data.mfunc_errors != NULL) {
+        if(carray_length(data.mfunc_errors) == 0) {
+            add_breaks(string, "This macro function does not raise any errors\n"); 
+
+            return;
+        }
+
+        add_breaks(string, "This macro function will raise an error when any of the following conditions are met.\n"); 
+
+        /* There are errors to write, so write them. */
+        for(eindex = 0; eindex < carray_length(data.mfunc_errors); eindex++) {
+            struct DocgenMacroFunctionError error = data.mfunc_errors->contents[eindex];
+
+            cstring_concats(string, "    - "); 
+            cstring_concats(string, error.description); 
+            cstring_concats(string, "\n.br\n"); 
+        }
+
+        return;
+    }
+}
+
 struct CString docgen_postprocess_manual(struct PostprocessorData data,
                                          struct PostprocessorParams params) {
     struct CString output = cstring_init("");
@@ -404,6 +503,8 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
     synopsis(&output, data, params);
 
     print_section(&output, "DESCRIPTION", data.description);
+    parameters(&output, data, params);
+    errors(&output, data, params);
     print_section(&output, "RETURN VALUE", data.return_value);
 
     /* The return value field, which is just a description of what
