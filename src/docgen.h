@@ -60,14 +60,16 @@
 #define DOCGEN_MANUAL_NAME_LENGTH           64 + 1
 #define DOCGEN_MANUAL_SECTION_LENGTH        64 + 1
 #define DOCGEN_PARAMETER_NAME_LENGTH        64
+#define DOCGEN_TYPE_LENGTH                  64
 #define DOCGEN_INCLUSION_PATH_LENGTH        128 + 1
 #define DOCGEN_EMBED_NAME_LENGTH            128
 #define DOCGEN_SECTION_NAME_LENGTH          128
+#define DOCGEN_PARAMETER_DESCRIPTION_LENGTH 128
+#define DOCGEN_ERROR_DESCRIPTION_LENGTH     128
 #define DOCGEN_TABLE_LENGTH                 2048
 #define DOCGEN_LINE_LENGTH                  1024
 #define DOCGEN_BLOCK_LINE_LENGTH            1024 + 1
-#define DOCGEN_PARAMETER_NAME_DESCRIPTION   128
-#define DOCGEN_ERROR_DESCRIPTION_LENGTH     128
+
 
 /* The types of inclusions available */
 #define DOCGEN_INCLUSION_LOCAL      0
@@ -94,10 +96,17 @@
 #define REFERENCE_HEAP          1
 #define REFERENCE_FREE(value)
 
-
-#define EMBED_TYPE struct Embed
-#define EMBED_HEAP 1
+#define EMBED_TYPE              struct Embed
+#define EMBED_HEAP              1
 #define EMBED_FREE(value)
+
+#define PARAMETER_TYPE          struct Parameter
+#define PARAMETER_HEAP          1
+#define PARAMETER_FREE(value)
+
+#define ERROR_TYPE              struct Error
+#define ERROR_HEAP              1
+#define ERROR_FREE(value)
 
 #define EMBED_COMPARE(cmp_a, cmp_b) \
     strcmp((cmp_a).name, (cmp_b).name) == 0
@@ -250,18 +259,11 @@ struct PostprocessorData {
     /* Section metadata */
     const char *brief;
     const char *arguments;
+
+    struct Errors *errors;
+    struct Parameters *parameters;
     struct Inclusions *cli_inclusions;
     struct Inclusions *comment_inclusions;
-
-    /* I really do not like this.
-     * Function and macro errors could easily be unified under a
-     * single banner (they are basically the exact samee structure),
-     * and macro parameters are just function parameters without
-     * a type. */
-    struct DocgenFunctionErrors *func_errors;
-    struct DocgenMacroFunctionErrors *mfunc_errors;
-    struct DocgenFunctionParameters *func_parameters;
-    struct DocgenMacroFunctionParameters *mfunc_parameters;
 
     struct CStrings *embedded_macros;
     struct CStrings *embedded_structures;

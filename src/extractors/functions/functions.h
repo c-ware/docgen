@@ -48,7 +48,6 @@
 #define DOCGEN_FUNCTION_DESCRIPTION_LENGTH      2048
 #define DOCGEN_FUNCTION_NOTES_LENGTH            2048
 
-#define DOCGEN_TYPE_LENGTH                      64
 #define DOCGEN_INCLUSION_LENGTH                 128
 #define DOCGEN_PARAMETER_NAME_LENGTH            64
 #define DOCGEN_PARAMETER_DESCRIPTION_LENGTH     128
@@ -57,14 +56,6 @@
 #define DOCGEN_FUNCTION_SETTING_LENGTH          32
 
 /* Data structure properties */
-#define PARAMETER_TYPE          struct DocgenFunctionParameter
-#define PARAMETER_HEAP          1
-#define PARAMETER_FREE(value)
-
-#define ERROR_TYPE          struct DocgenFunctionError
-#define ERROR_HEAP          1
-#define ERROR_FREE(value)
-
 #define FUNCTION_TYPE          struct DocgenFunction
 #define FUNCTION_HEAP          1
 #define FUNCTION_FREE(value)

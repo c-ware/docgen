@@ -113,8 +113,8 @@ struct DocgenMacroFunction {
     char example[DOCGEN_MACRO_FUNCTION_EXAMPLE_LENGTH + 1];
     char notes[DOCGEN_MACRO_FUNCTION_NOTES_LENGTH + 1];
 
-    struct DocgenMacroFunctionErrors *errors;
-    struct DocgenMacroFunctionParameters *parameters;
+    struct Errors *errors;
+    struct Parameters *parameters;
     struct References *references;
     struct Inclusions *inclusions;
     struct Embeds *embeds;
