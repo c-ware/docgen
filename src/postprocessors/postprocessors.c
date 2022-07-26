@@ -407,10 +407,10 @@ static void parameters(struct CString *string, struct PostprocessorData data,
         return;
 
     if(carray_length(data.parameters) == 0) {
-        if(params.target == DOCGEN_TARGET_FUNCTION
+        if(params.target == DOCGEN_TARGET_FUNCTION)
             add_breaks(string, "This function does not have any parameters.\n"); 
 
-        if(params.target == DOCGEN_TARGET_MACRO_FUNCTION
+        if(params.target == DOCGEN_TARGET_MACRO_FUNCTION)
             add_breaks(string, "This macro function does not have any parameters.\n"); 
 
         return;
@@ -437,10 +437,10 @@ static void errors(struct CString *string, struct PostprocessorData data,
     cstring_concats(string, "\n.br\n"); 
 
     if(carray_length(data.errors) == 0) {
-        if(params.target == DOCGEN_TARGET_FUNCTION) {
+        if(params.target == DOCGEN_TARGET_FUNCTION)
             add_breaks(string, "This function does not raise any errors.\n"); 
 
-        if(params.target == DOCGEN_TARGET_MACRO_FUNCTION) {
+        if(params.target == DOCGEN_TARGET_MACRO_FUNCTION)
             add_breaks(string, "This macro function does not raise any errors\n"); 
         
         return;

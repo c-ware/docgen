@@ -115,9 +115,9 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
 
             carray_append(new_function.inclusions, new_inclusion, INCLUDE);
         } else if(strcmp(tag_name.name, "error") == 0) {
-            struct DocgenFunctionError new_error;
+            struct Error new_error;
 
-            memset(&new_error, 0, sizeof(struct DocgenFunctionError));
+            memset(&new_error, 0, sizeof(struct Error));
             docgen_extract_field_line("error", new_error.description, DOCGEN_ERROR_DESCRIPTION_LENGTH,
                                       cursor->line, new_tag.line);
 
@@ -132,11 +132,11 @@ struct DocgenFunction docgen_parse_function_comment(struct LibmatchCursor *curso
         } else if(strcmp(tag_name.name, "param") == 0) {
             struct DocgenTag type_tag;
             struct DocgenTagName type_tag_name;
-            struct DocgenFunctionParameter new_parameter;
+            struct Parameter new_parameter;
 
             memset(&type_tag, 0, sizeof(struct DocgenTag));
             memset(&type_tag_name, 0, sizeof(struct DocgenTagName));
-            memset(&new_parameter, 0, sizeof(struct DocgenFunctionParameter));
+            memset(&new_parameter, 0, sizeof(struct Parameter));
 
             docgen_extract_field_line_arg("param", new_parameter.name, DOCGEN_PARAMETER_NAME_LENGTH,
                                           new_parameter.description, DOCGEN_PARAMETER_DESCRIPTION_LENGTH,

@@ -470,7 +470,7 @@ struct CStrings *make_embedded_macro_functions(int allow_briefs,
 
         /* Dump the parameters */
         for(iter_index = 0; iter_index < carray_length(target_macro_function.parameters); iter_index++) {
-            struct DocgenMacroFunctionParameter parameter = target_macro_function.parameters->contents[iter_index];
+            struct Parameter parameter = target_macro_function.parameters->contents[iter_index];
 
             cstring_concats(&new_macro_function_string, parameter.name);
 
@@ -542,7 +542,7 @@ struct CStrings *make_embedded_functions(int allow_briefs,
 
         /* Write the parameters */
         for(iter_index = 0; iter_index < carray_length(target_function.parameters); iter_index++) {
-            struct DocgenFunctionParameter parameter = target_function.parameters->contents[iter_index];
+            struct Parameter parameter = target_function.parameters->contents[iter_index];
 
             format_pointer(&new_function_string, parameter.type);
             cstring_concats(&new_function_string, parameter.name);

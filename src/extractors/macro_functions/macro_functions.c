@@ -49,8 +49,8 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
     memset(&new_macro_function, 0, sizeof(struct DocgenMacroFunction));
 
     /* Initialize function container */
-    new_macro_function.errors = carray_init(new_macro_function.errors, MACRO_FUNCTION_ERROR);
-    new_macro_function.parameters = carray_init(new_macro_function.parameters, MACRO_FUNCTION_PARAMETER);
+    new_macro_function.errors = carray_init(new_macro_function.errors, ERROR);
+    new_macro_function.parameters = carray_init(new_macro_function.parameters, PARAMETER);
     new_macro_function.references = carray_init(new_macro_function.references, REFERENCE);
     new_macro_function.inclusions = carray_init(new_macro_function.inclusions, INCLUDE);
     new_macro_function.embeds = carray_init(new_macro_function.embeds, EMBED);
@@ -115,13 +115,13 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
 
             carray_append(new_macro_function.inclusions, new_inclusion, INCLUDE);
         } else if(strcmp(tag_name.name, "error") == 0) {
-            struct DocgenMacroFunctionError new_error;
+            struct Error new_error;
 
-            memset(&new_error, 0, sizeof(struct DocgenMacroFunctionError));
-            docgen_extract_field_line("error", new_error.description, DOCGEN_MACRO_FUNCTION_ERROR_DESCRIPTION_LENGTH,
+            memset(&new_error, 0, sizeof(struct Error));
+            docgen_extract_field_line("error", new_error.description, DOCGEN_ERROR_DESCRIPTION_LENGTH,
                                       cursor->line, new_tag.line);
 
-            carray_append(new_macro_function.errors, new_error, MACRO_FUNCTION_ERROR);
+            carray_append(new_macro_function.errors, new_error, ERROR);
         } else if(strcmp(tag_name.name, "reference") == 0) {
             struct Reference new_reference;
 
@@ -132,17 +132,17 @@ struct DocgenMacroFunction docgen_parse_macro_function_comment(struct LibmatchCu
         } else if(strcmp(tag_name.name, "param") == 0) {
             struct DocgenTag type_tag;
             struct DocgenTagName type_tag_name;
-            struct DocgenMacroFunctionParameter new_parameter;
+            struct Parameter new_parameter;
 
             memset(&type_tag, 0, sizeof(struct DocgenTag));
             memset(&type_tag_name, 0, sizeof(struct DocgenTagName));
-            memset(&new_parameter, 0, sizeof(struct DocgenMacroFunctionParameter));
+            memset(&new_parameter, 0, sizeof(struct Parameter));
 
             docgen_extract_field_line_arg("param", new_parameter.name, DOCGEN_MACRO_FUNCTION_PARAMETER_NAME_LENGTH,
                                           new_parameter.description, DOCGEN_MACRO_FUNCTION_PARAMETER_DESCRIPTION_LENGTH,
                                           cursor->line, new_tag.line);
 
-            carray_append(new_macro_function.parameters, new_parameter, MACRO_FUNCTION_PARAMETER);
+            carray_append(new_macro_function.parameters, new_parameter, PARAMETER);
         } else if(strcmp(tag_name.name, "setting") == 0) {
             char setting_name[DOCGEN_MACRO_FUNCTION_SETTING_LENGTH + 1];
 

@@ -55,14 +55,6 @@
 #define DOCGEN_MACRO_FUNCTION_SETTING_LENGTH                    32
 
 /* Data structure properties */
-#define MACRO_FUNCTION_PARAMETER_TYPE          struct DocgenMacroFunctionParameter
-#define MACRO_FUNCTION_PARAMETER_HEAP          1
-#define MACRO_FUNCTION_PARAMETER_FREE(value)
-
-#define MACRO_FUNCTION_ERROR_TYPE          struct DocgenMacroFunctionError
-#define MACRO_FUNCTION_ERROR_HEAP          1
-#define MACRO_FUNCTION_ERROR_FREE(value)
-
 #define MACRO_FUNCTION_TYPE          struct DocgenMacroFunction
 #define MACRO_FUNCTION_HEAP          1
 #define MACRO_FUNCTION_FREE(value)
