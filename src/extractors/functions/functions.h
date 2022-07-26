@@ -71,41 +71,6 @@
 #define FUNCTION_COMPARE(cmp_a, cmp_b) (strcmp(cmp_a.name, cmp_b) == 0)
 
 /*
- * Represents a parameter that is passed to a function, its type, and
- * a description of it.
-*/
-struct DocgenFunctionParameter {
-    char name[DOCGEN_PARAMETER_NAME_LENGTH + 1];
-    char type[DOCGEN_TYPE_LENGTH + 1];
-    char description[DOCGEN_PARAMETER_DESCRIPTION_LENGTH + 1];
-};
-
-/*
- * An array of function parameters.
-*/
-struct DocgenFunctionParameters {
-    int length;
-    int capacity;
-    struct DocgenFunctionParameter *contents;
-};
-
-/*
- * Represents an error that a function can produce.
-*/
-struct DocgenFunctionError {
-    char description[DOCGEN_PARAMETER_DESCRIPTION_LENGTH + 1];
-};
-
-/*
- * An array of function errors.
-*/
-struct DocgenFunctionErrors {
-    int length;
-    int capacity;
-    struct DocgenFunctionError *contents;
-};
-
-/*
  * An abstract representation of all the information that is
  * provided about a function.
 */
@@ -121,8 +86,8 @@ struct DocgenFunction {
         char return_type[DOCGEN_TYPE_LENGTH + 1];
     } return_data;
 
-    struct DocgenFunctionErrors *errors;
-    struct DocgenFunctionParameters *parameters;
+    struct Errors *errors;
+    struct Parameters *parameters;
     struct References *references;
     struct Inclusions *inclusions;
     struct Embeds *embeds;

@@ -55,16 +55,19 @@
 #define CWARE_DOCGEN_VERSION    "1.0.2"
 
 /* Limits */
-#define DOCGEN_INCLUSION_TYPE_LENGTH    32 + 1
-#define DOCGEN_EMBED_TYPE_LENGTH        32
-#define DOCGEN_MANUAL_NAME_LENGTH       64 + 1
-#define DOCGEN_MANUAL_SECTION_LENGTH    64 + 1
-#define DOCGEN_INCLUSION_PATH_LENGTH    128 + 1
-#define DOCGEN_EMBED_NAME_LENGTH        128
-#define DOCGEN_SECTION_NAME_LENGTH      128
-#define DOCGEN_TABLE_LENGTH             2048
-#define DOCGEN_LINE_LENGTH              1024
-#define DOCGEN_BLOCK_LINE_LENGTH        1024 + 1
+#define DOCGEN_INCLUSION_TYPE_LENGTH        32 + 1
+#define DOCGEN_EMBED_TYPE_LENGTH            32
+#define DOCGEN_MANUAL_NAME_LENGTH           64 + 1
+#define DOCGEN_MANUAL_SECTION_LENGTH        64 + 1
+#define DOCGEN_PARAMETER_NAME_LENGTH        64
+#define DOCGEN_INCLUSION_PATH_LENGTH        128 + 1
+#define DOCGEN_EMBED_NAME_LENGTH            128
+#define DOCGEN_SECTION_NAME_LENGTH          128
+#define DOCGEN_TABLE_LENGTH                 2048
+#define DOCGEN_LINE_LENGTH                  1024
+#define DOCGEN_BLOCK_LINE_LENGTH            1024 + 1
+#define DOCGEN_PARAMETER_NAME_DESCRIPTION   128
+#define DOCGEN_ERROR_DESCRIPTION_LENGTH     128
 
 /* The types of inclusions available */
 #define DOCGEN_INCLUSION_LOCAL      0
@@ -104,6 +107,43 @@
 
 /* Configuration */
 #define DOCGEN_INDENTATION  4
+
+/*
+ * Represents a parameter that is passed to a macro or function.
+ * This has it's type (if it has one), the name, and a description
+ * of it.
+*/
+struct Parameter {
+    char name[DOCGEN_PARAMETER_NAME_LENGTH + 1];
+    char type[DOCGEN_TYPE_LENGTH + 1];
+    char description[DOCGEN_PARAMETER_DESCRIPTION_LENGTH + 1];
+};
+
+/*
+ * An array of parameters.
+*/
+struct Parameters {
+    int length;
+    int capacity;
+    struct Parameter *contents;
+};
+
+/*
+ * Represents an error that a macro or function can produce
+*/
+struct Error {
+    char description[DOCGEN_PARAMETER_DESCRIPTION_LENGTH + 1];
+};
+
+/*
+ * An array of function errors.
+*/
+struct Errors {
+    int length;
+    int capacity;
+    struct Error *contents;
+};
+
 
 /*
  * Represents an inclusion specified at the command line.
