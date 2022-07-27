@@ -22,13 +22,6 @@
  * @\E foo
  * @\E bar
  * @\T
- * @
- * @\T
- * @\S ;
- * @\H foo;bar;baz
- * @\E foo
- * @\E bar
- * @\T
  * @description
  *
  * @example

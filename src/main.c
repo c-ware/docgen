@@ -225,8 +225,8 @@
 #include "extractors/macro_functions/macro_functions.h"
 
 /* Pipeline logic */
-#include "writer/writer.h"
 #include "generators/generators.h"
+#include "postprocessors/writer/writer.h"
 #include "postprocessors/postprocessors.h"
 
 /* Global program state of reusable memory buffers. */

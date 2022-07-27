@@ -45,8 +45,8 @@
 #include <stdarg.h>
 
 #include "../docgen.h"
-#include "../writer/writer.h"
 
+#include "writer/writer.h"
 #include "postprocessors.h"
 
 #include "../extractors/macros/macros.h"
@@ -110,11 +110,18 @@
 static void add_breaks(struct CString *string, const char *input) {
     int cindex = 0;
     int input_length = 0;
+    int in_list_or_table = 0;
 
     liberror_is_null(add_breaks, string);
     liberror_is_null(add_breaks, input);
 
     input_length = strlen(input);
+
+    /* Scan the string to write for unclosed table or lists, and
+     * there are no nested lists or tables just in case
+     * we need to parse them to stop adding breaks in them. */
+    no_nested_elements(input);
+    no_unclosed_elements(input);
 
     /* For each newline character we find, output an extra string
      * '.br' to the cstring. */
@@ -124,8 +131,18 @@ static void add_breaks(struct CString *string, const char *input) {
         append_string[0] = input[cindex];
         append_string[1] = 0x00;
 
-        if(input[cindex] == '\n')
-            cstring_concats(string, "\n.br");
+        if(input[cindex] == '\n') {
+            if(in_list_or_table == 0)
+                cstring_concats(string, "\n.br");
+
+            /* At the very least, input[cindex + 1] will be a NUL
+             * byte, which will stop strncmp. We want to check to
+             * see if the line starts with the \T, and if it does,
+             * invert a boolean to tell it to stop writing .BR's */
+            if(strncmp(input + cindex + 1, "\\T\n", 3) == 0)
+                INVERT_BOOLEAN(in_list_or_table);
+
+        }
 
         /* In the case of newlines, the fallthrough will cause
          * the final string append operation to have written
@@ -253,7 +270,6 @@ static void inclusions(struct CString *string, struct PostprocessorData data,
 
         liberror_unhandled(inclusions);
     }
-
 
     /* Dump comment inclusions if there are any */
     for(inc_index = 0; data.comment_inclusions != NULL && inc_index <  carray_length(data.comment_inclusions); inc_index++) {
@@ -392,7 +408,6 @@ static void print_section(struct CString *string, const char *section,
     cstring_concats(string, "\n");
 
     /* If this section has no text, notify the user of this. */
-    writer_validate_string(section_text);
     add_breaks(string, section_text);
 }
 

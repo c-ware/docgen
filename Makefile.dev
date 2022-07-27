@@ -1,5 +1,5 @@
-OBJS=src/arguments.o src/main.o src/libstr/replace.o src/libstr/starts.o src/libstr/count.o src/libstr/strip.o src/libstr/reverse.o src/extractors/structures/structures.o src/extractors/functions/functions.o src/extractors/macros/macros.o src/extractors/projects/projects.o src/extractors/macro_functions/macro_functions.o src/common/common.o src/common/error.o src/generators/common.o src/generators/generators.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/match.o src/libmatch/cond.o src/libmatch/cursor.o src/cstring/cstring.o src/libpath/join_path.o src/libpath/mkdir.o src/libpath/exists.o src/postprocessors/postprocessors.o src/tags/tags.o src/writer/writer.o 
-TESTOBJS=src/arguments.o src/libstr/replace.o src/libstr/starts.o src/libstr/count.o src/libstr/strip.o src/libstr/reverse.o src/extractors/structures/structures.o src/extractors/functions/functions.o src/extractors/macros/macros.o src/extractors/projects/projects.o src/extractors/macro_functions/macro_functions.o src/common/common.o src/common/error.o src/generators/common.o src/generators/generators.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/match.o src/libmatch/cond.o src/libmatch/cursor.o src/cstring/cstring.o src/libpath/join_path.o src/libpath/mkdir.o src/libpath/exists.o src/postprocessors/postprocessors.o src/tags/tags.o src/writer/writer.o 
+OBJS=src/arguments.o src/main.o src/libstr/replace.o src/libstr/starts.o src/libstr/count.o src/libstr/strip.o src/libstr/reverse.o src/extractors/structures/structures.o src/extractors/functions/functions.o src/extractors/macros/macros.o src/extractors/projects/projects.o src/extractors/macro_functions/macro_functions.o src/common/common.o src/common/error.o src/generators/common.o src/generators/generators.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/match.o src/libmatch/cond.o src/libmatch/cursor.o src/cstring/cstring.o src/libpath/join_path.o src/libpath/mkdir.o src/libpath/exists.o src/postprocessors/postprocessors.o src/postprocessors/common.o src/postprocessors/writer/writer.o src/tags/tags.o 
+TESTOBJS=src/arguments.o src/libstr/replace.o src/libstr/starts.o src/libstr/count.o src/libstr/strip.o src/libstr/reverse.o src/extractors/structures/structures.o src/extractors/functions/functions.o src/extractors/macros/macros.o src/extractors/projects/projects.o src/extractors/macro_functions/macro_functions.o src/common/common.o src/common/error.o src/generators/common.o src/generators/generators.o src/libarg/libarg.o src/libmatch/read.o src/libmatch/match.o src/libmatch/cond.o src/libmatch/cursor.o src/cstring/cstring.o src/libpath/join_path.o src/libpath/mkdir.o src/libpath/exists.o src/postprocessors/postprocessors.o src/postprocessors/common.o src/postprocessors/writer/writer.o src/tags/tags.o 
 TESTS=
 CC=cc
 PREFIX=/usr/local
@@ -26,7 +26,7 @@ uninstall:
 src/arguments.o: src/arguments.c src/docgen.h
 	$(CC) -c $(CFLAGS) src/arguments.c -o src/arguments.o
 
-src/main.o: src/main.c src/docgen.h src/extractors/macros/macros.h src/extractors/projects/projects.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/writer/writer.h src/generators/generators.h src/postprocessors/postprocessors.h
+src/main.o: src/main.c src/docgen.h src/extractors/macros/macros.h src/extractors/projects/projects.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h src/generators/generators.h src/postprocessors/writer/writer.h src/postprocessors/postprocessors.h
 	$(CC) -c $(CFLAGS) src/main.c -o src/main.o
 
 src/libstr/replace.o: src/libstr/replace.c src/libstr/libstr.h
@@ -98,14 +98,17 @@ src/libpath/mkdir.o: src/libpath/mkdir.c src/libpath/libpath.h
 src/libpath/exists.o: src/libpath/exists.c src/libpath/libpath.h
 	$(CC) -c $(CFLAGS) src/libpath/exists.c -o src/libpath/exists.o
 
-src/postprocessors/postprocessors.o: src/postprocessors/postprocessors.c src/docgen.h src/writer/writer.h src/postprocessors/postprocessors.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
+src/postprocessors/postprocessors.o: src/postprocessors/postprocessors.c src/docgen.h src/postprocessors/writer/writer.h src/postprocessors/postprocessors.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
 	$(CC) -c $(CFLAGS) src/postprocessors/postprocessors.c -o src/postprocessors/postprocessors.o
+
+src/postprocessors/common.o: src/postprocessors/common.c src/docgen.h src/postprocessors/writer/writer.h
+	$(CC) -c $(CFLAGS) src/postprocessors/common.c -o src/postprocessors/common.o
+
+src/postprocessors/writer/writer.o: src/postprocessors/writer/writer.c src/docgen.h src/postprocessors/writer/writer.h
+	$(CC) -c $(CFLAGS) src/postprocessors/writer/writer.c -o src/postprocessors/writer/writer.o
 
 src/tags/tags.o: src/tags/tags.c src/tags/tags.h src/docgen.h
 	$(CC) -c $(CFLAGS) src/tags/tags.c -o src/tags/tags.o
-
-src/writer/writer.o: src/writer/writer.c src/docgen.h src/writer/writer.h
-	$(CC) -c $(CFLAGS) src/writer/writer.c -o src/writer/writer.o
 
 docgen: $(OBJS)
 	$(CC) $(OBJS) -o docgen $(LDFLAGS) $(LDLIBS)
