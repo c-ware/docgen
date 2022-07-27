@@ -194,6 +194,30 @@
  * @@embed constant: my_constant_name
  * @@embed function: my_function_name
  * @@embed macro_function: my_macro_function_name
+ * @
+ * @Docgen also supports a stuff like bolding, italics, and tables through use of
+ * @it's 'marker' systemm. Bolding is done through the marker \\B, and italics is
+ * @done through the \\I marker. These markers (along with table and list markers)
+ * @require the text they want to include to be surrounded by their opening tags.
+ * @So, if you wanted to bold text, you might do this.
+ * @
+ * @\\BThis is bold text\\B
+ * @
+ * @A full list of each marker that docgen supports.
+ * @\T
+ * @\S ;
+ * @\H Marker;Description;Surround
+ * @\E \\T;Start or end a table;Yes
+ * @\E \\L;Start or end a list;Yes
+ * @\E \\B;Start or end bold text;Yes
+ * @\E \\I;Start or end italic text;Yes
+ * @\E \\S;Table separator;No
+ * @\E \\H;Table header;No
+ * @\E \\E;Table or list element ;No
+ * @\T
+ * @
+ * @All this is great, but for a fairly basic walkthrough of getting started with docgen,
+ * @please see the \Bdocgen-intro\B(cware) manual.
  * @description
  *
  * @example
@@ -202,6 +226,8 @@
  * @
  * @Generating the above but with manual metadata (not exhaustive)
  * @    \Bdocgen functions src/file.h --title 'Docgen Manuals'\B
+ * @                                \B--section 'cware'\B
+ * @                                \B--date `date +'%b %d, %Y'`\B
  * @example
  *
  * @reference: cware(cware)

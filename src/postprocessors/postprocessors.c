@@ -354,6 +354,16 @@ static void synopsis(struct CString *string, struct PostprocessorData data,
     liberror_is_null(synopsis, string);
     liberror_is_null(synopsis, params.target_structure);
 
+    /* If all of these are true, there is nothing to write in the synopsis, so
+     * do not make the section. */
+    if(NUMBER_OF_EMBEDS(data) == 0 && NUMBER_OF_INCLUSIONS(data) == 0) {
+        if(data.arguments != NULL && strlen(data.arguments) == 0)
+            return;
+
+        if(data.arguments == NULL)
+            return;
+    }
+
     cstring_concats(string, ".SH SYNOPSIS\n");
     inclusions(string, data, params);
 
