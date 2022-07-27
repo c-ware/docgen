@@ -40,11 +40,12 @@ use more memory than this program already uses.
 
 The writer uses certain markers to tell the writer to perform certainn formatting techniques.
 This could be something like bolding, italics, tables, lists, etc.
-\E    list element
+\H    table header
+\E    table or list element
 \S    table separator
-\L    start a list
 \B    start or end bold
 \I    start or end italics
+\L    start or end a list
 \T    start or end a table
 
 Note, however, that docgen does NOT support nested formatters, like for example

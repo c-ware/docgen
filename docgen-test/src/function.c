@@ -14,9 +14,8 @@
  * @setting: struct-briefs
  * @setting: macro-briefs
  *
- *
  * @description
- * @This is a description.
+ * @This is a description. This description has a table.
  * @description
  *
  * @example
