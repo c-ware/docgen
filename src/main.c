@@ -65,14 +65,14 @@
  * @the project. What follows is a list of each type of token that documentation
  * @can be generated for, and a description of it.
  * @
- * @table
- * @sep: ;
- * @Token;Description
- * @functions;generates manuals for each documented function
- * @macros;generates manuals for each documented macro function
- * @project;generates a manual for a 'file' which is usually used as its central manual
- * @category;alias for project, but is intended to be used for sub-manuals
- * @table
+ * @\T
+ * @\S ;
+ * @\H Token;Description
+ * @\E functions;generates manuals for each documented function
+ * @\E macros;generates manuals for each documented macro function
+ * @\E project;generates a manual for a 'file' which is usually used as its central manual
+ * @\E category;alias for project, but is intended to be used for sub-manuals
+ * @\T
  * @
  * @Each type of token has different 'fields' in it that control how their
  * @manuals are generated. Some take an argument, some do not. The format
@@ -95,40 +95,40 @@
  * @    - category
  * @
  * @A 'function' token will accept:
- * @table
- * @sep: ;
- * @Field;Description
- * @@name: <NAME>;the name of the function
- * @@brief: <DESCRIPTION>;a brief description of the function
- * @@param <NAME>: <DESCRIPTION>;the name of a parameter, and a brief description
- * @@type: <TYPE>;the type of a parameter, or return value
- * @@return: <DESCRIPTION>;a description of the return value
- * @@example;the start and end of the example block
- * @@description;the start and end of the description block
- * @@notes;the start and end of the notes block
- * @@error;an error that the function can raise
- * @@reference: <MANUAL>(<SECTION>);another piece of documentation to also see (see also section)
- * @table
+ * @\T
+ * @\S ;
+ * @\H Field;Description
+ * @\E @name: <NAME>;the name of the function
+ * @\E @brief: <DESCRIPTION>;a brief description of the function
+ * @\E @param <NAME>: <DESCRIPTION>;the name of a parameter, and a brief description
+ * @\E @type: <TYPE>;the type of a parameter, or return value
+ * @\E @return: <DESCRIPTION>;a description of the return value
+ * @\E @example;the start and end of the example block
+ * @\E @description;the start and end of the description block
+ * @\E @notes;the start and end of the notes block
+ * @\E @error;an error that the function can raise
+ * @\E @reference: <MANUAL>(<SECTION>);another piece of documentation to also see (see also section)
+ * @\T
  * @
  * @The tags 'return' and 'param' both require a type tag IMMEDIATELY after
  * @them. No empty lines or text in between them.
  * @
  * @A 'project' and 'category' token will accept:
- * @table
- * @sep: ;
- * @Field;Description
- * @@name: <NAME>;the name of the project
- * @@brief: <DESCRIPTION>;a brief description of the project
- * @@description;the start and end of the description block
- * @@include: <PATH>;local inclusion of a file
- * @@isystem: <PATH>;system inclusion of a file
- * @@table;the start and end of a table
- * @@sep: <SEPARATOR>;the separator for the table
- * @@embed <TYPE>: <NAME>;a token to embed into the synopsis
- * @@arguments;the arguments that the program can take (if this is a user application)
- * @@reference: <MANUAL>(<SECTION>);another piece of documentation to also see (see also section)
- * @@setting: func-briefs;show embedded function briefs
- * @table
+ * @\T
+ * @\S ;
+ * @\H Field;Description
+ * @\E @name: <NAME>;the name of the project
+ * @\E @brief: <DESCRIPTION>;a brief description of the project
+ * @\E @description;the start and end of the description block
+ * @\E @include: <PATH>;local inclusion of a file
+ * @\E @isystem: <PATH>;system inclusion of a file
+ * @\E @table;the start and end of a table
+ * @\E @sep: <SEPARATOR>;the separator for the table
+ * @\E @embed <TYPE>: <NAME>;a token to embed into the synopsis
+ * @\E @arguments;the arguments that the program can take (if this is a user application)
+ * @\E @reference: <MANUAL>(<SECTION>);another piece of documentation to also see (see also section)
+ * @\E @setting: func-briefs;show embedded function briefs
+ * @\T
  * @
  * @Tables must be embedded inside of descriptions. Because of this, the '@'
  * @symbol used for the @table tag will be the @ used to specify the lines of a
@@ -136,53 +136,53 @@
  * have an '@' at the start.
  * @
  * @A 'structure' token will accept:
- * @table
- * @sep: ;
- * @Field;Description
- * @@name: <NAME>;the name of the structure or nested structure
- * @@brief: <DESCRIPTION>;a brief description of the structure or nested structure
- * @@field <NAME>: <DESCRIPTION>;the name and description of a field in the structure
- * @@type: <TYPE>;the type of the field
- * @@struct_start;start of a nested structure
- * @@struct_end;end of a nested structure
- * @table
+ * @\T
+ * @\S ;
+ * @\H Field;Description
+ * @\E @name: <NAME>;the name of the structure or nested structure
+ * @\E @brief: <DESCRIPTION>;a brief description of the structure or nested structure
+ * @\E @field <NAME>: <DESCRIPTION>;the name and description of a field in the structure
+ * @\E @type: <TYPE>;the type of the field
+ * @\E @struct_start;start of a nested structure
+ * @\E @struct_end;end of a nested structure
+ * @\T
  * @
  * @A 'constant' token will accept:
- * @table
- * @sep: ;
- * @Field;Description
- * @@name: <NAME>;the name of the constant
- * @@setting: ifndef;put an ifndef around the constant with the constant's name
- * @@brief: <DESCRIPTION>;a brief description of the constant
- * @@value: <VALUE>;the value of the constant
- * @table
+ * @\T
+ * @\S ;
+ * @\H Field;Description
+ * @\E @name: <NAME>;the name of the constant
+ * @\E @setting: ifndef;put an ifndef around the constant with the constant's name
+ * @\E @brief: <DESCRIPTION>;a brief description of the constant
+ * @\E @value: <VALUE>;the value of the constant
+ * @\T
  * @
  * @A 'macro_function' token will accept
- * @table
- * @sep: ;
- * @Field;Description
- * @@name: <NAME>;the name of the macro function
- * @@brief: <DESCRIPTION>;a brief description of the macro function
- * @@include: <PATH>;local inclusion of a file
- * @@isystem: <PATH>;system inclusion of a file
- * @@param <NAME>: <DESCRIPTION>;the name of a parameter, and a brief description
- * @@example;the start and end of the example block
- * @@description;the start and end of the description block
- * @@notes;the start and end of the notes block
- * @@error;an error that the macro function can raise
- * @table
+ * @\T
+ * @\S ;
+ * @\H Field;Description
+ * @\E @name: <NAME>;the name of the macro function
+ * @\E @brief: <DESCRIPTION>;a brief description of the macro function
+ * @\E @include: <PATH>;local inclusion of a file
+ * @\E @isystem: <PATH>;system inclusion of a file
+ * @\E @param <NAME>: <DESCRIPTION>;the name of a parameter, and a brief description
+ * @\E @example;the start and end of the example block
+ * @\E @description;the start and end of the description block
+ * @\E @notes;the start and end of the notes block
+ * @\E @error;an error that the macro function can raise
+ * @\T
  * @
  * @Do note that macro_function tokens do not accept a @type tag after the
  * @@param tag.
  * @
  * @The 'format' can be any of the following:
- * @table
- * @sep: ;
- * @Formatter;Description
- * @manpage;UNIX manual page for troff or nroff (default)
- * @dcfscript;DCF/SCRIPT or Waterloo SCRIPT for MVS or VM/CMS
- * @helpcms;VM/SP Release 5 HELPCMS file
- * @table
+ * @\T
+ * @\S ;
+ * @\H Formatter;Description
+ * @\E manpage;UNIX manual page for troff or nroff (default)
+ * @\E dcfscript;DCF/SCRIPT or Waterloo SCRIPT for MVS or VM/CMS
+ * @\E helpcms;VM/SP Release 5 HELPCMS file
+ * @\T
  * @
  * @Since you can embed function signatures, structures, constants, etc into the
  * @synopsis of the program, here is a list of each kind of token that can be
@@ -191,20 +191,17 @@
  * @As for tokens you can embed, here is an example of embedding each type of token:
  * @
  * @@embed structure: my_structure_name
- * @
  * @@embed constant: my_constant_name
- * @
  * @@embed function: my_function_name
- * @
  * @@embed macro_function: my_macro_function_name
  * @description
  *
- * @notes
- * @This is the notes section.
- * @notes
- *
  * @example
- * @This is the examples section.
+ * @Generating manual pages of functions in a header file.
+ * @    \Bdocgen functions src/file.h\B
+ * @
+ * @Generating the above but with manual metadata (not exhaustive)
+ * @    \Bdocgen functions src/file.h --title 'Docgen Manuals'\B
  * @example
  *
  * @reference: cware(cware)

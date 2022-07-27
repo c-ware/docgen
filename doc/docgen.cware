@@ -1,0 +1,281 @@
+.TH "docgen" "cware" "" "Jul 27, 2022" "C-Ware Manuals"
+.SH NAME
+docgen - generate documentation from c source code
+.SH SYNOPSIS
+docgen CATEGORY FILE [ --help | -h ] [ --format FORMAT | -f FORMAT ]
+.br
+                     [ --section SECTION | -s SECTION ]
+.br
+                     [ --title TITLE | -t TITLE ]
+.br
+                     [ --date DATE | -d DATE ]
+.br
+                     [ --include INCLUDE | -l INCLUDE ]
+.br
+                     [ --isystem INCLUDE | -i INCLUDE ]
+.br
+                     [ --language LANGUAGE | -x LANGUAGE ]
+.br
+
+.SH DESCRIPTION
+The 'docgen' project is a documentation generation system that uses
+.br
+a format-agnostic language to convert documentation into arbitrary
+.br
+formats that the user chooses, and the program has support for. This
+.br
+can make the creation of documentation easier, and less of a chore
+.br
+for the programmer because the documentation is stored in the source
+.br
+code of the program. This allows it to be more 'centralized,' and
+.br
+consistent across multiple formats.
+.br
+
+.br
+The program can generate different kinds of documentation. This can
+.br
+range anywhere from generating documentation for individual functions,
+.br
+and macro functions, to main project pages and categories to organize
+.br
+the project. What follows is a list of each type of token that documentation
+.br
+can be generated for, and a description of it.
+.br
+
+.br
+.TS
+tab(;);
+l l 
+_ _ 
+l l 
+.
+Token;Description
+functions;generates manuals for each documented function
+macros;generates manuals for each documented macro function
+project;generates a manual for a 'file' which is usually used as its central manual
+category;alias for project, but is intended to be used for sub-manuals
+.TE
+.br
+
+.br
+Each type of token has different 'fields' in it that control how their
+.br
+manuals are generated. Some take an argument, some do not. The format
+.br
+that is shown in the examples should be followed strictly. This includes
+.br
+adhering to whitespace. Text in <>'s should be replaced with arguments.
+.br
+If a field name has a colon (:) at the end, that colon MUST be immediately
+.br
+followed by a space, then the argument.
+.br
+
+.br
+A token that should be extracted by docgen needs to be a multiline C comment
+.br
+where the second line has this format:
+.br
+
+.br
+@docgen: <TOKEN_TYPE>
+.br
+
+.br
+The token type can be:
+.br
+    - structure
+.br
+    - project
+.br
+    - macro_function
+.br
+    - constant
+.br
+    - function
+.br
+    - category
+.br
+
+.br
+A 'function' token will accept:
+.br
+.TS
+tab(;);
+l l 
+_ _ 
+l l 
+.
+Field;Description
+@name: <NAME>;the name of the function
+@brief: <DESCRIPTION>;a brief description of the function
+@param <NAME>: <DESCRIPTION>;the name of a parameter, and a brief description
+@type: <TYPE>;the type of a parameter, or return value
+@return: <DESCRIPTION>;a description of the return value
+@example;the start and end of the example block
+@description;the start and end of the description block
+@notes;the start and end of the notes block
+@error;an error that the function can raise
+@reference: <MANUAL>(<SECTION>);another piece of documentation to also see (see also section)
+.TE
+.br
+
+.br
+The tags 'return' and 'param' both require a type tag IMMEDIATELY after
+.br
+them. No empty lines or text in between them.
+.br
+
+.br
+A 'project' and 'category' token will accept:
+.br
+.TS
+tab(;);
+l l 
+_ _ 
+l l 
+.
+Field;Description
+@name: <NAME>;the name of the project
+@brief: <DESCRIPTION>;a brief description of the project
+@description;the start and end of the description block
+@include: <PATH>;local inclusion of a file
+@isystem: <PATH>;system inclusion of a file
+@table;the start and end of a table
+@sep: <SEPARATOR>;the separator for the table
+@embed <TYPE>: <NAME>;a token to embed into the synopsis
+@arguments;the arguments that the program can take (if this is a user application)
+@reference: <MANUAL>(<SECTION>);another piece of documentation to also see (see also section)
+@setting: func-briefs;show embedded function briefs
+.TE
+.br
+
+.br
+Tables must be embedded inside of descriptions. Because of this, the '@'
+.br
+symbol used for the @table tag will be the @ used to specify the lines of a
+.br
+block. Inside the body of a block, as described above, all lines of it must
+.br
+' at the start.
+.br
+
+.br
+A 'structure' token will accept:
+.br
+.TS
+tab(;);
+l l 
+_ _ 
+l l 
+.
+Field;Description
+@name: <NAME>;the name of the structure or nested structure
+@brief: <DESCRIPTION>;a brief description of the structure or nested structure
+@field <NAME>: <DESCRIPTION>;the name and description of a field in the structure
+@type: <TYPE>;the type of the field
+@struct_start;start of a nested structure
+@struct_end;end of a nested structure
+.TE
+.br
+
+.br
+A 'constant' token will accept:
+.br
+.TS
+tab(;);
+l l 
+_ _ 
+l l 
+.
+Field;Description
+@name: <NAME>;the name of the constant
+@setting: ifndef;put an ifndef around the constant with the constant's name
+@brief: <DESCRIPTION>;a brief description of the constant
+@value: <VALUE>;the value of the constant
+.TE
+.br
+
+.br
+A 'macro_function' token will accept
+.br
+.TS
+tab(;);
+l l 
+_ _ 
+l l 
+.
+Field;Description
+@name: <NAME>;the name of the macro function
+@brief: <DESCRIPTION>;a brief description of the macro function
+@include: <PATH>;local inclusion of a file
+@isystem: <PATH>;system inclusion of a file
+@param <NAME>: <DESCRIPTION>;the name of a parameter, and a brief description
+@example;the start and end of the example block
+@description;the start and end of the description block
+@notes;the start and end of the notes block
+@error;an error that the macro function can raise
+.TE
+.br
+
+.br
+Do note that macro_function tokens do not accept a @type tag after the
+.br
+@param tag.
+.br
+
+.br
+The 'format' can be any of the following:
+.br
+.TS
+tab(;);
+l l 
+_ _ 
+l l 
+.
+Formatter;Description
+manpage;UNIX manual page for troff or nroff (default)
+dcfscript;DCF/SCRIPT or Waterloo SCRIPT for MVS or VM/CMS
+helpcms;VM/SP Release 5 HELPCMS file
+.TE
+.br
+
+.br
+Since you can embed function signatures, structures, constants, etc into the
+.br
+synopsis of the program, here is a list of each kind of token that can be
+.br
+embedded into the synopsis. Do note, however, that docgen needs to see the
+.br
+token's comment. If this is a problem, try using `cat file.c file.h | docgen`.
+.br
+As for tokens you can embed, here is an example of embedding each type of token:
+.br
+
+.br
+@embed structure: my_structure_name
+.br
+@embed constant: my_constant_name
+.br
+@embed function: my_function_name
+.br
+@embed macro_function: my_macro_function_name
+.br
+
+.br
+.SH EXAMPLES
+Generating manual pages of functions in a header file.
+.br
+    \fBdocgen functions src/file.h\fR
+.br
+
+.br
+Generating the above but with manual metadata (not exhaustive)
+.br
+    \fBdocgen functions src/file.h --title 'Docgen Manuals'\fR
+.br
+.SH SEE ALSO
+cware(cware)

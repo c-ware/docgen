@@ -28,10 +28,6 @@
  * @This is an example.
  * @example
  *
- * @notes
- * @These are the notes for this function.
- * @notes
- *
  * @error: you fail to use it
  * @error: foo bar
  *
