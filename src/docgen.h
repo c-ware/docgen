@@ -117,6 +117,23 @@
 /* Configuration */
 #define DOCGEN_INDENTATION  4
 
+extern struct ProgramState program_state;
+
+/*
+ * A global container that acts as a collection of reusable buffers
+ * of memory for different tasks performed in the program. Whenever
+ * a function calls another function, the programmer should be
+ * aware that their current buffer may be overwritten.
+*/
+struct ProgramState {
+    struct CString buffer_a;
+    struct CString buffer_b;
+    struct CString buffer_c;
+    struct CString buffer_d;
+    struct CString buffer_e;
+    struct CString buffer_f;
+};
+
 /*
  * Represents a parameter that is passed to a macro or function.
  * This has it's type (if it has one), the name, and a description

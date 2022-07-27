@@ -83,36 +83,20 @@ static struct WriterParams select_format_settings(const char *format) {
     return settings;
 }
 
-/*
- * @docgen: function
- * @brief perform error checking on the string that will be written
- * @name: validate_output
- *
- * @description
- * @Given an input string, it will validate it to make sure that it can be properly
- * @written to the file. It makes sure that:
- * @    - There are no unrecognized markers
- * @    - There is no lists or tables nested in each other
- * @    - Tables and lists are formatted correctly
- * @    - There are no incomplete escapes
- * @    - There are no unclosed tables and lists
- * @description
- *
- * @param string: the string to validate
- * @type: struct CString
-*/
-static void validate_output(struct CString string) {
+void writer_validate_string(const char *string) {
     int cindex = 0;
     int in_list = 0;
     int in_table = 0;
+    int length = strlen(string);
+    struct LibmatchCursor string_cursor = libmatch_cursor_init((char *) string, strlen(string));
 
     /* Detect incomplete markers and unrecognized ones */
-    for(cindex = 0; cindex < string.length; cindex++) {
-        char first_character = string.contents[cindex];
+    for(cindex = 0; cindex < length; cindex++) {
+        char first_character = string[cindex];
         char second_character = -1;
 
-        if((cindex + 1) <= string.length)
-            second_character = string.contents[cindex + 1];
+        if((cindex + 1) <= length)
+            second_character = string[cindex + 1];
 
         if(first_character != '\\')
             continue;
@@ -136,13 +120,13 @@ static void validate_output(struct CString string) {
                 continue;
         }
 
-        fprintf(stderr, "docgen: character '%c' at index %i is not a recognzied marker\n", string.contents[cindex + 1], cindex +  1);
+        fprintf(stderr, "docgen: character '%c' at index %i is not a recognzied marker\n", string[cindex + 1], cindex +  1);
         exit(EXIT_FAILURE); 
     }
 
     /* Verify that there are no tables in lists or lists in tables */
-    for(cindex = 0; cindex < string.length; cindex++) {
-        char first_character = string.contents[cindex];
+    for(cindex = 0; cindex < length; cindex++) {
+        char first_character = string[cindex];
         char second_character = -1;
 
         if(first_character != '\\')
@@ -150,7 +134,7 @@ static void validate_output(struct CString string) {
 
         /* Previous checks garuntee that each \ is not incomplete, and so we
          * can index past cindex without worrying about indexing out of bounds. */
-        second_character = string.contents[cindex + 1];
+        second_character = string[cindex + 1];
 
         /* Irrelevant sequences */
         if(second_character != 'T' && second_character != 'L') {
@@ -187,8 +171,8 @@ static void validate_output(struct CString string) {
     in_table = 0;
 
     /* Verify that there are no unclosed tables and lists */
-    for(cindex = 0; cindex < string.length; cindex++) {
-        char first_character = string.contents[cindex];
+    for(cindex = 0; cindex < length; cindex++) {
+        char first_character = string[cindex];
         char second_character = -1;
 
         if(first_character != '\\')
@@ -196,23 +180,17 @@ static void validate_output(struct CString string) {
 
         /* Previous checks garuntee that each \ is not incomplete, and so we
          * can index past cindex without worrying about indexing out of bounds. */
-        second_character = string.contents[cindex + 1];
+        second_character = string[cindex + 1];
 
         /* We do not have to worry about the second character being a list either
          * because of previous checks. */
-        if(second_character != 'T') {
+        if(second_character == 'T')
             INVERT_BOOLEAN(in_table);
-            cindex++;
 
-            continue;
-        }
-
-        if(second_character != 'L') {
+        if(second_character == 'L')
             INVERT_BOOLEAN(in_list);
-            cindex++;
 
-            continue;
-        }
+        cindex++;
     }
 
     if(in_list == 1) {
@@ -224,6 +202,64 @@ static void validate_output(struct CString string) {
         fprintf(stderr, "%s", "docgen: unclosed table inside of output\n");    
         exit(EXIT_FAILURE);
     }
+
+    /* Verify that tables are correctly formatted. First find a table,
+     * then parse it, then move onto the next */
+    while(string_cursor.cursor < string_cursor.length) {
+        int original_location = -1;
+        int first_character = libmatch_cursor_getch(&string_cursor);
+        int second_character = -1;
+
+        /* Ignore non marker sequences */
+        if(first_character != '\\')
+            continue;
+
+        second_character = libmatch_cursor_getch(&string_cursor);
+
+        /* We only care about tables here. */
+        if(second_character != 'T')
+            continue;
+
+        ASSERT_GETCH(&string_cursor, '\n');
+
+        /* Next line should be a \S to specify the separator, and
+         * should be follow this regular expression:
+         *
+         * \\S .\n
+        */
+        ASSERT_GETCH(&string_cursor, '\\');
+        ASSERT_GETCH(&string_cursor, 'S');
+        ASSERT_GETCH(&string_cursor, ' ');
+        ASSERT_GETCH_CLASS(&string_cursor, LIBMATCH_PRINTABLE);
+        ASSERT_GETCH(&string_cursor, '\n');
+
+        /* Next line should be the header. */
+        ASSERT_GETCH(&string_cursor, '\\');
+        ASSERT_GETCH(&string_cursor, 'H');
+        ASSERT_GETCH(&string_cursor, ' ');
+
+        /* Make sure the header is not empty, and go to the end of the line if it is.*/
+        ASSERT_GETCH_CLASS(&string_cursor, LIBMATCH_PRINTABLE);
+        libmatch_next_line(&string_cursor);
+
+        original_location = string_cursor.cursor;
+
+        /* While the last does not start with a `\T\n`, verify that
+         * it is an element `\E`, and is not empty. */
+        while(libmatch_string_expect(&string_cursor, "\\T\n") == 0) {
+            string_cursor.cursor = original_location;
+
+            ASSERT_GETCH(&string_cursor, '\\');
+            ASSERT_GETCH(&string_cursor, 'E');
+            ASSERT_GETCH(&string_cursor, ' ');
+            ASSERT_GETCH_CLASS(&string_cursor, LIBMATCH_PRINTABLE);
+            libmatch_next_line(&string_cursor);
+
+            original_location = string_cursor.cursor;
+        }
+
+        printf("!\n");
+    }
 }
 
 void dump_cstring(const char *format, struct CString string, char output_path[LIBPATH_MAX_PATH + 1]) {
@@ -234,9 +270,6 @@ void dump_cstring(const char *format, struct CString string, char output_path[LI
 
     liberror_is_null(dum_cstring, format);
     INIT_VARIABLE(settings);
-
-    /* Perform error checking on the output string */
-    validate_output(string);
 
     /* Determine the settings to use for interpretingg markers */
     settings = select_format_settings(format);

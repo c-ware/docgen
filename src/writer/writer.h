@@ -33,6 +33,7 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    struct CString buffer_e;
 */
 
 #ifndef DOCGEN_WRITER_H
@@ -63,6 +64,46 @@
     INVERT_BOOLEAN(marker)
 
 /*
+ * @docgen: macro_function
+ * @brief: assert that the next character is certain character
+ * @name: ASSERT_GETCH
+ *
+ * @description
+ * @Asserts that the next character is certain character, and dumps an error
+ * @message if it is not there.
+ * @description
+ *
+ * @param cursor: the cursor to getch
+ * @param x: the character to expect
+*/
+#define ASSERT_GETCH(_cursor, x)                                                            \
+do {                                                                                        \
+    if((libmatch_cursor_getch((_cursor)) == (x)))                                           \
+        break;                                                                              \
+                                                                                            \
+    fprintf(stderr, "docgen: expected '%c', got '%c' (line: %i)\n", (x),                    \
+            (_cursor)->buffer[(_cursor)->cursor - 1], (_cursor)->line);                     \
+    fprintf(stderr, "%s", "(Maintainers, remember that the writer is reading postprocessed" \
+            " text. This is not reading from the file itself. This error might be caused"   \
+            "by the documentation format postprocessor producing invalid syntax\n");        \
+    exit(EXIT_FAILURE);                                                                     \
+} while(0)
+
+#define ASSERT_GETCH_CLASS(_cursor, _class)                                                 \
+do {                                                                                        \
+    if(strchr(_class, libmatch_cursor_getch((_cursor))) != NULL)                            \
+        break;                                                                              \
+                                                                                            \
+    fprintf(stderr, "docgen: expected one of '%s', got '%c' (line: %i)\n", (_class),        \
+            (_cursor)->buffer[(_cursor)->cursor - 1], (_cursor)->line);                     \
+    fprintf(stderr, "%s", "(Maintainers, remember that the writer is reading postprocessed" \
+            " text. This is not reading from the file itself. This error might be caused"   \
+            "by the documentation format postprocessor producing invalid syntax\n");        \
+    exit(EXIT_FAILURE);                                                                     \
+} while(0)
+
+
+/*
  * A more abstract representation of a table.
 */
 struct Table {
@@ -71,6 +112,27 @@ struct Table {
     int separator;
     struct CString *sections;
 };
+
+/*
+ * @docgen: function
+ * @brief: verify that the string give to it contains no marker errors
+ * @name: validate_output
+ *
+ * @description
+ * @Given an input string, it will validate it to make sure that it can be properly
+ * @written to the file. It makes sure that:
+ * @    - There are no unrecognized markers
+ * @    - There is no lists or tables nested in each other
+ * @    - Tables and lists are formatted correctly
+ * @    - There are no incomplete escapes
+ * @    - There are no unclosed tables and lists
+ * @description
+ *
+ * @param string: the string to validate
+ * @type: struct CString
+*/
+
+void writer_validate_string(const char *string);
 
 /*
  * @docgen: function

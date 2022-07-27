@@ -229,6 +229,9 @@
 #include "generators/generators.h"
 #include "postprocessors/postprocessors.h"
 
+/* Global program state of reusable memory buffers. */
+struct ProgramState program_state;
+
 /*
  * @docgen: function
  * @brief: select a postprocessor to run based off the format

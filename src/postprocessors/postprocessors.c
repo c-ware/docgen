@@ -45,6 +45,7 @@
 #include <stdarg.h>
 
 #include "../docgen.h"
+#include "../writer/writer.h"
 
 #include "postprocessors.h"
 
@@ -391,6 +392,7 @@ static void print_section(struct CString *string, const char *section,
     cstring_concats(string, "\n");
 
     /* If this section has no text, notify the user of this. */
+    writer_validate_string(section_text);
     add_breaks(string, section_text);
 }
 

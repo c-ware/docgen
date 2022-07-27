@@ -98,13 +98,13 @@ src/libpath/mkdir.o: src/libpath/mkdir.c src/libpath/libpath.h
 src/libpath/exists.o: src/libpath/exists.c src/libpath/libpath.h
 	$(CC) -c $(CFLAGS) src/libpath/exists.c -o src/libpath/exists.o
 
-src/postprocessors/postprocessors.o: src/postprocessors/postprocessors.c src/docgen.h src/postprocessors/postprocessors.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
+src/postprocessors/postprocessors.o: src/postprocessors/postprocessors.c src/docgen.h src/writer/writer.h src/postprocessors/postprocessors.h src/extractors/macros/macros.h src/extractors/functions/functions.h src/extractors/structures/structures.h src/extractors/macro_functions/macro_functions.h
 	$(CC) -c $(CFLAGS) src/postprocessors/postprocessors.c -o src/postprocessors/postprocessors.o
 
 src/tags/tags.o: src/tags/tags.c src/tags/tags.h src/docgen.h
 	$(CC) -c $(CFLAGS) src/tags/tags.c -o src/tags/tags.o
 
-src/writer/writer.o: src/writer/writer.c
+src/writer/writer.o: src/writer/writer.c src/docgen.h src/writer/writer.h
 	$(CC) -c $(CFLAGS) src/writer/writer.c -o src/writer/writer.o
 
 docgen: $(OBJS)

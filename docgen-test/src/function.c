@@ -16,6 +16,19 @@
  *
  * @description
  * @This is a description. This description has a table.
+ * @\T
+ * @\S ;
+ * @\H foo;bar;baz
+ * @\E foo
+ * @\E bar
+ * @\T
+ * @
+ * @\T
+ * @\S ;
+ * @\H foo;bar;baz
+ * @\E foo
+ * @\E bar
+ * @\T
  * @description
  *
  * @example
