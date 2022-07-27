@@ -44,6 +44,7 @@
     ((type *) params.target_structure)->name
 
 struct CString;
+struct Table;
 struct DocgenFunction;
 struct GeneratorParams;
 struct DocgenStructures;
@@ -51,6 +52,7 @@ struct PostprocessorData;
 struct PostprocessorParams;
 
 struct CString docgen_postprocess_manual(struct PostprocessorData data, struct PostprocessorParams params);
+void docgen_postprocess_manual_table(FILE *location, struct Table table);
 
 void no_nested_elements(const char *string);
 void no_unclosed_elements(const char *string);

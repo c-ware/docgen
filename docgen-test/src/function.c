@@ -15,9 +15,13 @@
  * @setting: macro-briefs
  *
  * @description
- * @This is a description. This description has a table.
+ * @This is a \Bdescription\B. This description has a table.
  * @\T
- * @\S ; * @\H foo;bar;baz * @\E tuna;spam;thud * @\E waldo;quz;eggs * @\T
+ * @\S ;
+ * @\H foo;bar;\Bbaz\B
+ * @\E tuna;\Ispam\I;thud
+ * @\E \Bwaldo\B;quz;eggs
+ * @\T
  * @description
  *
  * @example

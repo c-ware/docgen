@@ -55,12 +55,12 @@
  * @for every single situation, but it is used for some.
  * @description
 */
-#define SWAP_MARKER_STATE(marker, setting)             \
-    if((marker) == 0)                                  \
-        fputs(settings. setting##_start, output_file); \
-    else                                               \
-        fputs(settings. setting##_end, output_file);   \
-                                                       \
+#define SWAP_MARKER_STATE(string, marker, setting)          \
+    if((marker) == 0)                                       \
+        cstring_concats(string, settings. setting##_start); \
+    else                                                    \
+        cstring_concats(string, settings. setting##_end);   \
+                                                            \
     INVERT_BOOLEAN(marker)
 
 /*

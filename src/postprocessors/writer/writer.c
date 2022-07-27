@@ -229,10 +229,12 @@ void dump_cstring(const char *format, struct CString string, char output_path[LI
     int parsing_marker = 0;
     FILE *output_file = NULL;
     struct WriterParams settings;
-    struct LibmatchCursor cursor = libmatch_cursor_init(string.contents, string.length);
+    struct LibmatchCursor cursor;
+    struct CString string_copy = cstring_init("");
 
     liberror_is_null(dum_cstring, format);
     INIT_VARIABLE(settings);
+    INIT_VARIABLE(cursor);
 
     /* Determine the settings to use for interpretingg markers */
     settings = select_format_settings(format);
@@ -247,6 +249,49 @@ void dump_cstring(const char *format, struct CString string, char output_path[LI
     if(output_file == NULL)
         liberror_failure(dump_cstring, fopen); 
 
+    /* Read the output and write the formatted form to the copied buffer */
+    for(cindex = 0; cindex < string.length; cindex++) {
+        int first_character = string.contents[cindex];
+        int second_character = -1;
+        char character[3] = {0, 0, 0};
+
+        if(first_character != '\\') {
+            character[0] = first_character;
+            character[1] = 0x00;
+
+            cstring_concats(&string_copy, character);
+
+            continue;
+        }
+
+        second_character = string.contents[cindex + 1];
+
+        switch(second_character) {
+            case 'B':
+               SWAP_MARKER_STATE(&string_copy, parsing_marker, bold);
+
+               break;
+
+            case 'I':
+               SWAP_MARKER_STATE(&string_copy, parsing_marker, italics);
+
+               break;
+
+            default:
+                character[0] = first_character;
+                character[1] = second_character;
+                character[2] = 0x00;
+
+                cstring_concats(&string_copy, character);
+
+                break;
+        }
+
+        cindex++;
+    }
+
+    cursor = libmatch_cursor_init(string_copy.contents, string_copy.length);
+
     /* Read and interpret individual lines. */
     while(cursor.cursor < cursor.length) {
         char *line = libmatch_read_alloc_until(&cursor, "\n");
@@ -258,18 +303,33 @@ void dump_cstring(const char *format, struct CString string, char output_path[LI
             int sindex = 0;
             struct Table parsed_table = parse_table(&cursor);
 
-            for(sindex = 0; sindex < carray_length(parsed_table.sections); sindex++) {
-                printf("Section: '%s'\n", parsed_table.sections->contents[sindex].contents); 
+            /* These elements must be given. */
+            if(parsed_table.header.contents == NULL) {
+                fprintf(stderr, "%s", "docgen: table must have a header\n"); 
+                exit(EXIT_FAILURE);
             }
 
-            exit(EXIT_FAILURE);
+            if(carray_length(parsed_table.sections) == 0) {
+                fprintf(stderr, "%s", "docgen: table must have sections beneath header\n"); 
+                exit(EXIT_FAILURE);
+            }
+
+            docgen_postprocess_manual_table(output_file, parsed_table);
+
+            carray_free((&parsed_table)->sections, CSTRING);
+            cstring_free(parsed_table.header);
+
+            free(line);
+
+            continue;
         }
 
-        /*
-        printf("Line: '%s'\n", line);
-        */
+        /* Since this is just a normal line, dump it. */
+        fprintf(output_file, "%s\n", line);
+
         free(line);
     }
 
+    cstring_free(string_copy);
     fclose(output_file);
 }

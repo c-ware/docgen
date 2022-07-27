@@ -518,3 +518,61 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
 
     return output;
 }
+
+void docgen_postprocess_manual_table(FILE *location, struct Table table) {
+    int sindex = 0;
+    char separator[2] = {table.separator, 0x00};
+    int headers = strcount(table.header.contents, separator) + 1;
+
+    fprintf(location, "%s", ".TS\n");
+    fprintf(location, "tab(%c);\n", table.separator);
+
+    /* Write the header left aligns */
+    for(sindex = 0; sindex < headers; sindex++) {
+        fprintf(location, "%c", 'l');
+
+        if(sindex == (headers - 1)) {
+            fprintf(location, "%s", " \n");
+
+            continue;
+        }
+
+        fprintf(location, "%c", ' ');
+    }
+
+    /* Write the header and section separator */
+    for(sindex = 0; sindex < headers; sindex++) {
+        fprintf(location, "%c", '_');
+
+        if(sindex == (headers - 1)) {
+            fprintf(location, "%s", " \n");
+
+            continue;
+        }
+
+        fprintf(location, "%c", ' ');
+    }
+
+    /* Write the section left aligns */
+    for(sindex = 0; sindex < headers; sindex++) {
+        fprintf(location, "%c", 'l');
+
+        if(sindex == (headers - 1)) {
+            fprintf(location, "%s", " \n");
+
+            continue;
+        }
+
+        fprintf(location, "%c", ' ');
+    }
+
+    fprintf(location, "%s", ".\n");
+    fprintf(location, "%s\n", table.header.contents);
+
+    /* Write the sections */
+    for(sindex = 0; sindex < carray_length(table.sections); sindex++) {
+        fprintf(location, "%s\n", table.sections->contents[sindex].contents); 
+    }
+
+    fprintf(location, "%s", ".TE\n");
+}
