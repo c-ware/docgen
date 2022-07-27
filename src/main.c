@@ -336,6 +336,8 @@ void generate_functions(struct GeneratorParams parameters, struct DocgenArgument
         carray_free(representation.embedded_macro_functions, CSTRING);
         carray_free(representation.embedded_structures, CSTRING);
         carray_free(representation.embedded_macros, CSTRING);
+
+        break;
     }
 }
 

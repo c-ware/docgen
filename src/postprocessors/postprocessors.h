@@ -53,7 +53,8 @@ struct PostprocessorParams;
 struct CString docgen_postprocess_manual(struct PostprocessorData data, struct PostprocessorParams params);
 
 void no_nested_elements(const char *string);
-void unrecognized_markers(const char *string);
 void no_unclosed_elements(const char *string);
+void no_unrecognized_markers(const char *string);
+void one_table_marker_per_line(const char *string);
 
 #endif

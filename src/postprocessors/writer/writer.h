@@ -102,37 +102,14 @@ do {                                                                            
     exit(EXIT_FAILURE);                                                                     \
 } while(0)
 
-
 /*
  * A more abstract representation of a table.
 */
 struct Table {
-    int length;
-    int height;
     int separator;
-    struct CString *sections;
+    struct CString header;
+    struct CStrings *sections;
 };
-
-/*
- * @docgen: function
- * @brief: verify that the string give to it contains no marker errors
- * @name: validate_output
- *
- * @description
- * @Given an input string, it will validate it to make sure that it can be properly
- * @written to the file. It makes sure that:
- * @    - There are no unrecognized markers
- * @    - There is no lists or tables nested in each other
- * @    - Tables and lists are formatted correctly
- * @    - There are no incomplete escapes
- * @    - There are no unclosed tables and lists
- * @description
- *
- * @param string: the string to validate
- * @type: struct CString
-*/
-
-void writer_validate_string(const char *string);
 
 /*
  * @docgen: function

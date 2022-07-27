@@ -17,11 +17,7 @@
  * @description
  * @This is a description. This description has a table.
  * @\T
- * @\S ;
- * @\H foo;bar;baz
- * @\E foo
- * @\E bar
- * @\T
+ * @\S ; * @\H foo;bar;baz * @\E tuna;spam;thud * @\E waldo;quz;eggs * @\T
  * @description
  *
  * @example

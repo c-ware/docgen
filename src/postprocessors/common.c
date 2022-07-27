@@ -51,7 +51,7 @@
  * Error checking logic
 */
 
-void unrecognized_markers(const char *string) {
+void no_unrecognized_markers(const char *string) {
     int cindex = 0;
     int length = strlen(string);
 
@@ -167,11 +167,6 @@ void no_unclosed_elements(const char *string) {
         cindex++;
     }
 
-    /* Reset these so that we can reliably tell which are not closed
-     * based off which are set to 1 when the loop ends. */
-    in_list = 0;
-    in_table = 0;
-
     if(in_list == 1) {
         fprintf(stderr, "%s", "docgen: unclosed list inside of output\n");    
         exit(EXIT_FAILURE);
@@ -179,6 +174,51 @@ void no_unclosed_elements(const char *string) {
 
     if(in_table == 1) {
         fprintf(stderr, "%s", "docgen: unclosed table inside of output\n");    
+        exit(EXIT_FAILURE);
+    }
+}
+
+void one_table_marker_per_line(const char *string) {
+    int cindex = 0;
+    int length = strlen(string);
+    int marker_on_this_line = 0;
+
+    /* Like last time, we can assume that markers have no
+     * missing componenets, so we can freely roll with indexing
+     * one character past the backslash. */
+    for(cindex = 0; cindex < length; cindex++) {
+        int first_character = string[cindex];
+        int second_character = -1;
+
+        /* A newline should reset that we have not
+         * seen a marker on this line. */
+        if(first_character == '\n')
+            marker_on_this_line = 0;
+
+        if(first_character != '\\')
+            continue;
+
+        second_character = string[cindex + 1];
+
+        /* None of these are table markers-- ignore them */
+        switch(second_character) {
+            case 'B': case 'I': case '\\': 
+            case 'L':
+                cindex++;
+
+                continue;
+        }
+
+        /* We have found a table marker. Have we already seen one
+         * this line? */
+        if(marker_on_this_line == 0) {
+            marker_on_this_line = 1;
+            cindex++;
+
+            continue ;
+        }
+
+        fprintf(stderr, "docgen: table marker '\\%c' found on the same line as another table marker\n", second_character);
         exit(EXIT_FAILURE);
     }
 }

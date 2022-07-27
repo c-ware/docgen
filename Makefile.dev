@@ -104,7 +104,9 @@ src/postprocessors/postprocessors.o: src/postprocessors/postprocessors.c src/doc
 src/postprocessors/common.o: src/postprocessors/common.c src/docgen.h src/postprocessors/writer/writer.h
 	$(CC) -c $(CFLAGS) src/postprocessors/common.c -o src/postprocessors/common.o
 
-src/postprocessors/writer/writer.o: src/postprocessors/writer/writer.c src/docgen.h src/postprocessors/writer/writer.h
+src/postprocessors/writer/writer.o: src/postprocessors/writer/writer.c src/docgen.h src/postprocessors/postprocessors.h
+
+#include 
 	$(CC) -c $(CFLAGS) src/postprocessors/writer/writer.c -o src/postprocessors/writer/writer.o
 
 src/tags/tags.o: src/tags/tags.c src/tags/tags.h src/docgen.h

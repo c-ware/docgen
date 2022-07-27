@@ -74,6 +74,7 @@
 */
 
 #include "../../docgen.h"
+#include "../postprocessors.h"
 
 #include "writer.h"
 
@@ -114,11 +115,121 @@ static struct WriterParams select_format_settings(const char *format) {
     return settings;
 }
 
+static char *get_next_marker(struct LibmatchCursor *cursor) {
+    while(cursor->cursor < cursor->length) {
+        char *next_line = libmatch_read_alloc_until(cursor, "\n");
+
+        libmatch_cursor_getch(cursor);
+
+        /* Immediately invalid line-- a marker is \x */
+        if(strlen(next_line) < 2) {
+            free(next_line); 
+
+            continue;
+        }
+
+        /* Not a marker */
+        if(next_line[0] != '\\') {
+            free(next_line); 
+
+            continue;
+        }
+
+        return next_line;
+    }
+
+    return NULL;
+}
+
+static void validate_separator(const char *line) {
+    struct LibmatchCursor cursor = libmatch_cursor_init((char *) line, strlen(line));
+
+    ASSERT_GETCH(&cursor, '\\');
+    ASSERT_GETCH(&cursor, 'S');
+    ASSERT_GETCH(&cursor, ' ');
+    ASSERT_GETCH_CLASS(&cursor, LIBMATCH_PRINTABLE);
+}
+
+static void assert_not_empty(const char *line) {
+    struct LibmatchCursor cursor = libmatch_cursor_init((char *) line, strlen(line));
+
+    ASSERT_GETCH(&cursor, '\\');
+    ASSERT_GETCH_CLASS(&cursor, LIBMATCH_ALPHA);
+    ASSERT_GETCH(&cursor, ' ');
+    ASSERT_GETCH_CLASS(&cursor, LIBMATCH_PRINTABLE);
+}
+
+static struct Table parse_table(struct LibmatchCursor *cursor) {
+    struct Table new_table;
+    char *next_marker = get_next_marker(cursor);
+
+    INIT_VARIABLE(new_table);
+
+    new_table.sections = carray_init(new_table.sections, CSTRING);
+
+    /* Iterate through each marker */
+    while(next_marker != NULL) {
+        /* End of the table */
+        if(strcmp(next_marker, "\\T") == 0) {
+            free(next_marker);
+
+            break;
+        }
+
+        /* Parse a separator */
+        if(strncmp(next_marker, "\\S", 2) == 0) {
+            validate_separator(next_marker);
+
+            new_table.separator = next_marker[strlen(next_marker) - 1];
+        }
+
+        /* Parse a header */
+        if(strncmp(next_marker, "\\H", 2) == 0) {
+            struct CString header_string;
+
+            INIT_VARIABLE(header_string);
+            header_string.contents = malloc(strlen(next_marker) - strlen("\\H ") + 1);
+            memset(header_string.contents, 0, strlen(next_marker) - strlen("\\H ") + 1);
+
+            /* Verify that the header is not empty, and create a copy of the parsed header. */
+            assert_not_empty(next_marker);
+            strncat(header_string.contents, next_marker + strlen("\\H "), strlen(next_marker) - strlen("\\H "));
+            header_string.length = strlen(header_string.contents);
+            header_string.capacity = header_string.length + 1;
+            new_table.header = header_string;
+        }
+
+        /* Parse an element */
+        if(strncmp(next_marker, "\\E", 2) == 0) {
+            struct CString section_string;
+
+            INIT_VARIABLE(section_string);
+            section_string.contents = malloc(strlen(next_marker) - strlen("\\E ") + 1);
+            memset(section_string.contents, 0, strlen(next_marker) - strlen("\\E ") + 1);
+
+            /* Verify that the section is not empty, and create a copy of the parsed section. */
+            assert_not_empty(next_marker);
+            strncat(section_string.contents, next_marker + strlen("\\E "), strlen(next_marker) - strlen("\\E "));
+            section_string.length = strlen(section_string.contents);
+            section_string.capacity = section_string.length + 1;
+
+            carray_append(new_table.sections, section_string, CSTRING);
+        }
+
+        /* Free either the correct marker, or ignore this one. */
+        free(next_marker);
+        next_marker = get_next_marker(cursor);
+    }
+
+    return new_table;
+}
+
 void dump_cstring(const char *format, struct CString string, char output_path[LIBPATH_MAX_PATH + 1]) {
     int cindex = 0;
     int parsing_marker = 0;
     FILE *output_file = NULL;
     struct WriterParams settings;
+    struct LibmatchCursor cursor = libmatch_cursor_init(string.contents, string.length);
 
     liberror_is_null(dum_cstring, format);
     INIT_VARIABLE(settings);
@@ -127,48 +238,37 @@ void dump_cstring(const char *format, struct CString string, char output_path[LI
     settings = select_format_settings(format);
     output_file = fopen(output_path, "w");
 
+    /* Perform basic sanity checks on the markers */
+    no_unrecognized_markers(string.contents);
+    no_nested_elements(string.contents);
+    no_unclosed_elements(string.contents);
+    one_table_marker_per_line(string.contents);
+
     if(output_file == NULL)
         liberror_failure(dump_cstring, fopen); 
 
-    printf("Writing: '%s'\n", string.contents);
+    /* Read and interpret individual lines. */
+    while(cursor.cursor < cursor.length) {
+        char *line = libmatch_read_alloc_until(&cursor, "\n");
+        libmatch_cursor_getch(&cursor);
 
-    /* Write each character, and interpret marker sequences */
-    for(cindex = 0; cindex < string.length; cindex++) {
-        char first_character = string.contents[cindex];
-        char second_character = -1;
+        /* Parse a table if the line starts with it (the line will not
+         * have any new line at the end of it) */
+        if(strcmp(line, "\\T") == 0) {
+            int sindex = 0;
+            struct Table parsed_table = parse_table(&cursor);
 
-        /* Also keep track of the next character, but it might be out
-         * of bounds, so make suure we do not index out of boundss. */
-        if((cindex + 1) < string.length)
-            second_character = string.contents[cindex + 1];
-
-        /* Is this a match sequence? */
-        if(first_character == '\\') {
-            switch(second_character) {
-                case '\\':
-                    fputc('\\', output_file);
-                    break;
-
-                /* Start or end bold. */
-                case 'B': SWAP_MARKER_STATE(parsing_marker, bold); break;
-
-                /* Start or end italics. */
-                case 'I': SWAP_MARKER_STATE(parsing_marker, italics); break;
-
-                default:
-                    fprintf(stderr, "docgen: unrecognized marker '\\%c'\n", second_character);
-                    exit(EXIT_FAILURE);
-
-                    break;
+            for(sindex = 0; sindex < carray_length(parsed_table.sections); sindex++) {
+                printf("Section: '%s'\n", parsed_table.sections->contents[sindex].contents); 
             }
 
-            /* Consider two characters parsed, so add an extra offset */
-            cindex++;
-
-            continue;
+            exit(EXIT_FAILURE);
         }
 
-        fputc(first_character, output_file);
+        /*
+        printf("Line: '%s'\n", line);
+        */
+        free(line);
     }
 
     fclose(output_file);
