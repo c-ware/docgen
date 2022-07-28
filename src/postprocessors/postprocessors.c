@@ -400,8 +400,19 @@ static void print_section(struct CString *string, const char *section,
     cstring_concats(string, ".SH ");
     cstring_concats(string, section);
     cstring_concats(string, "\n");
+    cstring_concats(string, section_text);
+}
 
-    /* If this section has no text, notify the user of this. */
+static void print_section_with_break(struct CString *string, const char *section,
+                                     const char *section_text) {
+    /* Do not produce a section for an empty seciton */
+    if(strlen(section_text) == 0)
+        return;
+
+    cstring_concats(string, ".SH ");
+    cstring_concats(string, section);
+    cstring_concats(string, "\n");
+
     add_breaks(string, section_text);
 }
 
@@ -491,7 +502,7 @@ struct CString docgen_postprocess_manual(struct PostprocessorData data,
     if(strlen(data.return_value) != 0)
         add_breaks(&output, "\n");
 
-    print_section(&output, "EXAMPLES", data.example);
+    print_section_with_break(&output, "EXAMPLES", data.example);
     print_section(&output, "NOTES", data.notes);
 
     see_also(&output, data, params);
