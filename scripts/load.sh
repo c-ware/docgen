@@ -6,6 +6,10 @@ docgen project ./src/main.c --section cware          \
                             --title 'C-Ware Manuals' \
                             --date "`date +'%b %d, %Y'`"
 
+docgen project ./pages/docgen-intro --section cware          \
+                                    --title 'C-Ware Manuals' \
+                                    --date "`date +'%b %d, %Y'`"
+
 # Process the Makefiles
 makegen project unix --binary docgen --main src/main.c > Makefile
 makegen project unix --binary docgen --main src/main.c \

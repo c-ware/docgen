@@ -1,0 +1,242 @@
+.TH "docgen-intro" "cware" "" "Jul 27, 2022" "C-Ware Manuals"
+.SH NAME
+docgen-intro - an introduction into how to use docgen
+.SH DESCRIPTION
+As described previously, docgen is a program for generating documentation
+.br
+through comments in the source code of a program. This is because it leads
+.br
+to easier to manage documentation, and keeps things organized.
+.br
+
+.br
+This serves as an introduction to writing docgen comments, and will show how
+.br
+to write a comment for describing a project or library-- a sort of central
+.br
+manual of sorts for your project that might redirect users to other parts
+.br
+of the documentation.
+.br
+
+.br
+So, let's begin. First off, declare a multiline comment. The first tag that
+.br
+docgen parses should be on the first line after the opening one. In our case,
+.br
+we want to generate a project manual, so we tell docgen this by putting the
+.br
+first tag as:
+.br
+
+.br
+\fB
+.br
+@docgen: project
+.br
+\fR
+.br
+
+.br
+Now that docgen knows what kind of documentation to generate, we need to start
+.br
+giving it some information about our project, like its name, a brief description,
+.br
+a long description, examples, notes, see also, etc. Let's give it a name and a broef
+.br
+description. Remember: each tag has to be on its own line.
+.br
+
+.br
+\fB
+.br
+@name: my_prog
+.br
+@brief: this is my test program
+.br
+\fR
+.br
+
+.br
+Let's say our program accepts some arguments to it. We want this to display
+.br
+in the 'SYNOPSIS' section, but how do we tell docgen to put it in there? The
+.br
+answer is the \fBarguments\fR tag.
+.br
+
+.br
+The arguments tag surrounds a block of text that should act as the program's
+.br
+argument string. it is always put at the top of projects. Let's say ours looks like
+.br
+this.
+.br
+
+.br
+\fB
+.br
+@arguments
+.br
+@my_prog FOO BAR [ --help | -h ] [ --some-flag | -s ]
+.br
+@                [ --some-option OPT | -o OPT ]
+.br
+@arguments
+.br
+\fR
+.br
+
+.br
+
+.br
+All block tags like arguments, and notes require that there is an 'at symbol' on each
+.br
+line of the block like shown above. Now, we need to describe our project. We do this with
+.br
+the \fB@description\fR tag, which @surrounds a block of text to consider it apart of the
+.br
+description. For example
+.br
+
+.br
+\fB
+.br
+@description
+.br
+@This is part of my program description.
+.br
+@This is another line of my program description.
+.br
+@Tags can have \\Bbold text\\B, and they can also have
+.br
+@\\IItalic text\\I.
+.br
+@description
+.br
+\fR
+.br
+
+.br
+Let's say we want to also point the users to sub-manuals that are apart of the project
+.br
+itself. We might want to do it with a table. Let's change the description to this to:
+.br
+
+.br
+\fB
+.br
+@description
+.br
+@This is part of my program description.
+.br
+@This is another line of my program description.
+.br
+@Tags can have \\Bbold text\\B, and they can also have
+.br
+@\\IItalic text\\I.
+.br
+@
+.br
+@You can find sub-manuals at these locations.
+.br
+@\\T
+.br
+@\\S ;
+.br
+@\\H Manual;Description
+.br
+@\\E \\Bmanual-a\\B(1);This is the first manual
+.br
+@\\E \\Bmanual-b\\B(1);This is the second manual
+.br
+@\\E \\Bmanual-c\\B(1);This is the third manual
+.br
+@\\T
+.br
+@description
+.br
+\fR
+.br
+
+.br
+\fB\\S\fR is the separator specifier for the table, which tells docgen where one cell ends
+.br
+and anoother begins. They must be one character. \fB\\H\fR is the 'header' which is the top
+.br
+of the table, and usually is used to describe each column in the table, and \fB\\E\fR is
+.br
+used to tell docgen what each row is. Rows can have the separator key to tell docgen to
+.br
+put the text after in the next column.
+.br
+
+.br
+We can do the same for notes (we do not add a table, although you can also add one in any
+.br
+of the sections.)
+.br
+\fB
+.br
+@notes
+.br
+@This is where the notes for my program go. Most likely fit for technicalities about
+.br
+@using the program, things too small to mention in the description, etc.
+.br
+@notes
+.br
+\fR
+.br
+
+.br
+And examples.
+.br
+\fB
+.br
+@examples
+.br
+@Here is one example of how to use my program.
+.br
+@\\Bmy_prog argument_a argument_b --some-option foo\\B
+.br
+@
+.br
+@Here is how to get help with my program.
+.br
+@\\Bmy_prog --help\\B
+.br
+@examples
+.br
+\fR
+.br
+
+.br
+Finally, let's tell the user where to find other related manuals with the
+.br
+\fB@reference\fR tag.
+.br
+
+.br
+\fB
+.br
+@reference: fork(1)
+.br
+@reference: write(1)
+.br
+@reference: printf(3)
+.br
+\fR
+.br
+
+.br
+And that is mostly it for how to generate a project. See the examples section
+.br
+of the main manual to see how to generate your project once you have written it,
+.br
+and the other types of documentation you can generate along with the tags they
+.br
+use.
+.br
+
+.br
