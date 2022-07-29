@@ -53,4 +53,3 @@ Note, however, that docgen does NOT support nested formatters, like for example
 
 That is pretty much it.
 All this just to make whitespace appear correctly. Jesus christ.
-
