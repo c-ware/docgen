@@ -1,6 +1,6 @@
 CC=cc
 OBJS=../../deps/cstring/cstring.o
-CFLAGS=
+CFLAGS=-Wall -Wextra -Wshadow -g -ansi
 PROGNAME=docgen-extractor-c
 
 all: $(OBJS) $(PROGNAME)

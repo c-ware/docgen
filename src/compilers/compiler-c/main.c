@@ -35,20 +35,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef CWARE_DOCGEN_EXTRACTOR_H
-#define CWARE_DOCGEN_EXTRACTOR_H
+/*
+ * This is the entry point for the docgen compiler for C tags. It reads input
+ * line by line and produces a target-independant representation of all of the
+ * tags for the target to produce into documentation.
+*/
 
-/* Limits */
-#define LINE_LENGTH   1024 + 1
+#include <string.h>
+#include <stdlib.h>
 
-/* Exit codes */
-#define EXIT_MISSING_NEWLINE        2
-#define EXIT_UNCLOSED_COMMENT       3
-#define EXIT_UNCLOSED_STRING        4
-#define EXIT_UNCLOSED_DOCGEN        5
-#define EXIT_CLOSED_ON_DOCGEN_TAG   6
+#include "../../docgen.h"
 
-/* Misc. information */
-#define PROGRAM_NAME    "docgen-extractor-c"
-
-#endif
+int main(void) {
+    return EXIT_SUCCESS;
+}

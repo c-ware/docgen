@@ -50,26 +50,63 @@
 
 #include "main.h"
 
-int skip_double_quote(struct CString stdin_body, int offset) {
+#define HANDLE_COMMENTS_AND_STRINGS()                                       \
+    /* Skip to the next double quote. The function called here will         \
+     * produce an error yelling at the user if the end of the file is       \
+     * encountered and no ending quote is found. Also, we can still         \
+     * find double quotes in comments, so we do not do this check when      \
+     * we are in comments. */                                               \
+    if(character == '"' && in_comment == 0) {                               \
+        index++;                                                            \
+        index += skip_double_quote(stdin_body, index);                      \
+                                                                            \
+        continue;                                                           \
+    }                                                                       \
+                                                                            \
+    if(character == '\'' && in_comment == 0) {                              \
+        index++;                                                            \
+        index += skip_single_quote(stdin_body, index);                      \
+                                                                            \
+        continue;                                                           \
+    }                                                                       \
+                                                                            \
+    /* We are in a comment now. We can assume we are not in a string        \
+     * because of the other checks that would skip strings. */              \
+    if(strncmp(stdin_body.contents + index, "/*", 2) == 0) {                \
+        in_comment = 1;                                                     \
+        index += strlen("/*");                                              \
+                                                                            \
+        continue;                                                           \
+    }                                                                       \
+                                                                            \
+    /* We are no longer in a comment. Same logic applies as the above. */   \
+    if(strncmp(stdin_body.contents + index, "*/", 2) == 0) {                \
+        in_comment = 0;                                                     \
+        index += strlen("/*");                                              \
+                                                                            \
+        continue;                                                           \
+    }
+
+int skip_double_quote(struct CString body, int offset) {
     int escaped = 0;
     int caller_offset = 0;
 
-    LIBERROR_IS_NULL(stdin_body.contents);
+    LIBERROR_IS_NULL(body.contents);
     LIBERROR_IS_NEGATIVE(offset);
-    LIBERROR_IS_NEGATIVE(stdin_body.length);
-    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
-    LIBERROR_IS_VALUE(stdin_body.length, 0);
-    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
-    LIBERROR_OUT_OF_BOUNDS(offset, stdin_body.length);
+    LIBERROR_IS_NEGATIVE(body.length);
+    LIBERROR_IS_NEGATIVE(body.capacity);
+    LIBERROR_IS_VALUE(body.length, 0);
+    LIBERROR_IS_VALUE(body.capacity, 0);
+    LIBERROR_OUT_OF_BOUNDS(offset, body.length);
 
-    while(offset < stdin_body.length) {
+    while(offset < body.length) {
         int character = 0;
 
-        LIBERROR_OUT_OF_BOUNDS(offset, stdin_body.length);
-        character = stdin_body.contents[offset];
+        LIBERROR_OUT_OF_BOUNDS(offset, body.length);
+        character = body.contents[offset];
 
         /* Skip two characters, and toggle the escaped so that
-         * if (offset += 2 < stdin_body.length), then we can
+         * if (offset += 2 < body.length), then we can
          * differentiate between an incomplete escape, and an
          * unclosed string */
         if(character == '\\') {
@@ -99,26 +136,26 @@ int skip_double_quote(struct CString stdin_body, int offset) {
     exit(EXIT_UNCLOSED_STRING);
 }
 
-int skip_single_quote(struct CString stdin_body, int offset) {
+int skip_single_quote(struct CString body, int offset) {
     int escaped = 0;
     int caller_offset = 0;
 
-    LIBERROR_IS_NULL(stdin_body.contents);
+    LIBERROR_IS_NULL(body.contents);
     LIBERROR_IS_NEGATIVE(offset);
-    LIBERROR_IS_NEGATIVE(stdin_body.length);
-    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
-    LIBERROR_IS_VALUE(stdin_body.length, 0);
-    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
-    LIBERROR_OUT_OF_BOUNDS(offset, stdin_body.length);
+    LIBERROR_IS_NEGATIVE(body.length);
+    LIBERROR_IS_NEGATIVE(body.capacity);
+    LIBERROR_IS_VALUE(body.length, 0);
+    LIBERROR_IS_VALUE(body.capacity, 0);
+    LIBERROR_OUT_OF_BOUNDS(offset, body.length);
 
-    while(offset < stdin_body.length) {
+    while(offset < body.length) {
         int character = 0;
 
-        LIBERROR_OUT_OF_BOUNDS(offset, stdin_body.length);
-        character = stdin_body.contents[offset];
+        LIBERROR_OUT_OF_BOUNDS(offset, body.length);
+        character = body.contents[offset];
 
         /* Skip two characters, and toggle the escaped so that
-         * if (offset += 2 < stdin_body.length), then we can
+         * if (offset += 2 < body.length), then we can
          * differentiate between an incomplete escape, and an
          * unclosed string */
         if(character == '\\') {
@@ -186,7 +223,11 @@ int get_line(struct CString stdin_body, int index) {
     return line;
 }
 
-void error_ends_with_newline(struct CString stdin_body) {
+/*
+ * Produce an error message if the stdin body does not end with a
+ * newline (0x10)
+*/
+void error_ends_without_newline(struct CString stdin_body) {
     LIBERROR_IS_NULL(stdin_body.contents);
     LIBERROR_IS_NEGATIVE(stdin_body.length);
     LIBERROR_IS_NEGATIVE(stdin_body.capacity);
@@ -202,6 +243,10 @@ void error_ends_with_newline(struct CString stdin_body) {
     exit(EXIT_MISSING_NEWLINE);
 }
 
+/*
+ * Produce an error message if the stdin body contains an unmatched
+ * docgen tag.
+*/
 void error_unmatched_docgen(struct CString stdin_body) {
     int index = 0;
     int in_comment = 0;
@@ -220,41 +265,7 @@ void error_unmatched_docgen(struct CString stdin_body) {
         LIBERROR_OUT_OF_BOUNDS(index, stdin_body.length);
         character = stdin_body.contents[index];
 
-        /* Skip to the next double quote. The function called here will
-         * produce an error yelling at the user if the end of the file is
-         * encountered and no ending quote is found. Also, we can still
-         * find double quotes in comments, so we do not do this check when
-         * we are in comments. */
-        if(character == '"' && in_comment == 0) {
-            index++;
-            index += skip_double_quote(stdin_body, index);
-
-            continue; 
-        }
-
-        if(character == '\'' && in_comment == 0) {
-            index++;
-            index += skip_single_quote(stdin_body, index);
-
-            continue; 
-        }
-
-        /* We are in a comment now. We can assume we are not in a string
-         * because of the other checks that would skip strings. */
-        if(strncmp(stdin_body.contents + index, "/*", 2) == 0) {
-            in_comment = 1;
-            index += strlen("/*");
-
-            continue;
-        }
-
-        /* We are no longer in a comment. Same logic applies as the above. */
-        if(strncmp(stdin_body.contents + index, "*/", 2) == 0) {
-            in_comment = 0; 
-            index += strlen("/*");
-
-            continue;
-        }
+        HANDLE_COMMENTS_AND_STRINGS()
 
         /* If this is not the docgen tag, then ignore it. */
         if(strncmp(stdin_body.contents + index, "@docgen\n", strlen("@docgen\n")) != 0) {
@@ -290,6 +301,78 @@ void error_unmatched_docgen(struct CString stdin_body) {
     exit(EXIT_UNCLOSED_DOCGEN);
 }
 
+/*
+ * Verifies that the end of a comment does not appear on the same line
+ * as a docgen tag.
+*/
+void error_comment_end_on_tag_line(struct CString stdin_body) {
+    int index = 0;
+    int in_comment = 0;
+    int last_tag_line = 0;
+    int in_docgen_tag = 0;
+
+    LIBERROR_IS_NULL(stdin_body.contents);
+    LIBERROR_IS_NEGATIVE(stdin_body.length);
+    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
+    LIBERROR_IS_VALUE(stdin_body.length, 0);
+    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
+
+    while(index < stdin_body.length) {
+        int character = 0;
+        char *newline_location = NULL;
+
+        LIBERROR_OUT_OF_BOUNDS(index, stdin_body.length);
+        character = stdin_body.contents[index];
+
+        HANDLE_COMMENTS_AND_STRINGS()
+
+        /* Do not bother with characters that are not '@' signs */
+        if(character != '@') {
+            index++;
+
+            continue; 
+        }
+
+        /* Toggle the docgen tag to let us know that we can now display docgen
+         * tags */
+        if(strncmp(stdin_body.contents + index, "@docgen\n", strlen("@docgen\n")) == 0) {
+            INVERT_BOOLEAN(in_docgen_tag);
+            index += strlen("@docgen\n");
+
+            continue;
+        }
+
+        /* Only count '@' signs as actual docgen tags if we are IN a docgen block */
+        if(in_docgen_tag == 0) {
+            index++;
+
+            continue; 
+        }
+
+        /* We know there will always be a new line, so we can replace the
+         * new line temporarily so we can check the line, and then put it back. */
+        newline_location = strchr(stdin_body.contents + index, '\n');
+        LIBERROR_IS_NULL(newline_location);
+        LIBERROR_IS_NOT_VALUE(*newline_location, '\n');
+
+        /* There cannot be an end of multiline comment delimiter on the same line
+         * as this docgen tag */
+        if(strstr(stdin_body.contents + index, "*/") != NULL) {
+            fprintf(LIBERROR_STREAM, PROGRAM_NAME ": '*/' detected on the same line as a docgen tag on line %i\n",
+                    get_line(stdin_body, index) + 1);
+            exit(EXIT_CLOSED_ON_DOCGEN_TAG);
+        }
+
+        index = CHAR_OFFSET(stdin_body.contents, newline_location);
+    }
+}
+
+/*
+ * Scan the stdin (through the consumed cstring) for any docgen
+ * tags. A docgen tag is defined as anything that is between
+ * two opening tags, 'docgen.' For each tag it finds, it will
+ * write it to the stdout.
+*/
 void scan_stdin(struct CString stdin_body) {
     int index = 0;
     int in_comment = 0;
@@ -308,38 +391,7 @@ void scan_stdin(struct CString stdin_body) {
         LIBERROR_OUT_OF_BOUNDS(index, stdin_body.length);
         character = stdin_body.contents[index];
 
-        /* We are in a comment now. We can assume we are not in a string
-         * because of the other checks that would skip strings. */
-        if(strncmp(stdin_body.contents + index, "/*", 2) == 0) {
-            in_comment = 1;
-            index += strlen("/*");
-
-            continue;
-        }
-
-        /* We are no longer in a comment. Same logic applies as the above. */
-        if(strncmp(stdin_body.contents + index, "*/", 2) == 0) {
-            in_comment = 0; 
-            index += strlen("*/");
-
-            continue;
-        }
-
-        /* Skip to the next double quote. We can still find double quotes in
-         * comments, so we do not do this check when we are in comments. */
-        if(character == '"' && in_comment == 0) {
-            index++;
-            index += skip_double_quote(stdin_body, index);
-
-            continue; 
-        }
-
-        if(character == '\'' && in_comment == 0) {
-            index++;
-            index += skip_single_quote(stdin_body, index);
-
-            continue; 
-        }
+        HANDLE_COMMENTS_AND_STRINGS()
 
         /* Do not bother with characters that are not '@' signs */
         if(character != '@') {
@@ -366,11 +418,6 @@ void scan_stdin(struct CString stdin_body) {
             continue; 
         }
 
-        /* @docgen
-@foo
-@docgen
-*/
-
         /* We know there will always be a new line, so we can replace the
          * new line temporarily so printf will not display past it, and then
          * put it back. */
@@ -389,9 +436,9 @@ void scan_stdin(struct CString stdin_body) {
 int main(void) {
     struct CString stdin_body = cstring_loads(stdin);
 
-    error_ends_with_newline(stdin_body);    
+    error_ends_without_newline(stdin_body);    
+    error_comment_end_on_tag_line(stdin_body);
     error_unmatched_docgen(stdin_body);
-
     scan_stdin(stdin_body);
 
     cstring_free(stdin_body);
