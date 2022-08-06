@@ -776,6 +776,42 @@ struct CString cstring_loadf(FILE *file);
 
 /*
  * @docgen: function
+ * @brief: load a stream into a cstring
+ * @name: cstring_loads
+ *
+ * @include: cstring.h
+ *
+ * @description
+ * @Loads the contents of a stream (stdin, presumably), into a NUL-terminated
+ * @cstring. Please do not use this for regular files, which are seekable. Rather,
+ * @use cstring_loadf(cware)
+ * @description
+ *
+ * @example
+ * @#include "cstring.h"
+ * @
+ * @int main(void) {
+ * @    // Load the stdin into a string
+ * @    struct CString string_a = cstring_loads(stdin);
+ * @
+ * @    cstring_free(string_a);
+ * @
+ * @    return 0;
+ * @}
+ * @example
+ *
+ * @error: stream is NULL
+ *
+ * @param stream: the stream to load
+ * @type: FILE *
+ *
+ * @return: a new cstring
+ * @type: struct CString
+*/
+struct CString cstring_loads(FILE *stream);
+
+/*
+ * @docgen: function
  * @brief: slice a segment of the string
  * @name: cstring_slice
  *

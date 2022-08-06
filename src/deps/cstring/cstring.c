@@ -319,6 +319,22 @@ struct CString cstring_loadf(FILE *file) {
     return cstring;
 }
 
+struct CString cstring_loads(FILE *stream) {
+    int length = 0;
+    char buffer[256 + 1];
+    struct CString cstring = cstring_init("");
+
+    liberror_is_null(cstring_loads, stream);
+
+    /* Read 256 bytes until there is nothing else to read */
+    while((length = fread(buffer, 1, 256, stream)) != 0) {
+        buffer[length] = 0x00;
+        cstring_concats(&cstring, buffer);
+    }
+
+    return cstring;
+}
+
 /* Misc. operations */
 void cstring_reset(struct CString *cstring) {
     liberror_is_null(cstring_reset, cstring);

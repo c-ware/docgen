@@ -1,0 +1,21 @@
+These are the error checks that should happen before extraction (not necessarily in this order)
+
+- All double-strings are closed
+- All single-quote strings are closed
+- All mutliline comments are closed (including non-docgen comments)
+- There are no unknown tags (check only docgen comments)
+- The file must end in a new line (\n)
+- No multiline tags have holes inside of them (lines without a @)
+- All multiline tags are closed
+- Tag names are not too long
+- All embed choices are valid (e.g only constant, macro_function, function, etc)
+- All docgen choices are valid (e.g only project, functions, etc)
+- All things requested to be embedded exist in the file
+- All embedded structures are closed with struct_end
+- The first tag is always @docgen (a tag is defined as any line in a comment where the first @ appears before
+                                   any alphanumeric character)
+- There are no unknown settings declared
+- Tags do not overlap on the same line
+- Function parameters have a type after them
+- Structure fields have a type after them
+- Return has a type after it

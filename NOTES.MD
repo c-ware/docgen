@@ -1,25 +1,49 @@
 # NOTES.md
 
-Stuff to remember about the project.
+- A pipeline oriented implementation of docgen
+- Each individual component feeds input into the next
+- Components are unified through a shell script
 
-- Remember not to extraneous information between table or list markers and their
-related markers, (like in the case of troff, .br being added), as this will mess
-up the strict rules about table and lists. If our table looks like this before it
-is processed by the writer:
+- Extractor
+    - Strips all non-docgen comments and code from the stdin
+      by following these rules.
 
-```
-\T
-.br
-\S ;
-.br
-...
-```
+      1. Read line
+      2. Does this line contain a @? (jump to 1 if no)
+      3. Starting at the @, does the line contain @docgen\n? (jump to 5 if no)
+      4. Invert the IN_DOCGEN_COMMENT boolean
+      5. Are we in a docgen comment? (jump to 1 if no)
+      6. Print everything after @
+      7. Jump to 1
 
-Then it will error because the `\T` epects a `\S` immediately after. This is only
-really a concern in troff, but either way, this is usually avoided by having blocks
-like descriptions and notes be written with the `add_breaks` function, which will
-not add .br's in between each line. All you must do is verify that the block you
-are about to write is correct by calling the publuc function `writer_validate_string`.
-As for tables or lists that may be written by the postprocessor, well, just do not
-add .br's! That being said, make sure you call the validation function before the
-call to `add_breaks`.
+    - Outputs each line with its text after the @. Each "object" which are the tags
+      extracted from a single comment is grouped in a pair of "@docgen" tags. Each
+      object is not necessarily the same type to allow the compiler to handle embeds,
+      as it needs to know each object to embed.
+
+- Compiler
+    - Translates each object of a certain type into a machine-readable format
+    - Format consists of:
+        - Global settings
+        - List of section and body pairs
+        - List of embeds for the synopsis
+    - Most of the language-specific logic comes from the synopsis,
+      and by proxy, embeds.
+    - Calls on docgen library functions for generating the description, notes, etc
+    - The compiler will output a format like this:
+        SETTINGS 0x1 SETTING 0x1 VALUE 0x2 SETTING 0x1 VALUE 0x3
+        SECTIONS 0x1 SECTIOB 0x1 BODY 0x2 SECTION 0x1 BODY 0x3
+        EMBEDS 0x1 TYPE 0x1 EMBED 0x2 TYPE 0x1 EMBED
+        0x4
+        SETTINGS 0x1 SETTING 0x1 VALUE 0x2 SETTING 0x1 VALUE 0x3
+        SECTIONS 0x1 SECTIOB 0x1 BODY 0x2 SECTION 0x1 BODY 0x3
+        EMBEDS 0x1 TYPE 0x1 EMBED 0x2 TYPE 0x1 EMBED
+        0x4
+        ...
+
+- Formatter
+    - Translates each compiled object into an actual piece of documentation
+      using the target's rules and syntax.
+    - Iteratively loads each compiled object
+    - Tags are extracted from the array with a "find_tag" functionn
+    - Name of the file extracted from the "name" setting
