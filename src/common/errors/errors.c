@@ -36,47 +36,48 @@
 */
 
 /*
- * Central header for docgen and all of its programs. Contains all the dependencies
- * for each program.
+ * This file implements common error handling routines, like getting the line
+ * number.
 */
 
-#ifndef CWARE_DOCGEN_H
-#define CWARE_DOCGEN_H
+#include "errors.h"
 
-#include "deps/cstring/cstring.h"
-#include "deps/liberror/liberror.h"
+#include "../../docgen.h"
 
-#define PTR_TO_NUM(x) \
-    ((unsigned long) (x))
+/* 
+ * Scan the stdin body until the index location to see which line
+ * the cursor is on. The search will stop when it goes beyond the
+ * given index.
+*/
+int common_errors_get_line(struct CString body, int index) {
+    int line = 0;
+    int cursor = 0;
 
-#define CHAR_OFFSET(str, chr) \
-    ((PTR_TO_NUM(chr)) - (PTR_TO_NUM(str)))
+    LIBERROR_IS_NULL(body.contents);
+    LIBERROR_IS_NEGATIVE(index);
+    LIBERROR_IS_NEGATIVE(body.length);
+    LIBERROR_IS_NEGATIVE(body.capacity);
+    LIBERROR_IS_VALUE(body.length, 0);
+    LIBERROR_IS_VALUE(body.capacity, 0);
+    LIBERROR_OUT_OF_BOUNDS(index, body.length);
 
-#define INVERT_BOOLEAN(x) \
-        ((x) = !(x))
+    /* We can do this rather than the actual length since we verify that the
+     * index to stop at is within the bounds of the length.  */
+    while(cursor < index) {
+        int character = 0;
 
-/* Object verifies (basically a bunch of calls to
- * liberror to verify the structure of an object
- * at runtime is how it should be. */
-#define VERIFY_CSTRING(string)               \
-    LIBERROR_IS_NULL((string).contents);     \
-    LIBERROR_IS_NEGATIVE((string).length);   \
-    LIBERROR_IS_NEGATIVE((string).capacity); \
-    LIBERROR_IS_VALUE((string).length, 0);   \
-    LIBERROR_IS_VALUE((string).capacity, 0)
+        LIBERROR_OUT_OF_BOUNDS(cursor, body.length);
+        character = body.contents[cursor];
 
+        if(character != '\n') {
+            cursor++;
 
-/* Useful character classes */
-#define CLASS_LOWER          "abcdefghijklmnopqrstuvwxyz"
-#define CLASS_UPPER          "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define CLASS_NUMERIC        "0123456789"
-#define CLASS_ALPHA          CLASS_LOWER CLASS_UPPER
-#define CLASS_ALPHANUM       CLASS_LOWER CLASS_ALPHA CLASS_NUMERIC
-#define CLASS_WHITESPACE     " \t\v\n\r"
-#define CLASS_UNPRINTABLE    "\x0\x1\x2\x3\x4\x5\x6\x7\x8\x9\xA\xB\xC\xD\xE\xF\x10\x11\x12\x13\x14" \
-                             "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x20"
-#define CLASS_PRINTABLE      "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm[];',./{}:\"<>?1234567890!@#$%^&*()-=_+`~\\|"
-#define CLASS_NON_ALPHA      "[];',./{}:\"<>?!@#$%^&*()-=_+`~\\|" CLASS_NUMERIC CLASS_WHITESPACE CLASS_UNPRINTABLE
-    
+            continue;
+        }
 
-#endif
+        line++;
+        cursor++;
+    }
+
+    return line;
+}

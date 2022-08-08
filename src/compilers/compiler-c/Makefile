@@ -1,7 +1,7 @@
 CC=cc
 OBJS=../../deps/cstring/cstring.o ../../common/errors/errors.o
 CFLAGS=-Wall -Wextra -Wshadow -g -ansi
-PROGNAME=docgen-extractor-c
+PROGNAME=docgen-compiler-c
 
 all: $(OBJS) $(PROGNAME)
 

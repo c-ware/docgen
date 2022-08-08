@@ -47,6 +47,7 @@
 #include <stdlib.h>
 
 #include "../../docgen.h"
+#include "../../common/errors/errors.h"
 
 #include "main.h"
 
@@ -91,12 +92,7 @@ int skip_double_quote(struct CString body, int offset) {
     int escaped = 0;
     int caller_offset = 0;
 
-    LIBERROR_IS_NULL(body.contents);
-    LIBERROR_IS_NEGATIVE(offset);
-    LIBERROR_IS_NEGATIVE(body.length);
-    LIBERROR_IS_NEGATIVE(body.capacity);
-    LIBERROR_IS_VALUE(body.length, 0);
-    LIBERROR_IS_VALUE(body.capacity, 0);
+    VERIFY_CSTRING(stdin_body);
     LIBERROR_OUT_OF_BOUNDS(offset, body.length);
 
     while(offset < body.length) {
@@ -140,12 +136,7 @@ int skip_single_quote(struct CString body, int offset) {
     int escaped = 0;
     int caller_offset = 0;
 
-    LIBERROR_IS_NULL(body.contents);
-    LIBERROR_IS_NEGATIVE(offset);
-    LIBERROR_IS_NEGATIVE(body.length);
-    LIBERROR_IS_NEGATIVE(body.capacity);
-    LIBERROR_IS_VALUE(body.length, 0);
-    LIBERROR_IS_VALUE(body.capacity, 0);
+    VERIFY_CSTRING(stdin_body);
     LIBERROR_OUT_OF_BOUNDS(offset, body.length);
 
     while(offset < body.length) {
@@ -185,54 +176,12 @@ int skip_single_quote(struct CString body, int offset) {
     exit(EXIT_UNCLOSED_STRING);
 }
 
-/* 
- * Scan the stdin body until the index location to see which line
- * the cursor is on. The search will stop when it goes beyond the
- * given index.
-*/
-int get_line(struct CString stdin_body, int index) {
-    int line = 0;
-    int cursor = 0;
-
-    LIBERROR_IS_NULL(stdin_body.contents);
-    LIBERROR_IS_NEGATIVE(index);
-    LIBERROR_IS_NEGATIVE(stdin_body.length);
-    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
-    LIBERROR_IS_VALUE(stdin_body.length, 0);
-    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
-    LIBERROR_OUT_OF_BOUNDS(index, stdin_body.length);
-
-    /* We can do this rather than the actual length since we verify that the
-     * index to stop at is within the bounds of the length. */
-    while(cursor <= index) {
-        int character = 0;
-
-        LIBERROR_OUT_OF_BOUNDS(cursor, stdin_body.length);
-        character = stdin_body.contents[cursor];
-
-        if(character != '\n') {
-            cursor++;
-
-            continue;
-        }
-
-        line++;
-        cursor++;
-    }
-
-    return line;
-}
-
 /*
  * Produce an error message if the stdin body does not end with a
  * newline (0x10)
 */
 void error_ends_without_newline(struct CString stdin_body) {
-    LIBERROR_IS_NULL(stdin_body.contents);
-    LIBERROR_IS_NEGATIVE(stdin_body.length);
-    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
-    LIBERROR_IS_VALUE(stdin_body.length, 0);
-    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
+    VERIFY_CSTRING(stdin_body);
 
     /* No need to check if (stdin_body.length - 1) is in bounds,
      * since (length - 1) is < 0 only when length <= 0 */
@@ -253,11 +202,7 @@ void error_unmatched_docgen(struct CString stdin_body) {
     int last_tag_line = 0;
     int in_docgen_tag = 0;
 
-    LIBERROR_IS_NULL(stdin_body.contents);
-    LIBERROR_IS_NEGATIVE(stdin_body.length);
-    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
-    LIBERROR_IS_VALUE(stdin_body.length, 0);
-    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
+    VERIFY_CSTRING(stdin_body);
 
     while(index < stdin_body.length) {
         int character = 0;
@@ -276,7 +221,7 @@ void error_unmatched_docgen(struct CString stdin_body) {
 
         /* Record where we found the opening docgen tag */
         if(in_docgen_tag == 0)
-            last_tag_line = get_line(stdin_body, index);
+            last_tag_line = common_errors_get_line(stdin_body, index);
 
         INVERT_BOOLEAN(in_docgen_tag);
         index += strlen("@docgen\n");
@@ -311,11 +256,7 @@ void error_comment_end_on_tag_line(struct CString stdin_body) {
     int last_tag_line = 0;
     int in_docgen_tag = 0;
 
-    LIBERROR_IS_NULL(stdin_body.contents);
-    LIBERROR_IS_NEGATIVE(stdin_body.length);
-    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
-    LIBERROR_IS_VALUE(stdin_body.length, 0);
-    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
+    VERIFY_CSTRING(stdin_body);
 
     while(index < stdin_body.length) {
         int character = 0;
@@ -359,7 +300,7 @@ void error_comment_end_on_tag_line(struct CString stdin_body) {
          * as this docgen tag */
         if(strstr(stdin_body.contents + index, "*/") != NULL) {
             fprintf(LIBERROR_STREAM, PROGRAM_NAME ": '*/' detected on the same line as a docgen tag on line %i\n",
-                    get_line(stdin_body, index) + 1);
+                    common_errors_get_line(stdin_body, index) + 1);
             exit(EXIT_CLOSED_ON_DOCGEN_TAG);
         }
 
@@ -378,11 +319,7 @@ void scan_stdin(struct CString stdin_body) {
     int in_comment = 0;
     int in_docgen_tag = 0;
 
-    LIBERROR_IS_NULL(stdin_body.contents);
-    LIBERROR_IS_NEGATIVE(stdin_body.length);
-    LIBERROR_IS_NEGATIVE(stdin_body.capacity);
-    LIBERROR_IS_VALUE(stdin_body.length, 0);
-    LIBERROR_IS_VALUE(stdin_body.capacity, 0);
+    VERIFY_CSTRING(stdin_body);
 
     while(index < stdin_body.length) {
         int character = 0;

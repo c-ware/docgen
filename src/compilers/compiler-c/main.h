@@ -35,48 +35,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*
- * Central header for docgen and all of its programs. Contains all the dependencies
- * for each program.
-*/
+#ifndef CWARE_DOCGEN_COMPILER_C_H
+#define CWARE_DOCGEN_COMPILER_C_H
 
-#ifndef CWARE_DOCGEN_H
-#define CWARE_DOCGEN_H
+/* Limits */
+#define TAG_LENGTH  32
 
-#include "deps/cstring/cstring.h"
-#include "deps/liberror/liberror.h"
+#define MULTILINE_TAGS  4
 
-#define PTR_TO_NUM(x) \
-    ((unsigned long) (x))
+/* Exit codes */
+#define EXIT_MISSING_NEWLINE            2
+#define EXIT_LINE_DOESNT_START_WITH_AT  3
+#define EXIT_UNCLOSED_TAG               4
+#define EXIT_TAG_TOO_LONG               5
 
-#define CHAR_OFFSET(str, chr) \
-    ((PTR_TO_NUM(chr)) - (PTR_TO_NUM(str)))
-
-#define INVERT_BOOLEAN(x) \
-        ((x) = !(x))
-
-/* Object verifies (basically a bunch of calls to
- * liberror to verify the structure of an object
- * at runtime is how it should be. */
-#define VERIFY_CSTRING(string)               \
-    LIBERROR_IS_NULL((string).contents);     \
-    LIBERROR_IS_NEGATIVE((string).length);   \
-    LIBERROR_IS_NEGATIVE((string).capacity); \
-    LIBERROR_IS_VALUE((string).length, 0);   \
-    LIBERROR_IS_VALUE((string).capacity, 0)
-
-
-/* Useful character classes */
-#define CLASS_LOWER          "abcdefghijklmnopqrstuvwxyz"
-#define CLASS_UPPER          "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define CLASS_NUMERIC        "0123456789"
-#define CLASS_ALPHA          CLASS_LOWER CLASS_UPPER
-#define CLASS_ALPHANUM       CLASS_LOWER CLASS_ALPHA CLASS_NUMERIC
-#define CLASS_WHITESPACE     " \t\v\n\r"
-#define CLASS_UNPRINTABLE    "\x0\x1\x2\x3\x4\x5\x6\x7\x8\x9\xA\xB\xC\xD\xE\xF\x10\x11\x12\x13\x14" \
-                             "\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\x20"
-#define CLASS_PRINTABLE      "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm[];',./{}:\"<>?1234567890!@#$%^&*()-=_+`~\\|"
-#define CLASS_NON_ALPHA      "[];',./{}:\"<>?!@#$%^&*()-=_+`~\\|" CLASS_NUMERIC CLASS_WHITESPACE CLASS_UNPRINTABLE
-    
+/* Misc. information */
+#define PROGRAM_NAME    "docgen-compiler-c"
 
 #endif
