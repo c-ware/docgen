@@ -49,7 +49,37 @@
  *      - All multiline tags are closed
  *          - All tags fit in the length requirements
  *              - All tags are recognized
-
+ *              - All tags are complete
+ *
+ * Some notes about the implementation of this, there are some shortcomings in
+ * regards to unrecognized tag detection. In it's current state, all VALID tags
+ * are searched for using their only their name-- that is, even without things
+ * like a '\n' or ':' after the name. This is to allow another error handler
+ * to produce helpful errors for situations where there is a missing 'delimiter'
+ * for the tag (being either '\n' or :). If the unrecognized tag function did
+ * include delimiters, it would do the same thing, but it would not clarify that
+ * it is a missing delimiter.
+ *
+ * As a side effect of this design choice, tags will be matched based off if the
+ * name itself is found at the start rather than being the only part of the word.
+ * This means that:
+ *
+ * @description
+ * and
+ * @description_extra
+ *
+ * are both considered to be the same tag. This should be fixed in a later version.
+ * This also goes for functions that do things like detect unclosed tags. If we had
+ *
+ * @description
+ * @foo
+ * @bar
+ * @description_extra
+ *
+ * This would not be considered to be an 'unclosed' tag. In the case of unclosed tags,
+ * this is done for the same reason as unrecognized ones. Producing helpful error
+ * messages. This can easily be fixed by reading a chunk of the text, though, or
+ * replacing the separator with '\0' then doing a strcmp.
 */
 
 #include <string.h>
@@ -60,18 +90,21 @@
 
 #include "main.h"
 
-#define SKIP_LINE_IF_TAG(location, tag)                                    \
-do {                                                                       \
+#define SKIP_LINE_IF_TAG(tag)                                              \
     if(strncmp(stdin_body.contents + cindex, (tag), strlen((tag))) == 0) { \
         cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;            \
                                                                            \
         continue;                                                          \
     }                                                                      \
-while(0)
 
-#define TOGGLE_MULTILINE_TAG(tag)                                        \
-    if(strncmp(stdin_body.contents + cindex, (tag), strlen((tag))) == 0) \
-        INVERT_BOOLEAN(in_multiline_tag)
+#define TOGGLE_MULTILINE_TAG(tag)                                          \
+    if(strncmp(stdin_body.contents + cindex, (tag), strlen((tag))) == 0) { \
+        INVERT_BOOLEAN(in_multiline_tag);                                  \
+                                                                           \
+        cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;            \
+                                                                           \
+        continue;                                                          \
+    }                                                                      \
 
 /*
  * Produce an error message if the stdin body does not end with a
@@ -238,10 +271,78 @@ void error_unrecognized_tag(struct CString stdin_body) {
          * unrecognized tags in the body of a multiline tag. We can be
          * sure that this will eventually end up leaving the tag because
          * because of the previous checks for unclosed tags. */
-        TOGGLE_MULTILINE_TAG("@description\n");
-        TOGGLE_MULTILINE_TAG("@notes\n");
-        TOGGLE_MULTILINE_TAG("@examples\n");
-        TOGGLE_MULTILINE_TAG("@arguments\n");
+        TOGGLE_MULTILINE_TAG("@description");
+        TOGGLE_MULTILINE_TAG("@notes");
+        TOGGLE_MULTILINE_TAG("@examples");
+        TOGGLE_MULTILINE_TAG("@arguments");
+
+        /* Do not error check tag bodies */
+        if(in_multiline_tag == 1) {
+            cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;
+
+            continue;
+        }
+
+        /* If all of these checks fail (these will skip to the next line
+         * if they match a tag), then we know we have found an unknown
+         * tag. */
+        SKIP_LINE_IF_TAG("@type");
+        SKIP_LINE_IF_TAG("@name");
+        SKIP_LINE_IF_TAG("@brief");
+        SKIP_LINE_IF_TAG("@embed");
+        SKIP_LINE_IF_TAG("@param");
+        SKIP_LINE_IF_TAG("@field");
+        SKIP_LINE_IF_TAG("@docgen");
+        SKIP_LINE_IF_TAG("@return");
+        SKIP_LINE_IF_TAG("@include");
+        SKIP_LINE_IF_TAG("@reference");
+        SKIP_LINE_IF_TAG("@struct_end");
+        SKIP_LINE_IF_TAG("@struct_start");
+
+        fprintf(LIBERROR_STREAM, PROGRAM_NAME ": unrecognized tag on line %i\n", common_errors_get_line(stdin_body, cindex) + 1);
+        exit(EXIT_UNKNOWN_TAG);
+    }
+}
+
+void error_expect_delimiter(struct CString stdin_body, const char *tag, const char *delimiter) {
+    int cindex = 0;
+    int in_multiline_tag = 0;
+
+    VERIFY_CSTRING(stdin_body);
+    LIBERROR_IS_NULL(tag);
+    LIBERROR_IS_NULL(delimiter);
+
+    while(cindex < stdin_body.length) {
+        char *newline = NULL;
+        const char *separator = NULL;
+
+        LIBERROR_OUT_OF_BOUNDS(cindex, stdin_body.length);
+
+        newline = strchr(stdin_body.contents + cindex, '\n');
+        separator = strpbrk(stdin_body.contents + cindex + 1, CLASS_NON_ALPHA);
+
+        LIBERROR_IS_NULL(newline);
+        LIBERROR_IS_NULL(separator);
+        LIBERROR_IS_NOT_VALUE(*newline, '\n');
+        LIBERROR_IS_NEGATIVE(CHAR_OFFSET(stdin_body.contents + cindex, newline));
+
+        /* Skip lines without this tag on it. */
+        if(strncmp(stdin_body.contents + cindex, tag, strlen(tag)) != 0) {
+            cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;
+
+            continue;
+        }
+
+        /* If, starting from the first non alphabetical character, the delimiter
+         * appears, we are good. */
+        if(strncmp(separator, delimiter, strlen(delimiter)) == 0) {
+            cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;
+
+            continue;
+        }
+
+        fprintf(LIBERROR_STREAM, PROGRAM_NAME ": incomplete tag on line %i. expected delimiter '%s'\n", common_errors_get_line(stdin_body, cindex) + 1, delimiter);
+        exit(EXIT_INCOMPLETE_TAG);
     }
 }
 
@@ -251,10 +352,28 @@ int main(void) {
     error_ends_without_newline(stdin_body);
     error_empty_line(stdin_body);
     error_line_doesnt_start_with_at(stdin_body);
-    error_unclosed_tag(stdin_body, "@description\n");
-    error_unclosed_tag(stdin_body, "@notes\n");
-    error_unclosed_tag(stdin_body, "@examples\n");
+    error_unclosed_tag(stdin_body, "@description");
+    error_unclosed_tag(stdin_body, "@notes");
+    error_unclosed_tag(stdin_body, "@examples");
+    error_unclosed_tag(stdin_body, "@arguments");
     error_tag_too_long(stdin_body);
+    error_expect_delimiter(stdin_body, "@notes", "\n");
+    error_expect_delimiter(stdin_body, "@docgen", "\n");
+    error_expect_delimiter(stdin_body, "@examples", "\n");
+    error_expect_delimiter(stdin_body, "@arguments", "\n");
+    error_expect_delimiter(stdin_body, "@description", "\n");
+    error_expect_delimiter(stdin_body, "@type", ": ");
+    error_expect_delimiter(stdin_body, "@name", ": ");
+    error_expect_delimiter(stdin_body, "@brief", ": ");
+    error_expect_delimiter(stdin_body, "@embed", ": ");
+    error_expect_delimiter(stdin_body, "@param", ": ");
+    error_expect_delimiter(stdin_body, "@field", ": ");
+    error_expect_delimiter(stdin_body, "@return", ": ");
+    error_expect_delimiter(stdin_body, "@include", ": ");
+    error_expect_delimiter(stdin_body, "@reference", ": ");
+    error_expect_delimiter(stdin_body, "@struct_end", ": ");
+    error_expect_delimiter(stdin_body, "@struct_start", ": ");
+    error_unrecognized_tag(stdin_body);
 
     cstring_free(stdin_body);
 

@@ -48,6 +48,8 @@
 #define EXIT_LINE_DOESNT_START_WITH_AT  3
 #define EXIT_UNCLOSED_TAG               4
 #define EXIT_TAG_TOO_LONG               5
+#define EXIT_UNKNOWN_TAG                6
+#define EXIT_INCOMPLETE_TAG             7
 
 /* Misc. information */
 #define PROGRAM_NAME    "docgen-compiler-c"
