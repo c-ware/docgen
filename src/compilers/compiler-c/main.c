@@ -50,6 +50,7 @@
  *          - All tags fit in the length requirements
  *              - All tags are recognized
  *              - All tags are complete
+ *                  - All ': ' delimited tags do not have empty bodies
  *
  * Some notes about the implementation of this, there are some shortcomings in
  * regards to unrecognized tag detection. In it's current state, all VALID tags
@@ -346,9 +347,70 @@ void error_expect_delimiter(struct CString stdin_body, const char *tag, const ch
     }
 }
 
+void error_empty_tags(struct CString stdin_body) {
+    int cindex = 0;
+    int in_multiline_tag = 0;
+
+    VERIFY_CSTRING(stdin_body);
+
+    while(cindex < stdin_body.length) {
+        char *newline = NULL;
+        const char *separator = NULL;
+
+        LIBERROR_OUT_OF_BOUNDS(cindex, stdin_body.length);
+        newline = strchr(stdin_body.contents + cindex, '\n');
+        separator = strchr(stdin_body.contents + cindex + 1, ' ');
+
+        LIBERROR_IS_NULL(newline);
+        LIBERROR_IS_NULL(separator);
+        LIBERROR_IS_NOT_VALUE(*newline, '\n');
+        LIBERROR_IS_NOT_VALUE(*separator, ' ');
+        LIBERROR_IS_NEGATIVE(CHAR_OFFSET(stdin_body.contents + cindex, newline));
+
+        /* Enter a multiline tag state so we do not perform checks for
+         * unrecognized tags in the body of a multiline tag. We can be
+         * sure that this will eventually end up leaving the tag because
+         * because of the previous checks for unclosed tags. */
+        TOGGLE_MULTILINE_TAG("@description");
+        TOGGLE_MULTILINE_TAG("@notes");
+        TOGGLE_MULTILINE_TAG("@examples");
+        TOGGLE_MULTILINE_TAG("@arguments");
+
+        if(strncmp(stdin_body.contents + cindex, "@docgen\n", strlen("@docgen\n")) == 0) {
+            cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;
+
+            continue;
+        }
+
+        /* Do not error check tag bodies */
+        if(in_multiline_tag == 1) {
+            cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;
+
+            continue;
+        }
+
+        LIBERROR_OUT_OF_BOUNDS(CHAR_OFFSET(stdin_body.contents, separator + 1), stdin_body.length);
+
+        /* Since we skip multiline tags, including their delimiters, all that
+         * should be left is tags with ': ' as a delimiter only, due to the
+         * previous checks. Thus, we can jump to the ' ' in ': ' and perform
+         * an offset check. */
+        if(CHAR_OFFSET(separator + 1, newline) > 0) {
+            cindex = CHAR_OFFSET(stdin_body.contents, newline) + 1;
+
+            continue;
+        }
+
+        fprintf(LIBERROR_STREAM, PROGRAM_NAME ": empty tag on line %i\n", common_errors_get_line(stdin_body, cindex) + 1);
+        exit(EXIT_UNKNOWN_TAG);
+    }
+}
+
 int main(void) {
     struct CString stdin_body = cstring_loads(stdin);
 
+    /* Perform lots of error checks to validate the input before we
+     * parse it into something useful. */
     error_ends_without_newline(stdin_body);
     error_empty_line(stdin_body);
     error_line_doesnt_start_with_at(stdin_body);
@@ -357,6 +419,7 @@ int main(void) {
     error_unclosed_tag(stdin_body, "@examples");
     error_unclosed_tag(stdin_body, "@arguments");
     error_tag_too_long(stdin_body);
+    error_unrecognized_tag(stdin_body);
     error_expect_delimiter(stdin_body, "@notes", "\n");
     error_expect_delimiter(stdin_body, "@docgen", "\n");
     error_expect_delimiter(stdin_body, "@examples", "\n");
@@ -373,7 +436,7 @@ int main(void) {
     error_expect_delimiter(stdin_body, "@reference", ": ");
     error_expect_delimiter(stdin_body, "@struct_end", ": ");
     error_expect_delimiter(stdin_body, "@struct_start", ": ");
-    error_unrecognized_tag(stdin_body);
+    error_empty_tags(stdin_body);
 
     cstring_free(stdin_body);
 

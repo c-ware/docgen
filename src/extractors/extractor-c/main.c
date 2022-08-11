@@ -92,7 +92,7 @@ int skip_double_quote(struct CString body, int offset) {
     int escaped = 0;
     int caller_offset = 0;
 
-    VERIFY_CSTRING(stdin_body);
+    VERIFY_CSTRING(body);
     LIBERROR_OUT_OF_BOUNDS(offset, body.length);
 
     while(offset < body.length) {
@@ -136,7 +136,7 @@ int skip_single_quote(struct CString body, int offset) {
     int escaped = 0;
     int caller_offset = 0;
 
-    VERIFY_CSTRING(stdin_body);
+    VERIFY_CSTRING(body);
     LIBERROR_OUT_OF_BOUNDS(offset, body.length);
 
     while(offset < body.length) {

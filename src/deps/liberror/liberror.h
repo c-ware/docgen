@@ -158,7 +158,7 @@
         if(((vindex) >= 0) && ((vindex) < (length)))                                                        \
             break;                                                                                          \
                                                                                                             \
-        fprintf(LIBERROR_STREAM, "index %i is not within the bounds of 0 and %i (%s:%i)\n", vindex, length, \
+        fprintf(LIBERROR_STREAM, "index %li is not within the bounds of 0 and %i (%s:%i)\n", (long) vindex, length, \
                 __FILE__, __LINE__);                                                                        \
         LIBERROR_ERROR_CALLBACK(LIBERROR_TYPE_BOUNDS);                                                      \
     } while(0)
