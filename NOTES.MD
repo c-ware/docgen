@@ -47,3 +47,13 @@
     - Iteratively loads each compiled object
     - Tags are extracted from the array with a "find_tag" functionn
     - Name of the file extracted from the "name" setting
+
+We need to generate a block of settings, composed embeds, and sections
+for each pair of @docgen_start and @docgen_end.
+
+Embeds are a bit more complex. They require performing another scan across
+the lines to determine two initial things:
+    -
+
+
+PARAM_START(

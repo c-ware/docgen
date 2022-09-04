@@ -35,49 +35,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*
- * This file implements common error handling routines, like getting the line
- * number.
+#ifndef CWARE_DOCGEN_COMMON_PARSING_H
+#define CWARE_DOCGEN_COMMON_PARSING_H
+
+struct CString;
+
+/* Read lines of a file into an array */
+int common_parse_readlines(struct CStrings *array, FILE *location);
+
+/* Determine if a line has a tag */
+int common_parse_line_has_tag(struct CString line);
+
+/* Retrieve the index of a tag on a line. Returns -1 if it does not
+ * exist. */
+int common_parse_get_tag_index(struct CString line);
+
+/* This function will read the name of a tag from a line, and write it
+ * into the given cstring. The name of the tag is defined as all the text
+ * from the first '@' to the first non-alphabetical or underscore character.
 */
+struct CString *common_parse_read_tag(struct CString line, struct CString *location);
 
-#include "../../docgen.h"
+/* Display the string converted to uppercase */
+void common_parse_upper_string(FILE *location, const char *string, int length);
 
-#include "errors.h"
-
-/* 
- * Scan the stdin body until the index location to see which line
- * the cursor is on. The search will stop when it goes beyond the
- * given index.
-*/
-int common_errors_get_line(struct CString body, int index) {
-    int line = 0;
-    int cursor = 0;
-
-    LIBERROR_IS_NULL(body.contents);
-    LIBERROR_IS_NEGATIVE(index);
-    LIBERROR_IS_NEGATIVE(body.length);
-    LIBERROR_IS_NEGATIVE(body.capacity);
-    LIBERROR_IS_VALUE(body.length, 0);
-    LIBERROR_IS_VALUE(body.capacity, 0);
-    LIBERROR_OUT_OF_BOUNDS(index, body.length);
-
-    /* We can do this rather than the actual length since we verify that the
-     * index to stop at is within the bounds of the length.  */
-    while(cursor < index) {
-        int character = 0;
-
-        LIBERROR_OUT_OF_BOUNDS(cursor, body.length);
-        character = body.contents[cursor];
-
-        if(character != '\n') {
-            cursor++;
-
-            continue;
-        }
-
-        line++;
-        cursor++;
-    }
-
-    return line;
-}
+#endif

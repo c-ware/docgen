@@ -35,49 +35,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*
- * This file implements common error handling routines, like getting the line
- * number.
-*/
+#ifndef CWARE_DOCGEN_EMBEDS_H
+#define CWARE_DOCGEN_EMBEDS_H
 
-#include "../../docgen.h"
+void compile_constant_embeds(struct ProgramState *state);
 
-#include "errors.h"
+void compile_function_embeds(struct ProgramState *state);
 
-/* 
- * Scan the stdin body until the index location to see which line
- * the cursor is on. The search will stop when it goes beyond the
- * given index.
-*/
-int common_errors_get_line(struct CString body, int index) {
-    int line = 0;
-    int cursor = 0;
+void compile_structure_embeds(struct ProgramState *state);
 
-    LIBERROR_IS_NULL(body.contents);
-    LIBERROR_IS_NEGATIVE(index);
-    LIBERROR_IS_NEGATIVE(body.length);
-    LIBERROR_IS_NEGATIVE(body.capacity);
-    LIBERROR_IS_VALUE(body.length, 0);
-    LIBERROR_IS_VALUE(body.capacity, 0);
-    LIBERROR_OUT_OF_BOUNDS(index, body.length);
+void compile_macro_function_embeds(struct ProgramState *state);
 
-    /* We can do this rather than the actual length since we verify that the
-     * index to stop at is within the bounds of the length.  */
-    while(cursor < index) {
-        int character = 0;
-
-        LIBERROR_OUT_OF_BOUNDS(cursor, body.length);
-        character = body.contents[cursor];
-
-        if(character != '\n') {
-            cursor++;
-
-            continue;
-        }
-
-        line++;
-        cursor++;
-    }
-
-    return line;
-}
+#endif

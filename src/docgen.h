@@ -43,6 +43,8 @@
 #ifndef CWARE_DOCGEN_H
 #define CWARE_DOCGEN_H
 
+#include "deps/cstack/cstack.h"
+#include "deps/carray/carray.h"
 #include "deps/cstring/cstring.h"
 #include "deps/liberror/liberror.h"
 
@@ -50,7 +52,7 @@
     ((unsigned long) (x))
 
 #define CHAR_OFFSET(str, chr) \
-    ((PTR_TO_NUM(chr)) - (PTR_TO_NUM(str)))
+    ((int) ((PTR_TO_NUM(chr)) - (PTR_TO_NUM(str))))
 
 #define INVERT_BOOLEAN(x) \
         ((x) = !(x))
@@ -58,13 +60,24 @@
 /* Object verifies (basically a bunch of calls to
  * liberror to verify the structure of an object
  * at runtime is how it should be. */
-#define VERIFY_CSTRING(string)               \
-    LIBERROR_IS_NULL((string).contents);     \
-    LIBERROR_IS_NEGATIVE((string).length);   \
-    LIBERROR_IS_NEGATIVE((string).capacity); \
-    LIBERROR_IS_VALUE((string).length, 0);   \
-    LIBERROR_IS_VALUE((string).capacity, 0)
+#define VERIFY_CSTRING(string)                \
+    LIBERROR_IS_NULL((string));               \
+    LIBERROR_IS_NULL((string)->contents);     \
+    LIBERROR_IS_NEGATIVE((string)->length);   \
+    LIBERROR_IS_NEGATIVE((string)->capacity); \
+    LIBERROR_IS_VALUE((string)->capacity, 0)
 
+#define VERIFY_CARRAY(carray)                \
+    LIBERROR_IS_NULL((carray));              \
+    LIBERROR_IS_NULL((carray)->contents);    \
+    LIBERROR_IS_NEGATIVE((carray)->length);  \
+    LIBERROR_IS_NEGATIVE((carray)->capacity)
+
+#define VERIFY_COMMON_PARSE_LINE_STAT(line_stat)      \
+    LIBERROR_IS_NULL((line_stat)->comment_start);     \
+    LIBERROR_IS_NULL((line_stat)->comment_end);       \
+    LIBERROR_IS_NULL((line_stat)->lastsingle_quote);  \
+    LIBERROR_IS_NULL((line_stat)->lastdouble_quote)
 
 /* Useful character classes */
 #define CLASS_LOWER          "abcdefghijklmnopqrstuvwxyz"

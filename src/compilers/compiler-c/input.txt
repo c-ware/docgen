@@ -1,0 +1,77 @@
+0:@docgen_start
+0:@type: foo
+0:@name: foo
+0:@brief: this is a function
+0:@reference: foo(bar)
+0:@embed: function
+0:@name: foo
+0:@description
+0:@foo
+0:@bar
+0:@baz
+0:@description
+0:@notes
+0:@bar
+0:@this is a note
+0:@this is a line in the note
+0:@notes
+0:@field: foo
+0:@type: foo
+0:@brief: foo
+0:@include: foo/bar/baz
+0:@docgen_end
+0:@docgen_start
+0:@type: foo
+0:@name: project
+0:@brief: this is a project
+0:@brief: foo
+0:@include: foo/bar/baz
+0:@docgen_end
+0:@docgen_start
+0:@type: function
+0:@name: foo
+0:@brief: this is another function
+0:@docgen_end
+0:@docgen_start
+0:@type: function
+0:@name: bar
+0:@brief: this is a function
+0:@fparam: my_param
+0:@type: int *
+0:@brief: this is a description
+0:@fparam: my_other
+0:@type: char ***
+0:@brief: this is a description
+0:@return: int *
+0:@brief: this is the return value
+0:@docgen_end
+0:@docgen_start
+0:@type: structure
+0:@name: my_struct
+0:@brief: this is a structure
+0:@struct_start
+0:@name: sub_struct
+0:@brief: this is a sub structure
+0:@field: bar
+0:@type: int *
+0:@brief: this is a structure field
+0:@struct_end
+0:@field: foo
+0:@type: int
+0:@brief: this is aslo a structure field
+0:@docgen_end
+0:@docgen_start
+0:@type: macro_function
+0:@name: MY_MACRO
+0:@brief: this is my macro function
+0:@mparam: foo
+0:@brief: this is a parameter
+0:@mparam: bar
+0:@brief: this is also a parameter
+0:@docgen_end
+0:@docgen_start
+0:@type: constant
+0:@name: MY_CONSTANT
+0:@brief: this is my constant
+0:@value: 5555
+0:@docgen_end

@@ -1,7 +1,7 @@
 CC=cc
 OBJS=../../deps/cstring/cstring.o ../../common/errors/errors.o ../../common/parsing/parsing.o
-CFLAGS=-Wall -Wextra -Wshadow -g -ansi
-PROGNAME=docgen-extractor-c
+CFLAGS=-Wall -Wextra -Wshadow -g -ansi -Wno-unused-variable -Wno-unused-parameter
+PROGNAME=docgen-backend-manpage
 
 all: $(OBJS) $(PROGNAME)
 
@@ -10,7 +10,7 @@ clean:
 	rm -f $(PROGNAME)
 
 $(PROGNAME): main.c $(OBJS)
-	$(CC) $< $(OBJS) -o $@ $(CFLAGS)
+	$(CC) main.c $(OBJS) -o $@ $(CFLAGS)
 
 ../../deps/cstring/cstring.o: ../../deps/cstring/cstring.c
 	$(CC) $< -o $@ -c $(CFLAGS)

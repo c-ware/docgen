@@ -39,19 +39,107 @@
 #define CWARE_DOCGEN_COMPILER_C_H
 
 /* Limits */
-#define TAG_LENGTH  32
+#define SPACING_PER_TAB 4
 
-#define MULTILINE_TAGS  4
+/* Tags */
+#define DOCGEN_START    "@docgen_start"
+#define DOCGEN_END      "@docgen_end"
 
 /* Exit codes */
-#define EXIT_MISSING_NEWLINE            2
-#define EXIT_LINE_DOESNT_START_WITH_AT  3
-#define EXIT_UNCLOSED_TAG               4
-#define EXIT_TAG_TOO_LONG               5
-#define EXIT_UNKNOWN_TAG                6
-#define EXIT_INCOMPLETE_TAG             7
+#define EXIT_UNCLOSED_DOCGEN            2
+#define EXIT_INCOMPLETE_LINE_NUMBER     3
+#define EXIT_EXPECTED_COLON             4
+#define EXIT_EXPECTED_AT_SIGN           5
+#define EXIT_EXPECTED_LINE_NUMBER       6
+#define EXIT_EXPECTED_TEXT              7
+#define EXIT_EMPTY_LINE                 8
+#define EXIT_UNRECOGNIZED_MULTILINE     9
+#define EXIT_UNCLOSED_TAG               10
+#define EXIT_UNRECOGNIZED_TAG           11
+#define EXIT_MISSING_LINES              12
+#define EXIT_UNEXPECTED_TAG             13
+#define EXIT_EXPECTED_TAG               14
+#define EXIT_TAG_OUTSIDE_OF_GROUP       15
+#define EXIT_EXPECTED_SPACE             16
 
 /* Misc. information */
 #define PROGRAM_NAME    "docgen-compiler-c"
+
+#define VERIFY_PROGRAM_STATE(state) \
+    LIBERROR_IS_NULL((state)->input_lines);        \
+    LIBERROR_IS_NULL((state)->compilation_output); \
+    VERIFY_CSTRING(&((state)->tag_name));          \
+    VERIFY_CARRAY((state)->input_lines)
+
+#define FUNCTION_PARAMETER_TYPE struct FunctionParameter
+#define FUNCTION_PARAMETER_HEAP 1
+#define FUNCTION_PARAMETER_FREE(value) \
+    cstring_free(value.name);          \
+    cstring_free(value.type);          \
+    cstring_free(value.description)
+
+#define MACRO_FUNCTION_PARAMETER_TYPE struct MacroFunctionParameter
+#define MACRO_FUNCTION_PARAMETER_HEAP 1
+#define MACRO_FUNCTION_PARAMETER_FREE(value) \
+    cstring_free(value.name);          \
+    cstring_free(value.description)
+
+/* Represents a function parameter */
+struct FunctionParameter {
+    struct CString name;
+    struct CString type;
+    struct CString description;
+};
+
+/* Represents an array of function parameters */
+struct FunctionParameters {
+    int length;
+    int capacity;
+    struct FunctionParameter *contents;
+};
+
+/* Represents basic information about a function embed. */
+struct Function {
+    struct CString name;
+    struct CString description;
+    struct CString return_type;
+    struct FunctionParameters *parameters;
+
+    /* Unused. */
+    struct CString return_description;
+};
+
+/* Represents a macro function parameter */
+struct MacroFunctionParameter {
+    struct CString name;
+    struct CString description;
+};
+
+/* Represents an array of macro function parameters */
+struct MacroFunctionParameters {
+    int length;
+    int capacity;
+    struct MacroFunctionParameter *contents;
+};
+
+/* Represents basic information about a macro function embed. */
+struct MacroFunction {
+    struct CString name;
+    struct CString description;
+    struct MacroFunctionParameters *parameters;
+
+    /* Unused. */
+    struct CString return_description;
+};
+
+/* Container of state for the program. Contains common
+ * data for memory reusage. */
+struct ProgramState {
+    struct Function temp_function;
+    struct MacroFunction temp_macro_function;
+    struct CString tag_name;
+    struct CStrings *input_lines;
+    FILE *compilation_output;
+};
 
 #endif

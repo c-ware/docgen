@@ -35,49 +35,49 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-/*
- * This file implements common error handling routines, like getting the line
- * number.
-*/
+#ifndef CWARE_DOCGEN_BACKEND_MANPAGE
+#define CWARE_DOCGEN_BACKEND_MANPAGE
 
-#include "../../docgen.h"
+#define SECTION_TYPE    struct Section
+#define SECTION_HEAP    1
+#define SECTION_COMPARE(a, b) \
+    (strcmp((a).name.contents, (b).name.contents) == 0)
 
-#include "errors.h"
+#define SECTION_FREE(section)     \
+    cstring_free((section).name); \
+    cstring_free((section).body)
 
-/* 
- * Scan the stdin body until the index location to see which line
- * the cursor is on. The search will stop when it goes beyond the
- * given index.
-*/
-int common_errors_get_line(struct CString body, int index) {
-    int line = 0;
-    int cursor = 0;
+#define EMBED_TYPE    struct Embed
+#define EMBED_HEAP    1
+#define EMBED_COMPARE(a, b) \
+    (strcmp((a).name.contents, (b).name.contents) == 0)
 
-    LIBERROR_IS_NULL(body.contents);
-    LIBERROR_IS_NEGATIVE(index);
-    LIBERROR_IS_NEGATIVE(body.length);
-    LIBERROR_IS_NEGATIVE(body.capacity);
-    LIBERROR_IS_VALUE(body.length, 0);
-    LIBERROR_IS_VALUE(body.capacity, 0);
-    LIBERROR_OUT_OF_BOUNDS(index, body.length);
+#define EMBED_FREE(embed)       \
+    cstring_free((embed).name); \
+    cstring_free((embed).body)
 
-    /* We can do this rather than the actual length since we verify that the
-     * index to stop at is within the bounds of the length.  */
-    while(cursor < index) {
-        int character = 0;
+/* A section name and body pair */
+struct Section {
+    struct CString name;
+    struct CString body;
+};
 
-        LIBERROR_OUT_OF_BOUNDS(cursor, body.length);
-        character = body.contents[cursor];
+struct Sections {
+    int length;
+    int capacity;
+    struct Section *contents;
+};
 
-        if(character != '\n') {
-            cursor++;
+/* A parsed embed */
+struct Embed {
+    struct CString name;
+    struct CString body;
+};
 
-            continue;
-        }
+struct Embeds {
+    int length;
+    int capacity;
+    struct Embed *contents;
+};
 
-        line++;
-        cursor++;
-    }
-
-    return line;
-}
+#endif

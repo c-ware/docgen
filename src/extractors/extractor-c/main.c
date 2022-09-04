@@ -37,9 +37,31 @@
 
 /*
  * This file is the entry point of the program that filters all non-docgen code
- * out of the stdin, and will dump it back out. Before it does all of this, it
- * will perform basic error checks on the input like verifying that each docgen
- * tag has a matching tag.
+ * out of the stdin, and will dump it back out. This does pretty much zero error
+ * checking and leaves that up to the compiler, since its error checking is much
+ * more approachable.
+ *
+ * It does this by scanning each line. If the line starts
+ * with a single or double quote before the at-sign, regardless of whether or not the
+ * string is closed, the line will be discarded.
+ *
+ * Assuming an at-sign appears before either (if either exist at all in the line), then
+ * the line will be printed to the stdout after (and including) the at-sign in this format:
+ * LINE_NUMBER:LINE
+ *
+ * This does, of course imply that a tag like this
+ * "@type: foo"
+ * will be ignored, but given how complex parsing becommes when we do not apply this small
+ * limitation is, it is a sacrifice I think is fair to make. As an example of the complexity,
+ * consider this circular rule.
+ *  - We need to keep track of whether or not we are in a comment,
+ *  - The opening delimiter can be inside of a string
+ *  - We need to keep track of whether or not we are in a comment
+ *
+ * While this is technically solvable, even in a line-oriented parser, I am making the decision
+ * to value the simplicity of this solution over the 100% perfectness of allowing it. It's
+ * a 99.99% perfect solution. Who the hell would put quotes around them, anyway? Seriously if
+ * you do that, go fix your damn code.
 */
 
 #include <time.h>
@@ -48,337 +70,50 @@
 
 #include "../../docgen.h"
 #include "../../common/errors/errors.h"
+#include "../../common/parsing/parsing.h"
 
 #include "main.h"
 
-#define HANDLE_COMMENTS_AND_STRINGS()                                       \
-    /* Skip to the next double quote. The function called here will         \
-     * produce an error yelling at the user if the end of the file is       \
-     * encountered and no ending quote is found. Also, we can still         \
-     * find double quotes in comments, so we do not do this check when      \
-     * we are in comments. */                                               \
-    if(character == '"' && in_comment == 0) {                               \
-        index++;                                                            \
-        index += skip_double_quote(stdin_body, index);                      \
-                                                                            \
-        continue;                                                           \
-    }                                                                       \
-                                                                            \
-    if(character == '\'' && in_comment == 0) {                              \
-        index++;                                                            \
-        index += skip_single_quote(stdin_body, index);                      \
-                                                                            \
-        continue;                                                           \
-    }                                                                       \
-                                                                            \
-    /* We are in a comment now. We can assume we are not in a string        \
-     * because of the other checks that would skip strings. */              \
-    if(strncmp(stdin_body.contents + index, "/*", 2) == 0) {                \
-        in_comment = 1;                                                     \
-        index += strlen("/*");                                              \
-                                                                            \
-        continue;                                                           \
-    }                                                                       \
-                                                                            \
-    /* We are no longer in a comment. Same logic applies as the above. */   \
-    if(strncmp(stdin_body.contents + index, "*/", 2) == 0) {                \
-        in_comment = 0;                                                     \
-        index += strlen("/*");                                              \
-                                                                            \
-        continue;                                                           \
-    }
-
-int skip_double_quote(struct CString body, int offset) {
-    int escaped = 0;
-    int caller_offset = 0;
-
-    VERIFY_CSTRING(body);
-    LIBERROR_OUT_OF_BOUNDS(offset, body.length);
-
-    while(offset < body.length) {
-        int character = 0;
-
-        LIBERROR_OUT_OF_BOUNDS(offset, body.length);
-        character = body.contents[offset];
-
-        /* Skip two characters, and toggle the escaped so that
-         * if (offset += 2 < body.length), then we can
-         * differentiate between an incomplete escape, and an
-         * unclosed string */
-        if(character == '\\') {
-            escaped = 1;
-            offset += 2;
-            caller_offset += 2;
-
-            continue; 
-        }
-
-        /* This condition will never be met if a backslash is met
-         * immediately before this character, since a backslash
-         * causes the offset to be incremented twice, past its
-         * character. Also, note that the (+1) is so that the cursor
-         * is immediately positioned AFTER the string. */
-        if(character == '"')
-            return caller_offset + 1;
-
-        offset++;
-        caller_offset++;
-        escaped = 0;
-    }
-
-    /* If this point is ever reached, we know that the string
-     * is never closed, or an escape is incomplete. */
-    fprintf(LIBERROR_STREAM, "%s", PROGRAM_NAME ": input file has unclosed string\n");
-    exit(EXIT_UNCLOSED_STRING);
-}
-
-int skip_single_quote(struct CString body, int offset) {
-    int escaped = 0;
-    int caller_offset = 0;
-
-    VERIFY_CSTRING(body);
-    LIBERROR_OUT_OF_BOUNDS(offset, body.length);
-
-    while(offset < body.length) {
-        int character = 0;
-
-        LIBERROR_OUT_OF_BOUNDS(offset, body.length);
-        character = body.contents[offset];
-
-        /* Skip two characters, and toggle the escaped so that
-         * if (offset += 2 < body.length), then we can
-         * differentiate between an incomplete escape, and an
-         * unclosed string */
-        if(character == '\\') {
-            escaped = 1;
-            offset += 2;
-            caller_offset += 2;
-
-            continue; 
-        }
-
-        /* This condition will never be met if a backslash is met
-         * immediately before this character, since a backslash
-         * causes the offset to be incremented twice, past its
-         * character. Also, note that the (+1) is so that the cursor
-         * is immediately positioned AFTER the string. */
-        if(character == '\'')
-            return caller_offset + 1;
-
-        offset++;
-        caller_offset++;
-        escaped = 0;
-    }
-
-    /* If this point is ever reached, we know that the string
-     * is never closed, or an escape is incomplete. */
-    fprintf(LIBERROR_STREAM, "%s", PROGRAM_NAME ": input file has unclosed string\n");
-    exit(EXIT_UNCLOSED_STRING);
-}
-
 /*
- * Produce an error message if the stdin body does not end with a
- * newline (0x10)
+ * This function will run through each line, and display any docgen tags
+ * on that line if there are any.
 */
-void error_ends_without_newline(struct CString stdin_body) {
-    VERIFY_CSTRING(stdin_body);
+void display_docgen_tags(struct CStrings lines) {
+    int line_index = 0;
 
-    /* No need to check if (stdin_body.length - 1) is in bounds,
-     * since (length - 1) is < 0 only when length <= 0 */
-    if(stdin_body.contents[stdin_body.length - 1] == '\n')
-        return;
+    VERIFY_CSTRING(&lines);
 
-    fprintf(LIBERROR_STREAM, "%s", PROGRAM_NAME ": stdin does not end with a new line\n");
-    exit(EXIT_MISSING_NEWLINE);
-}
+    for(line_index = 0; line_index < carray_length(&lines); line_index++) {
+        int tag_index = 0;
+        struct CString line;
 
-/*
- * Produce an error message if the stdin body contains an unmatched
- * docgen tag.
-*/
-void error_unmatched_docgen(struct CString stdin_body) {
-    int index = 0;
-    int in_comment = 0;
-    int last_tag_line = 0;
-    int in_docgen_tag = 0;
+        LIBERROR_INIT(line);
+        LIBERROR_OUT_OF_BOUNDS(line_index, lines.length);  
+        LIBERROR_IS_NULL(lines.contents[line_index].contents);
+        VERIFY_CSTRING(&lines.contents[line_index]);
 
-    VERIFY_CSTRING(stdin_body);
+        line = lines.contents[line_index];
 
-    while(index < stdin_body.length) {
-        int character = 0;
-
-        LIBERROR_OUT_OF_BOUNDS(index, stdin_body.length);
-        character = stdin_body.contents[index];
-
-        HANDLE_COMMENTS_AND_STRINGS()
-
-        /* If this is not the docgen tag, then ignore it. */
-        if(strncmp(stdin_body.contents + index, "@docgen\n", strlen("@docgen\n")) != 0) {
-            index++;
-
+        /* Ignore this line. Not a tag. */
+        if(common_parse_line_has_tag(line) == 0)
             continue;
-        }
 
-        /* Record where we found the opening docgen tag */
-        if(in_docgen_tag == 0)
-            last_tag_line = common_errors_get_line(stdin_body, index);
+        tag_index = common_parse_get_tag_index(line);
+        LIBERROR_IS_NEGATIVE(tag_index);
+        LIBERROR_OUT_OF_BOUNDS(tag_index, line.length);
 
-        INVERT_BOOLEAN(in_docgen_tag);
-        index += strlen("@docgen\n");
-    }
-
-    /* Once the loop ends, if we are still "in a comment" then we can produce
-     * an error yelling at the luser. */
-    if(in_comment == 1) {
-        fprintf(LIBERROR_STREAM, "%s", PROGRAM_NAME ": input file has unclosed comment\n");
-        exit(EXIT_UNCLOSED_COMMENT);
-
-        return;
-    }
-
-    /* However, if the loop ends and we have not met a matching "docgen" tag,
-     * we got a problem. */
-    if(in_docgen_tag == 0)
-        return; 
-
-    fprintf(LIBERROR_STREAM, PROGRAM_NAME ": input file has unclosed docgen tag on line %i\n",
-           last_tag_line + 1);
-    exit(EXIT_UNCLOSED_DOCGEN);
-}
-
-/*
- * Verifies that the end of a comment does not appear on the same line
- * as a docgen tag.
-*/
-void error_comment_end_on_tag_line(struct CString stdin_body) {
-    int index = 0;
-    int in_comment = 0;
-    int last_tag_line = 0;
-    int in_docgen_tag = 0;
-
-    VERIFY_CSTRING(stdin_body);
-
-    while(index < stdin_body.length) {
-        int character = 0;
-        char *newline_location = NULL;
-
-        LIBERROR_OUT_OF_BOUNDS(index, stdin_body.length);
-        character = stdin_body.contents[index];
-
-        HANDLE_COMMENTS_AND_STRINGS()
-
-        /* Do not bother with characters that are not '@' signs */
-        if(character != '@') {
-            index++;
-
-            continue; 
-        }
-
-        /* Toggle the docgen tag to let us know that we can now display docgen
-         * tags */
-        if(strncmp(stdin_body.contents + index, "@docgen\n", strlen("@docgen\n")) == 0) {
-            INVERT_BOOLEAN(in_docgen_tag);
-            index += strlen("@docgen\n");
-
-            continue;
-        }
-
-        /* Only count '@' signs as actual docgen tags if we are IN a docgen block */
-        if(in_docgen_tag == 0) {
-            index++;
-
-            continue; 
-        }
-
-        /* We know there will always be a new line, so we can replace the
-         * new line temporarily so we can check the line, and then put it back. */
-        newline_location = strchr(stdin_body.contents + index, '\n');
-        LIBERROR_IS_NULL(newline_location);
-        LIBERROR_IS_NOT_VALUE(*newline_location, '\n');
-
-        /* There cannot be an end of multiline comment delimiter on the same line
-         * as this docgen tag */
-        if(strstr(stdin_body.contents + index, "*/") != NULL) {
-            fprintf(LIBERROR_STREAM, PROGRAM_NAME ": '*/' detected on the same line as a docgen tag on line %i\n",
-                    common_errors_get_line(stdin_body, index) + 1);
-            exit(EXIT_CLOSED_ON_DOCGEN_TAG);
-        }
-
-        index = CHAR_OFFSET(stdin_body.contents, newline_location);
-    }
-}
-
-/*
- * Scan the stdin (through the consumed cstring) for any docgen
- * tags. A docgen tag is defined as anything that is between
- * two opening tags, 'docgen.' For each tag it finds, it will
- * write it to the stdout.
-*/
-void scan_stdin(struct CString stdin_body) {
-    int index = 0;
-    int in_comment = 0;
-    int in_docgen_tag = 0;
-
-    VERIFY_CSTRING(stdin_body);
-
-    while(index < stdin_body.length) {
-        int character = 0;
-        char *newline_location = NULL;
-
-        LIBERROR_OUT_OF_BOUNDS(index, stdin_body.length);
-        character = stdin_body.contents[index];
-
-        HANDLE_COMMENTS_AND_STRINGS()
-
-        /* Do not bother with characters that are not '@' signs */
-        if(character != '@') {
-            index++;
-
-            continue; 
-        }
-
-        /* Toggle the docgen tag to let us know that we can now display docgen
-         * tags */
-        if(strncmp(stdin_body.contents + index, "@docgen\n", strlen("@docgen\n")) == 0) {
-            INVERT_BOOLEAN(in_docgen_tag);
-            index += strlen("@docgen\n");
-
-            printf("@docgen\n");
-
-            continue;
-        }
-
-        /* Only count '@' signs as actual docgen tags if we are IN a docgen block */
-        if(in_docgen_tag == 0) {
-            index++;
-
-            continue; 
-        }
-
-        /* We know there will always be a new line, so we can replace the
-         * new line temporarily so printf will not display past it, and then
-         * put it back. */
-        newline_location = strchr(stdin_body.contents + index, '\n');
-
-        LIBERROR_IS_NULL(newline_location);
-        LIBERROR_IS_NOT_VALUE(*newline_location, '\n');
-
-        newline_location[0] = '\0';
-        printf("%s\n", stdin_body.contents + index);
-        index = CHAR_OFFSET(stdin_body.contents, newline_location);
-        newline_location[0] = '\n';
+        printf("%i:%s\n", line_index + 1, line.contents + tag_index);
     }
 }
 
 int main(void) {
-    struct CString stdin_body = cstring_loads(stdin);
+    struct CStrings *stdin_lines = carray_init(stdin_lines, CSTRING);
 
-    error_ends_without_newline(stdin_body);    
-    error_comment_end_on_tag_line(stdin_body);
-    error_unmatched_docgen(stdin_body);
-    scan_stdin(stdin_body);
+    common_parse_readlines(stdin_lines, stdin);
 
-    cstring_free(stdin_body);
+    display_docgen_tags(*stdin_lines);
+    
+    carray_free(stdin_lines, CSTRING);
 
     return EXIT_SUCCESS;
 }
