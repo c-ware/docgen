@@ -918,7 +918,7 @@ int main(void) {
 
         /* Generate some of the other sections */
         fprintf(state.compilation_output, "%s", "START_SECTION NAME\n");
-        fprintf(state.compilation_output, "%s - %s\n", strchr(state.input_lines->contents[line_index + 2].contents, ' ') + 1, strchr(state.input_lines->contents[line_index + 2].contents, ' ') + 1);
+        fprintf(state.compilation_output, "%s - %s\n", strchr(state.input_lines->contents[line_index + 2].contents, ' ') + 1, strchr(state.input_lines->contents[line_index + 3].contents, ' ') + 1);
         fprintf(state.compilation_output, "%s", "END_SECTION\n");
 
 
