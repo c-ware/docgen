@@ -1,4 +1,5 @@
 CC=cc
+PREFIX=/usr/local
 OBJS=../../deps/cstring/cstring.o ../../common/errors/errors.o ../../common/parsing/parsing.o embeds/functions.o embeds/structures.o embeds/macro_functions.o embeds/constants.o
 CFLAGS=-Wall -Wextra -Wshadow -g -ansi -Wno-unused-variable -Wno-unused-parameter
 PROGNAME=docgen-compiler-c
@@ -8,6 +9,10 @@ all: $(OBJS) $(PROGNAME)
 clean:
 	rm -f $(OBJS)
 	rm -f $(PROGNAME)
+
+install:
+	mkdir -p $(PREIFX)/bin
+	cp $(PROGNAME) $(PREFIX)/bin
 
 $(PROGNAME): main.c $(OBJS)
 	$(CC) main.c $(OBJS) -o $@ $(CFLAGS)

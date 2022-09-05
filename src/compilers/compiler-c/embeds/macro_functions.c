@@ -131,6 +131,7 @@ void compile_macro_function_embeds(struct ProgramState *state) {
         fprintf(state->compilation_output, "%s", "START_EMBED ");
         fprintf(state->compilation_output, "%s", strchr(line.contents, ' ') + 1);
         fprintf(state->compilation_output, "%c", '\n');
+        fprintf(state->compilation_output, "%s", "2\n");
 
         /* Reset the temporary function */
         cstring_reset(&(state->temp_macro_function.name));

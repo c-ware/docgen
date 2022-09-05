@@ -232,6 +232,7 @@ void compile_structure_embeds(struct ProgramState *state) {
         fprintf(state->compilation_output, "%s", "START_EMBED ");
         fprintf(state->compilation_output, "%s", strchr(line.contents, ' ') + 1);
         fprintf(state->compilation_output, "%s", "\n");
+        fprintf(state->compilation_output, "%s", "3\n");
 
         /* Since we always start at the start of the docgen body (at "@docgen_start", we
          * can get the description and name first from here. */

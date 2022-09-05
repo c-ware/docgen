@@ -36,7 +36,7 @@
 */
 
 /* 
- * Implementations of the function embedding logic.
+ * Implementations of the constant embedding logic.
 */
 
 #include <stdio.h>
@@ -111,10 +111,11 @@ void compile_constant_embeds(struct ProgramState *state) {
         line = state->input_lines->contents[line_index + 2];
         common_parse_read_tag(line, &(state->tag_name)); 
 
-        /* Dump the name for the start embed */
+        /* Dump the name for the start embed, as well as the integer type */
         fprintf(state->compilation_output, "%s", "START_EMBED ");
         fprintf(state->compilation_output, "%s", strchr(line.contents, ' ') + 1);
         fprintf(state->compilation_output, "%c", '\n');
+        fprintf(state->compilation_output, "%s", "0\n");
 
         compile_constant_embed(state, line_index);
         fprintf(state->compilation_output, "%s", "END_EMBED\n");

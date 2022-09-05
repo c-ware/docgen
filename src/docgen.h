@@ -47,6 +47,7 @@
 #include "deps/carray/carray.h"
 #include "deps/cstring/cstring.h"
 #include "deps/liberror/liberror.h"
+#include "deps/argparse/argparse.h"
 
 #define PTR_TO_NUM(x) \
     ((unsigned long) (x))

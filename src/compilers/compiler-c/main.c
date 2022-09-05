@@ -125,13 +125,13 @@ int is_multiline(struct CString tag) {
     if(strcmp(tag.contents, "@description") == 0)
         return 1;
 
+    if(strcmp(tag.contents, "@synopsis") == 0)
+        return 1;
+
     if(strcmp(tag.contents, "@notes") == 0)
         return 1;
 
     if(strcmp(tag.contents, "@examples") == 0)
-        return 1;
-
-    if(strcmp(tag.contents, "@arguments") == 0)
         return 1;
 
     return 0;
@@ -141,6 +141,9 @@ int is_field(struct CString tag) {
     VERIFY_CSTRING(&tag);
 
     if(strcmp(tag.contents, "@value") == 0)
+        return 1;
+
+    if(strcmp(tag.contents, "@show_brief") == 0)
         return 1;
 
     if(strcmp(tag.contents, "@reference") == 0)
@@ -694,16 +697,19 @@ void compile_embed_requests(struct ProgramState *state, int start_index) {
         if(strcmp(state->tag_name.contents, "@embed") != 0)
             continue;
 
-        /* Get the type */
         fprintf(state->compilation_output, "%s ", "START_EMBED_REQUEST"); 
-        common_parse_upper_string(state->compilation_output, strchr(line.contents, ' ') + 1, strlen(strchr(line.contents, ' ') + 1));
-        fprintf(state->compilation_output, "%c", '\n');
 
         /* Get the name of the thing to embed */
+        line = state->input_lines->contents[line_index];
+        common_parse_read_tag(line, &(state->tag_name)); 
+        fprintf(state->compilation_output, "%s\n", strchr(line.contents, ' ') + 1);
+
+        /* Determine whether or not briefs are shown */
+
         line = state->input_lines->contents[line_index + 1];
         common_parse_read_tag(line, &(state->tag_name)); 
-
         fprintf(state->compilation_output, "%s\n", strchr(line.contents, ' ') + 1);
+
         fprintf(state->compilation_output, "%s", "END_EMBED_REQUEST\n"); 
     }
 }
@@ -813,7 +819,8 @@ void compile_references(struct ProgramState *state, int start_index) {
         /* Dump reference tags */
         if(strcmp(state->tag_name.contents, "@reference") == 0) {
             fprintf(state->compilation_output, "%s", "START_REFERENCE\n"); 
-            fprintf(state->compilation_output, "%s\n", strchr(line.contents, ' ') + 1); 
+            fprintf(state->compilation_output, "%s\n", strchr(strtok(line.contents, "("), ' ') + 1); 
+            fprintf(state->compilation_output, "%s\n", strtok(NULL, ")")); 
             fprintf(state->compilation_output, "%s", "END_REFERENCE\n"); 
 
             continue;
@@ -869,7 +876,7 @@ int main(void) {
     /* Verify all tags have the tags that they require following them */
     error_tags_have_postrequisites(&state, "@mparam",       1, "@brief");
     error_tags_have_postrequisites(&state, "@return",       1, "@brief");
-    error_tags_have_postrequisites(&state, "@embed",        1, "@name");
+    error_tags_have_postrequisites(&state, "@embed",        1, "@show_brief");
     error_tags_have_postrequisites(&state, "@field",        2, "@type", "@brief");
     error_tags_have_postrequisites(&state, "@struct_start", 2, "@name", "@brief");
     error_tags_have_postrequisites(&state, "@fparam",       2, "@type", "@brief");
@@ -900,7 +907,7 @@ int main(void) {
          * end tag, it will be ignored, so the only case where
          * the tag will not be ignored is when its the start tag. */
         if(strcmp(state.tag_name.contents, DOCGEN_START) == 0) {
-            fprintf(state.compilation_output, "%s", "START_GROUP\n");
+            fprintf(state.compilation_output, "START_GROUP %s\n", strchr(state.input_lines->contents[line_index + 2].contents, ' ') + 1);
         } else if(strcmp(state.tag_name.contents, DOCGEN_END) == 0) {
             fprintf(state.compilation_output, "%s", "END_GROUP\n");
 
@@ -908,6 +915,12 @@ int main(void) {
         } else {
             continue;
         }
+
+        /* Generate some of the other sections */
+        fprintf(state.compilation_output, "%s", "START_SECTION NAME\n");
+        fprintf(state.compilation_output, "%s - %s\n", strchr(state.input_lines->contents[line_index + 2].contents, ' ') + 1, strchr(state.input_lines->contents[line_index + 2].contents, ' ') + 1);
+        fprintf(state.compilation_output, "%s", "END_SECTION\n");
+
 
         /* Begin the various compilation phases, where each (except
          * embedding) starts at our current index, and stops when it
@@ -919,12 +932,13 @@ int main(void) {
         compile_parameters(&state, line_index);
         compile_references(&state, line_index);
 
-        /* Functions and macro functions implicitly embed themselves */
+        /* Functions and macro functions implicitly embed themselves with no brief showed */
         if(strcmp(strchr(state.input_lines->contents[line_index + 1].contents, ' ') + 1, "function") == 0 ||
            strcmp(strchr(state.input_lines->contents[line_index + 1].contents, ' ') + 1, "macro_function") == 0) {
              
-            fprintf(state.compilation_output, "%s", "START_EMBED_REQUEST\n");
+            fprintf(state.compilation_output, "%s", "START_EMBED_REQUEST ");
             fprintf(state.compilation_output, "%s\n", strchr(state.input_lines->contents[line_index + 2].contents, ' ') + 1);
+            fprintf(state.compilation_output, "%i\n", 0);
             fprintf(state.compilation_output, "%s", "END_EMBED_REQUEST\n");
          }
     }

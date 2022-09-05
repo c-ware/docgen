@@ -49,6 +49,11 @@
 
 #include "main.h"
 
+/*
+ * ==========================
+ * #   Parsing operations   #
+ * ==========================
+*/
 void common_parse_embeds(struct CStrings lines, struct Embeds *array) {
     int in_body = 0;
     int line_index = 0;
@@ -96,13 +101,18 @@ void common_parse_embeds(struct CStrings lines, struct Embeds *array) {
         embed.name = cstring_init("");
         embed.body = cstring_init("");
 
-        /* Get the name */
+        /* Get the name and type */
         cstring_concats(&(embed.name), strchr(line.contents, ' ') + 1);
+        embed.type = strtoul(lines.contents[line_index + 1].contents, NULL, 10);
+
         in_body = 1;
+
+        /* Type is the first 'line' after the directive, so we skip it */
+        line_index++;
     }
 }
 
-void common_parse_embed_requests(struct CStrings lines, struct CStrings *array, int start_index) {
+void common_parse_embed_requests(struct CStrings lines, struct EmbedRequests *array, int start_index) {
     int line_index = 0;
 
     VERIFY_CARRAY(array);
@@ -111,7 +121,7 @@ void common_parse_embed_requests(struct CStrings lines, struct CStrings *array, 
 
     for(line_index = start_index; line_index < carray_length(&lines); line_index++) {
         struct CString line; 
-        struct CString embed_request;
+        struct EmbedRequest embed_request;
 
         LIBERROR_INIT(line);
         LIBERROR_INIT(embed_request);
@@ -123,16 +133,19 @@ void common_parse_embed_requests(struct CStrings lines, struct CStrings *array, 
         if(strcmp(line.contents, "END_GROUP") == 0)
             break;
         
-        if(strcmp(line.contents, "START_EMBED_REQUEST") != 0)
+        if(strncmp(line.contents, "START_EMBED_REQUEST", strlen("START_EMBED_REQUEST")) != 0)
             continue;
 
         LIBERROR_OUT_OF_BOUNDS(line_index + 1, carray_length(&lines));
 
         /* Add a new embed request */
-        embed_request = cstring_init("");
-        cstring_concat(&embed_request, lines.contents[line_index + 1]);
+        embed_request.name = cstring_init("");
+        cstring_concats(&(embed_request.name), strchr(lines.contents[line_index].contents, ' ') + 1);
 
-        carray_append(array, embed_request, CSTRING);
+        /* Are comments allowed? */
+        embed_request.allow_comment = strtoul(lines.contents[line_index + 1].contents, NULL, 10);
+
+        carray_append(array, embed_request, EMBED_REQUEST);
     }
 }
 
@@ -346,60 +359,379 @@ void common_parse_appends(struct CStrings lines, struct Sections *array, int sta
     }
 }
 
-int main(void) {
+void common_parse_references(struct CStrings lines, struct References *array, int start_index) {
+    int line_index = 0;
+
+    VERIFY_CARRAY(array);
+    VERIFY_CARRAY(&lines);
+    LIBERROR_IS_NEGATIVE(start_index);
+
+    for(line_index = start_index; line_index < carray_length(&lines); line_index++) {
+        struct CString line; 
+        struct Reference reference;
+
+        LIBERROR_INIT(line);
+        LIBERROR_INIT(reference);
+        VERIFY_CSTRING(lines.contents + line_index);
+
+        line = lines.contents[line_index];
+
+        /* Stop when we find the end of this group */
+        if(strcmp(line.contents, "END_GROUP") == 0)
+            break;
+        
+        if(strcmp(line.contents, "START_REFERENCE") != 0)
+            continue;
+
+        LIBERROR_OUT_OF_BOUNDS(line_index + 1, carray_length(&lines));
+
+        /* Add a new reference */
+        reference.name = cstring_init("");
+        reference.category = cstring_init("");
+
+        cstring_concat(&(reference.name), lines.contents[line_index + 1]);
+        cstring_concat(&(reference.category), lines.contents[line_index + 2]);
+
+        carray_append(array, reference, REFERENCE);
+    }
+}
+
+int common_parse_highest_type(struct Embeds array) {
+    int embed_index = 0;
+    int type = -1;
+
+    for(embed_index = 0; embed_index < carray_length(&array); embed_index++) {
+        if(array.contents[embed_index].type < type)
+            continue;
+
+        type = array.contents[embed_index].type;
+    }
+
+    return type;
+}
+
+int common_parse_count_types(struct Embeds array, int type) {
+    int count = 0;
+    int embed_index = 0;
+
+    LIBERROR_IS_NEGATIVE(type);
+
+    for(embed_index = 0; embed_index < carray_length(&array); embed_index++) {
+        if(array.contents[embed_index].type != type)
+            continue;
+
+        count++;    
+    }
+
+    return count;
+}
+
+/*
+ * ========================
+ * # Formatting functions #
+ * ========================
+*/
+struct CString *common_parse_format_embeds(struct Embeds embeds, struct EmbedRequests requests, struct CString *embed_location) {
+    int type_id = 0;
+    int embed_index = 0;
+    struct Embeds *filtered_embeds = NULL;
+    struct Embeds *merged_embeds = NULL;
+
+    filtered_embeds = carray_init(filtered_embeds, EMBED);
+    merged_embeds = carray_init(merged_embeds, EMBED);
+
+    /* Fill up the embed bodies with the bodies of all the requested embeds,
+     * ordered by the types. */
+    for(type_id = 0; type_id < common_parse_highest_type(embeds) + 1; type_id++) {
+        /* For each embed, if its of the type we expect, and is requested, add it. */
+        for(embed_index = 0; embed_index < carray_length(&embeds); embed_index++) {
+            int requested_index = -1;
+            struct Embed new_embed;
+
+            /* Not the type we're looking for */
+            if(embeds.contents[embed_index].type != type_id)
+                continue;
+
+            requested_index = carray_find(&requests, embeds.contents[embed_index].name.contents, requested_index, EMBED_REQUEST);
+
+            /* This embed was not requested. */
+            if(requested_index == -1)
+                continue;
+
+            /* Duplicate the embed with the comment removed if needed.
+             * The initialization of the embed name is TECHNICALLY
+             * unnecessary, it just exists so we do not attempt to
+             * free NULL. */
+            new_embed.name = cstring_init("");
+            new_embed.body = cstring_init("");
+            new_embed.type = embeds.contents[embed_index].type;
+
+            if(requests.contents[requested_index].allow_comment == 0) {
+                cstring_concats(&(new_embed.body), strchr(embeds.contents[embed_index].body.contents, '\n') + 1);
+                new_embed.has_comment = 0;
+            } else {
+                cstring_concat(&(new_embed.body), embeds.contents[embed_index].body);
+                new_embed.has_comment = 1;
+            }
+
+            carray_append(filtered_embeds, new_embed, EMBED);
+        }
+    }
+
+    /* Merge the uncommented types, then merge the commented ones */
+    for(type_id = 0; type_id < common_parse_highest_type(*filtered_embeds) + 1; type_id++) {
+        int commented_embeds = 0;
+        struct Embed commented;
+        struct Embed uncommented;
+
+        /* Do not try to initialize new bodies for types with no embeds in it */
+        if(common_parse_count_types(embeds, type_id) == 0)
+            continue;
+
+        LIBERROR_INIT(commented);
+        LIBERROR_INIT(uncommented);
+
+        commented.name = cstring_init("");
+        commented.body = cstring_init("");
+        commented.has_comment = 1;
+
+        uncommented.name = cstring_init("");
+        uncommented.body = cstring_init("");
+        uncommented.has_comment = 0;
+
+        /* Add the uncommented and commented requested embeds that match this type */
+        for(embed_index = 0; embed_index < carray_length(filtered_embeds); embed_index++) {
+            if(filtered_embeds->contents[embed_index].type != type_id)
+                continue;
+
+            if(filtered_embeds->contents[embed_index].has_comment == 1) {
+                /* There was a commented embed before us, so add a new line */
+                if(commented_embeds > 0)
+                    cstring_concats(&commented.body, "\n");
+
+                cstring_concats(&commented.body, filtered_embeds->contents[embed_index].body.contents);
+                commented_embeds++;
+            } else if(filtered_embeds->contents[embed_index].has_comment == 0) {
+                cstring_concats(&uncommented.body, filtered_embeds->contents[embed_index].body.contents);
+            } else {
+                fprintf(LIBERROR_STREAM, "Should not get here (%s:%i)\n", __FILE__, __LINE__); 
+                abort();
+            }
+            
+            continue;
+        }
+
+        if(commented.body.length > 0) {
+            carray_append(merged_embeds, commented, EMBED); 
+        } else {
+            EMBED_FREE(commented); 
+        }
+
+        if(uncommented.body.length > 0) {
+            carray_append(merged_embeds, uncommented, EMBED); 
+        } else {
+            EMBED_FREE(uncommented); 
+        }
+    }
+
+    /* Merge the final array into a single string */
+    for(embed_index = 0; embed_index < carray_length(merged_embeds); embed_index++) {
+        cstring_concats(embed_location, merged_embeds->contents[embed_index].body.contents);
+
+        if(embed_index == (carray_length(merged_embeds) - 1))
+            continue;
+
+        cstring_concats(embed_location, "\n");
+    }
+
+    carray_free(merged_embeds, EMBED);
+    carray_free(filtered_embeds, EMBED);
+
+    return embed_location;
+}
+
+/*
+ * =====================
+ * # Manual Formatters #
+ * =====================
+*/
+void translate_newlines(FILE *location, struct CString string) {
+    int character = 0;
+
+    for(character = 0; character < string.length; character++) {
+        if(string.contents[character] == '\n') {
+            fprintf(location, "%s", "\n.br\n");
+        } else {
+            fprintf(location, "%c", string.contents[character]);
+        }
+    }
+}
+
+/*
+ * ===================
+ * #  Main function  #
+ * ===================
+*/
+
+int main(int argc, char **argv) {
     int index = 0;
     struct Embeds *embeds = NULL;
     struct CStrings *input_lines = NULL;
+    struct ArgparseParser parser = argparse_init("docgen-backend-manapage", argc, argv);
+    const char *category = NULL;
+    const char *title = NULL;
+    const char *date = NULL;
+
+    argparse_add_option(&parser, "-c", "--category", 1);
+    argparse_add_option(&parser, "-t", "--title", 1);
+    argparse_add_option(&parser, "-d", "--date", 1);
+    argparse_error(parser);
+
+    if(argparse_option_exists(parser, "-c") != 0)
+        category = argparse_get_option_parameter(parser, "-c", 0);
+    else if(argparse_option_exists(parser, "--category") != 0)
+        category = argparse_get_option_parameter(parser, "--category", 0);
+    else
+        category = "1";
+
+    if(argparse_option_exists(parser, "-t") != 0)
+        title = argparse_get_option_parameter(parser, "-t", 0);
+    else if(argparse_option_exists(parser, "--title") != 0)
+        title = argparse_get_option_parameter(parser, "--title", 0);
+    else
+        title = "";
+
+    if(argparse_option_exists(parser, "-d") != 0)
+        date = argparse_get_option_parameter(parser, "-d", 0);
+    else if(argparse_option_exists(parser, "--date") != 0)
+        date = argparse_get_option_parameter(parser, "--date", 0);
+    else
+        date = "";
 
     embeds = carray_init(embeds, EMBED);
     input_lines = carray_init(input_lines, CSTRING);
-    
+  
     /* Collect the data we need */
-    common_parse_embeds(*input_lines, embeds);
     common_parse_readlines(input_lines, stdin);
+    common_parse_embeds(*input_lines, embeds);
 
     /* For each group, parse the data we need and put it into a manual */
     for(index = 0; index < carray_length(input_lines); index++) {
         int index_ = 0;
         struct CString line;
+        struct CString synopsis_embed;
         struct Sections *sections = NULL;
-        struct CStrings *embed_requests = NULL;
+        struct References *references = NULL;
+        struct EmbedRequests *embed_requests = NULL;
+        char output_file_path[OUTPUT_FILE_PATH_LENGTH + 1];
+        FILE *output_file = NULL;
 
         LIBERROR_OUT_OF_BOUNDS(index, carray_length(input_lines));
         VERIFY_CSTRING(input_lines->contents + index);
 
         line = input_lines->contents[index];
 
-        if(strcmp(line.contents, "START_GROUP") != 0)
+        if(strncmp(line.contents, "START_GROUP", strlen("START_GROUP")) != 0)
             continue; 
 
+        /* Open the output file, but first make sure we can hold a path large
+         * enough. */
+        if((strlen("doc/") + strlen(strchr(line.contents, ' ') + 1) + strlen(".") + strlen(category)) >= OUTPUT_FILE_PATH_LENGTH) {
+            fprintf(LIBERROR_STREAM, "%s", "docgen-backend-manpage: output file path is too long." );
+            exit(1);
+        }
+
+        sprintf(output_file_path, "doc/%s.%s", strchr(line.contents, ' ') + 1, category);
+        output_file = fopen(output_file_path, "w+");
+
+        LIBERROR_IS_NULL(output_file);
+
+        synopsis_embed = cstring_init("");
         sections = carray_init(sections, SECTION);
-        embed_requests = carray_init(embed_requests, CSTRING);
+        embed_requests = carray_init(embed_requests, EMBED_REQUEST);
+        references = carray_init(references, REFERENCE);
 
         /* Extract this group's data */
         common_parse_prepends(*input_lines, sections, index);
         common_parse_sections(*input_lines, sections, index);
         common_parse_appends(*input_lines, sections, index);
         common_parse_embed_requests(*input_lines, embed_requests, index);
+        common_parse_format_embeds(*embeds, *embed_requests, &synopsis_embed);
+        common_parse_references(*input_lines, references, index);
 
-        /* What are the sections we have? */
+        /* Header */
+        fprintf(output_file, ".TH %s %s \"%s\" \"\" %s\n", strchr(line.contents, ' ') + 1, category, date, title);
+
+        /* Get the name */
         for(index_ = 0; index_ < carray_length(sections); index_++) {
-            printf("%s:\n%s\n", sections->contents[index_].name.contents, sections->contents[index_].body.contents);
+            struct Section section = sections->contents[index_];
+
+            if(strcmp(section.name.contents, "NAME") != 0)
+                continue;
+
+            fprintf(output_file, ".SH %s\n.br\n", section.name.contents);
+            translate_newlines(output_file, section.body);
         }
 
-        printf("%s", "Requested embeds:\n");
-        for(index_ = 0; index_ < carray_length(embed_requests); index_++) {
-            printf("\t%s\n",  embed_requests->contents[index_].contents);
+        /* Get the synopsis */
+        for(index_ = 0; index_ < carray_length(sections); index_++) {
+            struct Section section = sections->contents[index_];
+
+            if(strcmp(section.name.contents, "SYNOPSIS") != 0)
+                continue;
+
+            fprintf(output_file, "%s", ".SH SYNOPSIS\n.br\n");
+            
+            /* If the body already exists (i.e there is stuff before the
+             * embeds), make a new line for the embeds if there are any */
+            if(section.body.length > 0 && synopsis_embed.length > 0) {
+                translate_newlines(output_file, section.body);
+                fprintf(output_file, "%s", "\n.br\n");
+            }
+
+            translate_newlines(output_file, synopsis_embed);
         }
 
-        printf("%s", "Next group...\n");
+        /* Get the other sections */
+        for(index_ = 0; index_ < carray_length(sections); index_++) {
+            struct Section section = sections->contents[index_];
 
+            if(strcmp(section.name.contents, "NAME") == 0 || strcmp(section.name.contents, "SYNOPSIS") == 0)
+                continue;
+
+            fprintf(output_file, ".SH %s\n.br\n", section.name.contents);
+            translate_newlines(output_file, section.body);
+        }
+
+
+        /* Dump the see-also if there is any. */
+        if(carray_length(references) > 0) {
+            fprintf(output_file, ".SH SEE ALSO\n.br\n"); 
+
+            for(index_ = 0; index_ < carray_length(references); index_++) {
+                fprintf(output_file, "%s(%s)", references->contents[index_].name.contents, references->contents[index_].category.contents);
+
+                if(index_ == (carray_length(references) - 1))
+                    continue; 
+
+                fprintf(output_file, "%s", ", ");
+            }
+
+            fprintf(output_file, "%c", '\n');
+        }
+
+        cstring_free(synopsis_embed);
         carray_free(sections, SECTION);
-        carray_free(embed_requests, CSTRING);
+        carray_free(embed_requests, EMBED_REQUEST);
+
+        fclose(output_file);
+
+        break;
     }
 
     carray_free(embeds, EMBED);
     carray_free(input_lines, CSTRING);
+    argparse_free(parser);
 
     return 0;
 }

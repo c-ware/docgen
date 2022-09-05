@@ -38,6 +38,8 @@
 #ifndef CWARE_DOCGEN_BACKEND_MANPAGE
 #define CWARE_DOCGEN_BACKEND_MANPAGE
 
+#define OUTPUT_FILE_PATH_LENGTH    1024 + 1
+
 #define SECTION_TYPE    struct Section
 #define SECTION_HEAP    1
 #define SECTION_COMPARE(a, b) \
@@ -56,6 +58,19 @@
     cstring_free((embed).name); \
     cstring_free((embed).body)
 
+#define EMBED_REQUEST_TYPE  struct EmbedRequest
+#define EMBED_REQUEST_HEAP  1
+#define EMBED_REQUEST_FREE(request) \
+    cstring_free((request).name);
+#define EMBED_REQUEST_COMPARE(a, b) \
+    (strcmp((a).name.contents, (b)) == 0)
+
+#define REFERENCE_TYPE  struct Reference
+#define REFERENCE_HEAP  1
+#define REFERENCE_FREE(reference)      \
+    cstring_free((reference).name);    \
+    cstring_free((reference).category)
+
 /* A section name and body pair */
 struct Section {
     struct CString name;
@@ -70,8 +85,16 @@ struct Sections {
 
 /* A parsed embed */
 struct Embed {
+    int type;
     struct CString name;
     struct CString body;
+
+    /* This field is only used when embeds are being filtered, so
+     * we do not need to make a new structure to hold embeds, and
+     * whether or not they have a comment, as we merge non-commented
+     * embeds of the same type and commented ones of the same type
+     * separately before merging them both. */
+    int has_comment;
 };
 
 struct Embeds {
@@ -79,5 +102,30 @@ struct Embeds {
     int capacity;
     struct Embed *contents;
 };
+
+/* Embed requests */
+struct EmbedRequest {
+    int allow_comment;
+    struct CString name;
+};
+
+struct EmbedRequests {
+    int length;
+    int capacity;
+    struct EmbedRequest *contents;
+};
+
+/* References */
+struct Reference {
+    struct CString name;   
+    struct CString category;
+};
+
+struct References {
+    int length;
+    int capacity;
+    struct Reference *contents;
+};
+
 
 #endif
