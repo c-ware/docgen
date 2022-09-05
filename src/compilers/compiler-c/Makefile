@@ -18,22 +18,22 @@ $(PROGNAME): main.c $(OBJS)
 	$(CC) main.c $(OBJS) -o $@ $(CFLAGS)
 
 embeds/functions.o: embeds/functions.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) embeds/functions.c -o $@ -c $(CFLAGS)
 
 embeds/constants.o: embeds/constants.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) embeds/constants.c -o $@ -c $(CFLAGS)
 
 embeds/macro_functions.o: embeds/macro_functions.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) embeds/macro_functions.c -o $@ -c $(CFLAGS)
 
 embeds/structures.o: embeds/structures.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) embeds/structures.c -o $@ -c $(CFLAGS)
 
 ../../deps/cstring/cstring.o: ../../deps/cstring/cstring.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../deps/cstring/cstring.c -o $@ -c $(CFLAGS)
 
 ../../common/errors/errors.o: ../../common/errors/errors.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../common/errors/errors.c -o $@ -c $(CFLAGS)
 
 ../../common/parsing/parsing.o: ../../common/parsing/parsing.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../common/parsing/parsing.c -o $@ -c $(CFLAGS)

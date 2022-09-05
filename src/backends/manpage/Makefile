@@ -18,19 +18,19 @@ $(PROGNAME): main.c $(OBJS)
 	$(CC) main.c $(OBJS) -o $@ $(CFLAGS)
 
 ../../deps/cstring/cstring.o: ../../deps/cstring/cstring.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../deps/cstring/cstring.c -o $@ -c $(CFLAGS)
 
 ../../common/errors/errors.o: ../../common/errors/errors.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../common/errors/errors.c -o $@ -c $(CFLAGS)
 
 ../../common/parsing/parsing.o: ../../common/parsing/parsing.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../common/parsing/parsing.c -o $@ -c $(CFLAGS)
 
 ../../deps/argparse/ap_inter.o: ../../deps/argparse/ap_inter.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../deps/argparse/ap_inter.c -o $@ -c $(CFLAGS)
 
 ../../deps/argparse/argparse.o: ../../deps/argparse/argparse.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../deps/argparse/argparse.c -o $@ -c $(CFLAGS)
 
 ../../deps/argparse/extract.o: ../../deps/argparse/extract.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../deps/argparse/extract.c -o $@ -c $(CFLAGS)

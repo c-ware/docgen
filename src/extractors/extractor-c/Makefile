@@ -15,13 +15,13 @@ install:
 	cp $(PROGNAME) $(PREFIX)/bin
 
 $(PROGNAME): main.c $(OBJS)
-	$(CC) $< $(OBJS) -o $@ $(CFLAGS)
+	$(CC) main.c $(OBJS) -o $@ $(CFLAGS)
 
 ../../deps/cstring/cstring.o: ../../deps/cstring/cstring.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../deps/cstring/cstring.c -o $@ -c $(CFLAGS)
 
 ../../common/errors/errors.o: ../../common/errors/errors.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../common/errors/errors.c -o $@ -c $(CFLAGS)
 
 ../../common/parsing/parsing.o: ../../common/parsing/parsing.c
-	$(CC) $< -o $@ -c $(CFLAGS)
+	$(CC) ../../common/parsing/parsing.c -o $@ -c $(CFLAGS)
