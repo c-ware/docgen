@@ -725,8 +725,6 @@ int main(int argc, char **argv) {
         carray_free(embed_requests, EMBED_REQUEST);
 
         fclose(output_file);
-
-        break;
     }
 
     carray_free(embeds, EMBED);
