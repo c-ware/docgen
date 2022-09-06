@@ -644,6 +644,8 @@ int main(int argc, char **argv) {
         sprintf(output_file_path, "doc/%s.%s", strchr(line.contents, ' ') + 1, category);
         output_file = fopen(output_file_path, "w+");
 
+        printf("%s\n", output_file_path);
+
         LIBERROR_IS_NULL(output_file);
 
         synopsis_embed = cstring_init("");
@@ -660,7 +662,7 @@ int main(int argc, char **argv) {
         common_parse_references(*input_lines, references, index);
 
         /* Header */
-        fprintf(output_file, ".TH %s %s \"%s\" \"\" %s\n", strchr(line.contents, ' ') + 1, category, date, title);
+        fprintf(output_file, ".TH \"%s\" \"%s\" \"%s\" \"\" \"%s\"\n", strchr(line.contents, ' ') + 1, category, date, title);
 
         /* Get the name */
         for(index_ = 0; index_ < carray_length(sections); index_++) {
