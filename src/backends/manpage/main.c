@@ -88,7 +88,7 @@ struct ProgramArguments parse_arguments(int argc, char **argv) {
     struct ArgparseParser parser = argparse_init("docgen-backend-manapage", argc, argv);
 
     /* These are the options we want to accept */
-    argparse_add_option(&parser, "-c", "--category", 1);
+    argparse_add_option(&parser, "-s", "--section", 1);
     argparse_add_option(&parser, "-t", "--title", 1);
     argparse_add_option(&parser, "-d", "--date", 1);
 
