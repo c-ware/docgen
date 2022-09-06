@@ -49,506 +49,17 @@
 
 #include "main.h"
 
-/*
- * ==========================
- * #   Parsing operations   #
- * ==========================
-*/
-void common_parse_embeds(struct CStrings lines, struct Embeds *array) {
-    int in_body = 0;
-    int line_index = 0;
-    struct Embed embed;
-
-    VERIFY_CARRAY(array);
-    VERIFY_CARRAY(&lines);
-    LIBERROR_INIT(embed);
-
-    for(line_index = 0; line_index < carray_length(&lines); line_index++) {
-        struct CString line; 
-
-        LIBERROR_INIT(line);
-        VERIFY_CSTRING(lines.contents + line_index);
-
-        line = lines.contents[line_index];
-
-        /* We only want to parse when we start the embed (the space
-         * here is important to distinguish it from "START_EMBED_REQUEST" */
-        if(strncmp(line.contents, "START_EMBED ", strlen("START_EMBED ")) != 0) {
-            /* Stop parsing the body string (since theres no space after,
-             * theres no need for the extra space */
-            if(strcmp(line.contents, "END_EMBED") == 0) {
-                in_body = 0;
-                carray_append(array, embed, EMBED);
-
-                continue; 
-            }
-
-            /* If this is 1, we know we passed "START_EMBED ", and we have not
-             * yet met "END_EMBED ". */
-            if(in_body == 0)
-                continue;
-
-            cstring_concats(&embed.body, line.contents);
-            cstring_concats(&embed.body, "\n");
-
-            continue;
-        }
-
-
-        /* We will only get here once, which is when "START_EMBED " is found.
-         * Every other time when the string is not START_EMBED, it will add
-         * text to the body. */
-        embed.name = cstring_init("");
-        embed.body = cstring_init("");
-
-        /* Get the name and type */
-        cstring_concats(&(embed.name), strchr(line.contents, ' ') + 1);
-        embed.type = strtoul(lines.contents[line_index + 1].contents, NULL, 10);
-
-        in_body = 1;
-
-        /* Type is the first 'line' after the directive, so we skip it */
-        line_index++;
-    }
-}
-
-void common_parse_embed_requests(struct CStrings lines, struct EmbedRequests *array, int start_index) {
-    int line_index = 0;
-
-    VERIFY_CARRAY(array);
-    VERIFY_CARRAY(&lines);
-    LIBERROR_IS_NEGATIVE(start_index);
-
-    for(line_index = start_index; line_index < carray_length(&lines); line_index++) {
-        struct CString line; 
-        struct EmbedRequest embed_request;
-
-        LIBERROR_INIT(line);
-        LIBERROR_INIT(embed_request);
-        VERIFY_CSTRING(lines.contents + line_index);
-
-        line = lines.contents[line_index];
-
-        /* Stop when we find the end of this group */
-        if(strcmp(line.contents, "END_GROUP") == 0)
-            break;
-        
-        if(strncmp(line.contents, "START_EMBED_REQUEST", strlen("START_EMBED_REQUEST")) != 0)
-            continue;
-
-        LIBERROR_OUT_OF_BOUNDS(line_index + 1, carray_length(&lines));
-
-        /* Add a new embed request */
-        embed_request.name = cstring_init("");
-        cstring_concats(&(embed_request.name), strchr(lines.contents[line_index].contents, ' ') + 1);
-
-        /* Are comments allowed? */
-        embed_request.allow_comment = strtoul(lines.contents[line_index + 1].contents, NULL, 10);
-
-        carray_append(array, embed_request, EMBED_REQUEST);
-    }
-}
-
-void common_parse_prepends(struct CStrings lines, struct Sections *array, int start_index) {
-    int in_body = 0;
-    int line_index = 0;
-    struct Section *section = NULL;
-
-    VERIFY_CARRAY(array);
-    VERIFY_CARRAY(&lines);
-    LIBERROR_IS_NEGATIVE(start_index);
-    LIBERROR_INIT(section);
-
-    /* First things first-- let's collect all of the prepends */
-    for(line_index = start_index; line_index < carray_length(&lines); line_index++) {
-        struct CString line; 
-
-        LIBERROR_INIT(line);
-        VERIFY_CSTRING(lines.contents + line_index);
-
-        line = lines.contents[line_index];
-
-        /* Stop when we find the end of this group */
-        if(strcmp(line.contents, "END_GROUP") == 0)
-            break;
-
-        /* Start a new section, or use an existing one. */
-        if(strncmp(line.contents, "START_PREPEND_TO", strlen("START_PREPEND_TO")) == 0) {
-            int exists = 0;
-            struct Section search;
-
-            LIBERROR_INIT(search);
-
-            in_body = 1; 
-
-            /* If the section already exists, we should use the existing one. */
-            search.name.contents = strchr(line.contents, ' ') + 1;
-            exists = carray_find(array, search, exists, SECTION);
-
-            if(exists == -1) {
-                struct Section new_section;
-
-                new_section.name = cstring_init(""); 
-                new_section.body = cstring_init(""); 
-
-                /* All we can know from this line is the name of the section */
-                cstring_concats(&(new_section.name), strchr(line.contents, ' ') + 1);
-
-                carray_append(array, new_section, SECTION);
-                section = array->contents + (carray_length(array) - 1);
-            } else {
-                section = array->contents + exists;
-            }
-
-            continue;
-        }
-
-        /* Stop when the line is the end of a group */
-        if(strcmp(line.contents, "END_PREPEND_TO") == 0) {
-            in_body = 0;
-
-            continue;
-        }
-
-        if(in_body == 0)
-            continue;
-
-        /* Construct the body */
-        cstring_concats(&(section->body), line.contents);
-        cstring_concats(&(section->body), "\n");
-    }
-}
-
-void common_parse_sections(struct CStrings lines, struct Sections *array, int start_index) {
-    int in_body = 0;
-    int line_index = 0;
-    struct Section *section = NULL;
-
-    VERIFY_CARRAY(array);
-    VERIFY_CARRAY(&lines);
-    LIBERROR_IS_NEGATIVE(start_index);
-    LIBERROR_INIT(section);
-
-    /* Next, let's collect all of the base sections */
-    for(line_index = start_index; line_index < carray_length(&lines); line_index++) {
-        struct CString line; 
-
-        LIBERROR_INIT(line);
-        VERIFY_CSTRING(lines.contents + line_index);
-
-        line = lines.contents[line_index];
-
-        /* Stop when we find the end of this group */
-        if(strcmp(line.contents, "END_GROUP") == 0)
-            break;
-
-        /* Start a new section, or use an existing one. */
-        if(strncmp(line.contents, "START_SECTION", strlen("START_SECTION")) == 0) {
-            int exists = 0;
-            struct Section search;
-
-            LIBERROR_INIT(search);
-
-            in_body = 1; 
-
-            /* If the section already exists, we should use the existing one. */
-            search.name.contents = strchr(line.contents, ' ') + 1;
-            exists = carray_find(array, search, exists, SECTION);
-
-            if(exists == -1) {
-                struct Section new_section;
-
-                new_section.name = cstring_init(""); 
-                new_section.body = cstring_init(""); 
-
-                /* All we can know from this line is the name of the section */
-                cstring_concats(&(new_section.name), strchr(line.contents, ' ') + 1);
-
-                carray_append(array, new_section, SECTION);
-                section = array->contents + (carray_length(array) - 1);
-            } else {
-                section = array->contents + exists;
-            }
-
-            continue;
-        }
-
-        /* Stop when the line is the end of a group */
-        if(strcmp(line.contents, "END_SECTION") == 0) {
-            in_body = 0;
-
-            continue;
-        }
-
-        if(in_body == 0)
-            continue;
-
-        /* Construct the body */
-        cstring_concats(&(section->body), line.contents);
-        cstring_concats(&(section->body), "\n");
-    }
-}
-
-void common_parse_appends(struct CStrings lines, struct Sections *array, int start_index) {
-    int in_body = 0;
-    int line_index = 0;
-    struct Section *section = NULL;
-
-    VERIFY_CARRAY(array);
-    VERIFY_CARRAY(&lines);
-    LIBERROR_IS_NEGATIVE(start_index);
-    LIBERROR_INIT(section);
-
-    /* Next, let's collect all of the base sections */
-    for(line_index = start_index; line_index < carray_length(&lines); line_index++) {
-        struct CString line; 
-
-        LIBERROR_INIT(line);
-        VERIFY_CSTRING(lines.contents + line_index);
-
-        line = lines.contents[line_index];
-
-        /* Stop when we find the end of this group */
-        if(strcmp(line.contents, "END_GROUP") == 0)
-            break;
-
-        /* Start a new section, or use an existing one. */
-        if(strncmp(line.contents, "START_APPEND_TO", strlen("START_APPEND_TO")) == 0) {
-            int exists = 0;
-            struct Section search;
-
-            LIBERROR_INIT(search);
-
-            in_body = 1; 
-
-            /* If the section already exists, we should use the existing one. */
-            search.name.contents = strchr(line.contents, ' ') + 1;
-            exists = carray_find(array, search, exists, SECTION);
-
-            if(exists == -1) {
-                struct Section new_section;
-
-                new_section.name = cstring_init(""); 
-                new_section.body = cstring_init(""); 
-
-                /* All we can know from this line is the name of the section */
-                cstring_concats(&(new_section.name), strchr(line.contents, ' ') + 1);
-
-                carray_append(array, new_section, SECTION);
-                section = array->contents + (carray_length(array) - 1);
-            } else {
-                section = array->contents + exists;
-            }
-
-            continue;
-        }
-
-        /* Stop when the line is the end of a group */
-        if(strcmp(line.contents, "END_APPEND_TO") == 0) {
-            in_body = 0;
-
-            continue;
-        }
-
-        if(in_body == 0)
-            continue;
-
-        /* Construct the body */
-        cstring_concats(&(section->body), line.contents);
-        cstring_concats(&(section->body), "\n");
-    }
-}
-
-void common_parse_references(struct CStrings lines, struct References *array, int start_index) {
-    int line_index = 0;
-
-    VERIFY_CARRAY(array);
-    VERIFY_CARRAY(&lines);
-    LIBERROR_IS_NEGATIVE(start_index);
-
-    for(line_index = start_index; line_index < carray_length(&lines); line_index++) {
-        struct CString line; 
-        struct Reference reference;
-
-        LIBERROR_INIT(line);
-        LIBERROR_INIT(reference);
-        VERIFY_CSTRING(lines.contents + line_index);
-
-        line = lines.contents[line_index];
-
-        /* Stop when we find the end of this group */
-        if(strcmp(line.contents, "END_GROUP") == 0)
-            break;
-        
-        if(strcmp(line.contents, "START_REFERENCE") != 0)
-            continue;
-
-        LIBERROR_OUT_OF_BOUNDS(line_index + 1, carray_length(&lines));
-
-        /* Add a new reference */
-        reference.name = cstring_init("");
-        reference.category = cstring_init("");
-
-        cstring_concat(&(reference.name), lines.contents[line_index + 1]);
-        cstring_concat(&(reference.category), lines.contents[line_index + 2]);
-
-        carray_append(array, reference, REFERENCE);
-    }
-}
-
-int common_parse_highest_type(struct Embeds array) {
-    int embed_index = 0;
-    int type = -1;
-
-    for(embed_index = 0; embed_index < carray_length(&array); embed_index++) {
-        if(array.contents[embed_index].type < type)
-            continue;
-
-        type = array.contents[embed_index].type;
-    }
-
-    return type;
-}
-
-int common_parse_count_types(struct Embeds array, int type) {
-    int count = 0;
-    int embed_index = 0;
-
-    LIBERROR_IS_NEGATIVE(type);
-
-    for(embed_index = 0; embed_index < carray_length(&array); embed_index++) {
-        if(array.contents[embed_index].type != type)
-            continue;
-
-        count++;    
-    }
-
-    return count;
-}
-
-/*
- * ========================
- * # Formatting functions #
- * ========================
-*/
-struct CString *common_parse_format_embeds(struct Embeds embeds, struct EmbedRequests requests, struct CString *embed_location) {
-    int type_id = 0;
-    int embed_index = 0;
-    struct Embeds *filtered_embeds = NULL;
-    struct Embeds *merged_embeds = NULL;
-
-    filtered_embeds = carray_init(filtered_embeds, EMBED);
-    merged_embeds = carray_init(merged_embeds, EMBED);
-
-    /* Fill up the embed bodies with the bodies of all the requested embeds,
-     * ordered by the types. */
-    for(type_id = 0; type_id < common_parse_highest_type(embeds) + 1; type_id++) {
-        /* For each embed, if its of the type we expect, and is requested, add it. */
-        for(embed_index = 0; embed_index < carray_length(&embeds); embed_index++) {
-            int requested_index = -1;
-            struct Embed new_embed;
-
-            /* Not the type we're looking for */
-            if(embeds.contents[embed_index].type != type_id)
-                continue;
-
-            requested_index = carray_find(&requests, embeds.contents[embed_index].name.contents, requested_index, EMBED_REQUEST);
-
-            /* This embed was not requested. */
-            if(requested_index == -1)
-                continue;
-
-            /* Duplicate the embed with the comment removed if needed.
-             * The initialization of the embed name is TECHNICALLY
-             * unnecessary, it just exists so we do not attempt to
-             * free NULL. */
-            new_embed.name = cstring_init("");
-            new_embed.body = cstring_init("");
-            new_embed.type = embeds.contents[embed_index].type;
-
-            if(requests.contents[requested_index].allow_comment == 0) {
-                cstring_concats(&(new_embed.body), strchr(embeds.contents[embed_index].body.contents, '\n') + 1);
-                new_embed.has_comment = 0;
-            } else {
-                cstring_concat(&(new_embed.body), embeds.contents[embed_index].body);
-                new_embed.has_comment = 1;
-            }
-
-            carray_append(filtered_embeds, new_embed, EMBED);
-        }
-    }
-
-    /* Merge the uncommented types, then merge the commented ones */
-    for(type_id = 0; type_id < common_parse_highest_type(*filtered_embeds) + 1; type_id++) {
-        int commented_embeds = 0;
-        struct Embed commented;
-        struct Embed uncommented;
-
-        /* Do not try to initialize new bodies for types with no embeds in it */
-        if(common_parse_count_types(embeds, type_id) == 0)
-            continue;
-
-        LIBERROR_INIT(commented);
-        LIBERROR_INIT(uncommented);
-
-        commented.name = cstring_init("");
-        commented.body = cstring_init("");
-        commented.has_comment = 1;
-
-        uncommented.name = cstring_init("");
-        uncommented.body = cstring_init("");
-        uncommented.has_comment = 0;
-
-        /* Add the uncommented and commented requested embeds that match this type */
-        for(embed_index = 0; embed_index < carray_length(filtered_embeds); embed_index++) {
-            if(filtered_embeds->contents[embed_index].type != type_id)
-                continue;
-
-            if(filtered_embeds->contents[embed_index].has_comment == 1) {
-                /* There was a commented embed before us, so add a new line */
-                if(commented_embeds > 0)
-                    cstring_concats(&commented.body, "\n");
-
-                cstring_concats(&commented.body, filtered_embeds->contents[embed_index].body.contents);
-                commented_embeds++;
-            } else if(filtered_embeds->contents[embed_index].has_comment == 0) {
-                cstring_concats(&uncommented.body, filtered_embeds->contents[embed_index].body.contents);
-            } else {
-                fprintf(LIBERROR_STREAM, "Should not get here (%s:%i)\n", __FILE__, __LINE__); 
-                abort();
-            }
-            
-            continue;
-        }
-
-        if(commented.body.length > 0) {
-            carray_append(merged_embeds, commented, EMBED); 
-        } else {
-            EMBED_FREE(commented); 
-        }
-
-        if(uncommented.body.length > 0) {
-            carray_append(merged_embeds, uncommented, EMBED); 
-        } else {
-            EMBED_FREE(uncommented); 
-        }
-    }
-
-    /* Merge the final array into a single string */
-    for(embed_index = 0; embed_index < carray_length(merged_embeds); embed_index++) {
-        cstring_concats(embed_location, merged_embeds->contents[embed_index].body.contents);
-
-        if(embed_index == (carray_length(merged_embeds) - 1))
-            continue;
-
-        cstring_concats(embed_location, "\n");
-    }
-
-    carray_free(merged_embeds, EMBED);
-    carray_free(filtered_embeds, EMBED);
-
-    return embed_location;
-}
+static const char *help_message =
+    "docgen-backend-manpage [ --section SECTION | -s SECTION ]\n"
+    "                       [ --title TITLE | -t TITLE ]\n"
+    "                       [ --date DATE | -d DATE ]\n"
+    "Generate manual pages from compiled input.\n"
+    "\n"
+    "Optional arguments:\n"
+    "   --section, -s SECTION       the section of the manual page. defaults to 1\n"
+    "   --title, -t TITLE           the title (top center text) of the manual page. defaults to \"Manual\"\n"
+    "   --date, -d DATE             the date the manual was last modified. defaults to an empty string\n"
+    "";
 
 /*
  * =====================
@@ -568,45 +79,61 @@ void translate_newlines(FILE *location, struct CString string) {
 }
 
 /*
+ * =====================
+ * # Argument handling #
+ * =====================
+*/
+struct ProgramArguments parse_arguments(int argc, char **argv) {
+    struct ProgramArguments arguments = {"1", "Manual", ""};
+    struct ArgparseParser parser = argparse_init("docgen-backend-manapage", argc, argv);
+
+    /* These are the options we want to accept */
+    argparse_add_option(&parser, "-c", "--category", 1);
+    argparse_add_option(&parser, "-t", "--title", 1);
+    argparse_add_option(&parser, "-d", "--date", 1);
+
+    /* Display the help message */
+    if(argparse_option_exists(parser, "-h") != 0 || argparse_option_exists(parser, "--help") != 0) {
+        fprintf(LIBERROR_STREAM, "%s", help_message); 
+
+        exit(1);
+    }
+
+    argparse_error(parser);
+
+    /* Extract the options arguments (they already have assigned defaults) */
+    if(argparse_option_exists(parser, "-c") != 0)
+        arguments.section = argparse_get_option_parameter(parser, "-c", 0);
+    else if(argparse_option_exists(parser, "--category") != 0)
+        arguments.section = argparse_get_option_parameter(parser, "--category", 0);
+
+    if(argparse_option_exists(parser, "-t") != 0)
+        arguments.title = argparse_get_option_parameter(parser, "-t", 0);
+    else if(argparse_option_exists(parser, "--title") != 0)
+        arguments.title = argparse_get_option_parameter(parser, "--title", 0);
+
+    if(argparse_option_exists(parser, "-d") != 0)
+        arguments.date = argparse_get_option_parameter(parser, "-d", 0);
+    else if(argparse_option_exists(parser, "--date") != 0)
+        arguments.date = argparse_get_option_parameter(parser, "--date", 0);
+
+    argparse_free(parser);
+
+    return arguments;
+}
+
+/*
  * ===================
  * #  Main function  #
  * ===================
 */
-
-int main(int argc, char **argv) {
+int _main(int argc, char **argv) {
     int index = 0;
     struct Embeds *embeds = NULL;
     struct CStrings *input_lines = NULL;
-    struct ArgparseParser parser = argparse_init("docgen-backend-manapage", argc, argv);
     const char *category = NULL;
     const char *title = NULL;
     const char *date = NULL;
-
-    argparse_add_option(&parser, "-c", "--category", 1);
-    argparse_add_option(&parser, "-t", "--title", 1);
-    argparse_add_option(&parser, "-d", "--date", 1);
-    argparse_error(parser);
-
-    if(argparse_option_exists(parser, "-c") != 0)
-        category = argparse_get_option_parameter(parser, "-c", 0);
-    else if(argparse_option_exists(parser, "--category") != 0)
-        category = argparse_get_option_parameter(parser, "--category", 0);
-    else
-        category = "1";
-
-    if(argparse_option_exists(parser, "-t") != 0)
-        title = argparse_get_option_parameter(parser, "-t", 0);
-    else if(argparse_option_exists(parser, "--title") != 0)
-        title = argparse_get_option_parameter(parser, "--title", 0);
-    else
-        title = "";
-
-    if(argparse_option_exists(parser, "-d") != 0)
-        date = argparse_get_option_parameter(parser, "-d", 0);
-    else if(argparse_option_exists(parser, "--date") != 0)
-        date = argparse_get_option_parameter(parser, "--date", 0);
-    else
-        date = "";
 
     embeds = carray_init(embeds, EMBED);
     input_lines = carray_init(input_lines, CSTRING);
@@ -731,7 +258,58 @@ int main(int argc, char **argv) {
 
     carray_free(embeds, EMBED);
     carray_free(input_lines, CSTRING);
-    argparse_free(parser);
 
     return 0;
+}
+
+struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArguments arguments) {
+    int line_index = 0;
+    struct Embeds *embeds = NULL;
+    struct Manuals *manuals = NULL;
+
+    embeds = carray_init(embeds, EMBED);
+    manuals = carray_init(manuals, MANUAL);
+
+    common_parse_embeds(input_lines, embeds);
+
+    /* Generate a manual for each START_GROUP found */
+    for(line_index = 0; line_index < carray_length(&input_lines); line_index++) {
+        int section_index = 0;
+        struct Sections *sections = NULL;
+        struct CString line = input_lines.contents[line_index];
+
+        if(strncmp(line.contents, "START_GROUP", strlen("START_GROUP")) != 0)
+            continue;
+
+        sections = carray_init(sections, SECTION);
+
+        /* Retrieve this group's sections */
+        common_parse_prepends(input_lines, sections, line_index);
+        common_parse_sections(input_lines, sections, line_index);
+        common_parse_appends(input_lines, sections, line_index);
+
+        for(section_index = 0; section_index < carray_length(sections); section_index++) {
+            printf("Name: '%s'\n", sections->contents[section_index].name.contents); 
+            printf("Body: '%s'\n", sections->contents[section_index].body.contents); 
+        }
+    }
+
+    carray_free(embeds, EMBED);
+
+    return manuals;
+}
+
+int main(int argc, char **argv) {
+    struct Manuals *manuals = NULL;
+    struct CStrings *input_lines = NULL;
+    struct ProgramArguments arguments = parse_arguments(argc, argv);
+
+    input_lines = carray_init(input_lines, CSTRING);
+    common_parse_readlines(input_lines, stdin);
+    manuals = build_manuals(*input_lines, arguments);
+
+    carray_free(input_lines, CSTRING);
+    carray_free(manuals, MANUAL);
+
+    return 0;    
 }

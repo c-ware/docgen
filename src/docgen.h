@@ -49,6 +49,9 @@
 #include "deps/liberror/liberror.h"
 #include "deps/argparse/argparse.h"
 
+#define FIELD_VALUE(x) \
+    (strchr((x).contents, ' ') + 1)
+
 #define PTR_TO_NUM(x) \
     ((unsigned long) (x))
 

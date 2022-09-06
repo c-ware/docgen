@@ -38,94 +38,30 @@
 #ifndef CWARE_DOCGEN_BACKEND_MANPAGE
 #define CWARE_DOCGEN_BACKEND_MANPAGE
 
-#define OUTPUT_FILE_PATH_LENGTH    1024 + 1
+#define OUTPUT_FILE_PATH_LENGTH     1024 + 1
+#define PROGRAM_NAME                "docgen-backend-manpage"
 
-#define SECTION_TYPE    struct Section
-#define SECTION_HEAP    1
-#define SECTION_COMPARE(a, b) \
-    (strcmp((a).name.contents, (b).name.contents) == 0)
+#define MANUAL_TYPE struct Manual
+#define MANUAL_HEAP 1
+#define MANUAL_FREE(object) cstring_free((object).name); cstring_free((object).body)
 
-#define SECTION_FREE(section)     \
-    cstring_free((section).name); \
-    cstring_free((section).body)
+/* The command line arguments for the program */
+struct ProgramArguments {
+    const char *section;
+    const char *title;
+    const char *date;
+};
 
-#define EMBED_TYPE    struct Embed
-#define EMBED_HEAP    1
-#define EMBED_COMPARE(a, b) \
-    (strcmp((a).name.contents, (b).name.contents) == 0)
-
-#define EMBED_FREE(embed)       \
-    cstring_free((embed).name); \
-    cstring_free((embed).body)
-
-#define EMBED_REQUEST_TYPE  struct EmbedRequest
-#define EMBED_REQUEST_HEAP  1
-#define EMBED_REQUEST_FREE(request) \
-    cstring_free((request).name);
-#define EMBED_REQUEST_COMPARE(a, b) \
-    (strcmp((a).name.contents, (b)) == 0)
-
-#define REFERENCE_TYPE  struct Reference
-#define REFERENCE_HEAP  1
-#define REFERENCE_FREE(reference)      \
-    cstring_free((reference).name);    \
-    cstring_free((reference).category)
-
-/* A section name and body pair */
-struct Section {
+/* A body and name pair */
+struct Manual {
     struct CString name;
     struct CString body;
 };
 
-struct Sections {
+struct Manuals {
     int length;
     int capacity;
-    struct Section *contents;
+    struct Manual *contents;
 };
-
-/* A parsed embed */
-struct Embed {
-    int type;
-    struct CString name;
-    struct CString body;
-
-    /* This field is only used when embeds are being filtered, so
-     * we do not need to make a new structure to hold embeds, and
-     * whether or not they have a comment, as we merge non-commented
-     * embeds of the same type and commented ones of the same type
-     * separately before merging them both. */
-    int has_comment;
-};
-
-struct Embeds {
-    int length;
-    int capacity;
-    struct Embed *contents;
-};
-
-/* Embed requests */
-struct EmbedRequest {
-    int allow_comment;
-    struct CString name;
-};
-
-struct EmbedRequests {
-    int length;
-    int capacity;
-    struct EmbedRequest *contents;
-};
-
-/* References */
-struct Reference {
-    struct CString name;   
-    struct CString category;
-};
-
-struct References {
-    int length;
-    int capacity;
-    struct Reference *contents;
-};
-
 
 #endif
