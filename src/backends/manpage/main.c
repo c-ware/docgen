@@ -275,28 +275,35 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
     /* Generate a manual for each START_GROUP found */
     for(line_index = 0; line_index < carray_length(&input_lines); line_index++) {
         int section_index = 0;
+        struct Manual new_manual;
         struct Sections *sections = NULL;
+        struct EmbedRequests *requests = NULL;
         struct CString line = input_lines.contents[line_index];
+
+        LIBERROR_INIT(new_manual);
 
         if(strncmp(line.contents, "START_GROUP", strlen("START_GROUP")) != 0)
             continue;
 
         sections = carray_init(sections, SECTION);
+        requests = carray_init(requests, EMBED_REQUEST);
+        new_manual.body = cstring_init("");
+        new_manual.name = cstring_init("");
 
-        /* Retrieve this group's sections */
+        /* Retrieve this group's sections and metadata */
         common_parse_prepends(input_lines, sections, line_index);
         common_parse_sections(input_lines, sections, line_index);
         common_parse_appends(input_lines, sections, line_index);
+        common_parse_embed_requests(input_lines, requests, line_index);
 
-        for(section_index = 0; section_index < carray_length(sections); section_index++) {
-            printf("Name: '%s'\n", sections->contents[section_index].name.contents); 
-            printf("Body: '%s'\n", sections->contents[section_index].body.contents); 
-        }
+        /* Generate the synopsis' embed string */
+        common_parse_format_embeds(*embeds, *requests, &(new_manual.body));
+
+        /* TODO: add the manual body to the synopsis (also change the damn variable! */
+
+        carray_free(sections, SECTION);
+        carray_free(requests, EMBED_REQUEST);
     }
-
-    carray_free(embeds, EMBED);
-
-    return manuals;
 }
 
 int main(int argc, char **argv) {
@@ -309,7 +316,9 @@ int main(int argc, char **argv) {
     manuals = build_manuals(*input_lines, arguments);
 
     carray_free(input_lines, CSTRING);
+    /*
     carray_free(manuals, MANUAL);
+    */
 
     return 0;    
 }
