@@ -262,6 +262,43 @@ int _main(int argc, char **argv) {
     return 0;
 }
 
+struct Section *find_section(struct Sections sections, const char *name) {
+    int section_index = 0;
+
+    for(section_index = 0; section_index < carray_length(&sections); section_index++) {
+        if(strcmp(sections.contents[section_index].name.contents, name) != 0)
+           continue;
+
+       return sections.contents + section_index; 
+    }
+
+    return NULL;
+}
+
+void add_section(struct Manual *location, struct Sections sections, const char *name) {
+    struct Section *named_section = find_section(sections, name);
+
+    if(named_section == NULL)
+        return;
+
+    cstring_concats(&(location->body), ".SH ");
+    cstring_concat(&(location->body), named_section->name);
+    cstring_concats(&(location->body), "\n");
+    cstring_concat(&(location->body), named_section->body);
+}
+
+void add_embeds(struct Sections sections, struct CString embed_string) {
+    struct Section *synopsis_section = find_section(sections, "SYNOPSIS");
+
+    if(synopsis_section == NULL)
+        return;
+
+    if(synopsis_section->body.length > 0)
+        cstring_concats(&(synopsis_section->body), "\n");
+
+    cstring_concat(&(synopsis_section->body), embed_string);
+}
+
 struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArguments arguments) {
     int line_index = 0;
     struct Embeds *embeds = NULL;
@@ -278,6 +315,7 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         struct Manual new_manual;
         struct Sections *sections = NULL;
         struct EmbedRequests *requests = NULL;
+        struct CString manual_embeds = cstring_init("");
         struct CString line = input_lines.contents[line_index];
 
         LIBERROR_INIT(new_manual);
@@ -290,6 +328,9 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         new_manual.body = cstring_init("");
         new_manual.name = cstring_init("");
 
+        /* Get the name of the manual (which is right after the START_GROUP directive */
+        cstring_concats(&(new_manual.name), strchr(line.contents, ' ') + 1);
+
         /* Retrieve this group's sections and metadata */
         common_parse_prepends(input_lines, sections, line_index);
         common_parse_sections(input_lines, sections, line_index);
@@ -297,28 +338,78 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         common_parse_embed_requests(input_lines, requests, line_index);
 
         /* Generate the synopsis' embed string */
-        common_parse_format_embeds(*embeds, *requests, &(new_manual.body));
+        common_parse_format_embeds(*embeds, *requests, &manual_embeds);
 
-        /* TODO: add the manual body to the synopsis (also change the damn variable! */
+        /* Add an extra line between existing synopsis text, and the embeds, if there is
+         * existing text. */
+        add_embeds(*sections, manual_embeds);
+
+        /* Manual needs a header */
+        cstring_concats(&(new_manual.body), ".TH \"");
+        cstring_concat(&(new_manual.body), new_manual.name);
+        cstring_concats(&(new_manual.body), "\" \"");
+        cstring_concats(&(new_manual.body), arguments.section);
+        cstring_concats(&(new_manual.body), "\" \"");
+        cstring_concats(&(new_manual.body), arguments.date);
+        cstring_concats(&(new_manual.body), "\" \"");
+        cstring_concats(&(new_manual.body), "\" \"");
+        cstring_concats(&(new_manual.body), arguments.title);
+        cstring_concats(&(new_manual.body), "\"\n");
+
+        /* Add the sections to the manual string */
+        add_section(&new_manual, *sections, "NAME");
+        add_section(&new_manual, *sections, "SYNOPSIS");
+        add_section(&new_manual, *sections, "DESCRIPTION");
+        add_section(&new_manual, *sections, "NOTES");
+        add_section(&new_manual, *sections, "EXAMPLES");
+
+        /* Add the final manual */
+        carray_append(manuals, new_manual, MANUAL);
 
         carray_free(sections, SECTION);
         carray_free(requests, EMBED_REQUEST);
+        cstring_free(manual_embeds);
     }
+
+    return manuals;
 }
 
 int main(int argc, char **argv) {
+    int manual_index = 0;
     struct Manuals *manuals = NULL;
     struct CStrings *input_lines = NULL;
+    struct CString manual_path = cstring_init("");
     struct ProgramArguments arguments = parse_arguments(argc, argv);
 
     input_lines = carray_init(input_lines, CSTRING);
     common_parse_readlines(input_lines, stdin);
     manuals = build_manuals(*input_lines, arguments);
 
+    /* Write each manual to its intended location */
+    for(manual_index = 0; manual_index < carray_length(manuals); manual_index++) {
+        FILE *manual_file = NULL;
+        struct Manual manual = manuals->contents[manual_index];
+
+        cstring_reset(&manual_path);
+
+        /* Ceate the path for the manual */
+        cstring_concats(&manual_path, "doc/");
+        cstring_concat(&manual_path, manual.name);
+        cstring_concats(&manual_path, ".");
+        cstring_concats(&manual_path, arguments.section);
+
+        manual_file = fopen(manual_path.contents, "w+");
+        LIBERROR_FILE_OPEN_FAILURE(manual_file, manual_path.contents);
+
+        /* Write the manual, translating each 0x10 (linefeed) into
+         * `\n.br\n` */
+        translate_newlines(manual_file, manual.body);
+
+        fclose(manual_file);
+    }
+
     carray_free(input_lines, CSTRING);
-    /*
     carray_free(manuals, MANUAL);
-    */
 
     return 0;    
 }
