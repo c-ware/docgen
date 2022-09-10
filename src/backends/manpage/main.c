@@ -127,141 +127,6 @@ struct ProgramArguments parse_arguments(int argc, char **argv) {
  * #  Main function  #
  * ===================
 */
-int _main(int argc, char **argv) {
-    int index = 0;
-    struct Embeds *embeds = NULL;
-    struct CStrings *input_lines = NULL;
-    const char *category = NULL;
-    const char *title = NULL;
-    const char *date = NULL;
-
-    embeds = carray_init(embeds, EMBED);
-    input_lines = carray_init(input_lines, CSTRING);
-  
-    /* Collect the data we need */
-    common_parse_readlines(input_lines, stdin);
-    common_parse_embeds(*input_lines, embeds);
-
-    /* For each group, parse the data we need and put it into a manual */
-    for(index = 0; index < carray_length(input_lines); index++) {
-        int index_ = 0;
-        struct CString line;
-        struct CString synopsis_embed;
-        struct Sections *sections = NULL;
-        struct References *references = NULL;
-        struct EmbedRequests *embed_requests = NULL;
-        char output_file_path[OUTPUT_FILE_PATH_LENGTH + 1];
-        FILE *output_file = NULL;
-
-        LIBERROR_OUT_OF_BOUNDS(index, carray_length(input_lines));
-        VERIFY_CSTRING(input_lines->contents + index);
-
-        line = input_lines->contents[index];
-
-        if(strncmp(line.contents, "START_GROUP", strlen("START_GROUP")) != 0)
-            continue; 
-
-        /* Open the output file, but first make sure we can hold a path large
-         * enough. */
-        if((strlen("doc/") + strlen(strchr(line.contents, ' ') + 1) + strlen(".") + strlen(category)) >= OUTPUT_FILE_PATH_LENGTH) {
-            fprintf(LIBERROR_STREAM, "%s", "docgen-backend-manpage: output file path is too long." );
-            exit(1);
-        }
-
-        sprintf(output_file_path, "doc/%s.%s", strchr(line.contents, ' ') + 1, category);
-        output_file = fopen(output_file_path, "w+");
-
-        printf("%s\n", output_file_path);
-
-        LIBERROR_IS_NULL(output_file);
-
-        synopsis_embed = cstring_init("");
-        sections = carray_init(sections, SECTION);
-        embed_requests = carray_init(embed_requests, EMBED_REQUEST);
-        references = carray_init(references, REFERENCE);
-
-        /* Extract this group's data */
-        common_parse_prepends(*input_lines, sections, index);
-        common_parse_sections(*input_lines, sections, index);
-        common_parse_appends(*input_lines, sections, index);
-        common_parse_embed_requests(*input_lines, embed_requests, index);
-        common_parse_format_embeds(*embeds, *embed_requests, &synopsis_embed);
-        common_parse_references(*input_lines, references, index);
-
-        /* Header */
-        fprintf(output_file, ".TH \"%s\" \"%s\" \"%s\" \"\" \"%s\"\n", strchr(line.contents, ' ') + 1, category, date, title);
-
-        /* Get the name */
-        for(index_ = 0; index_ < carray_length(sections); index_++) {
-            struct Section section = sections->contents[index_];
-
-            if(strcmp(section.name.contents, "NAME") != 0)
-                continue;
-
-            fprintf(output_file, ".SH %s\n.br\n", section.name.contents);
-            translate_newlines(output_file, section.body);
-        }
-
-        /* Get the synopsis */
-        for(index_ = 0; index_ < carray_length(sections); index_++) {
-            struct Section section = sections->contents[index_];
-
-            if(strcmp(section.name.contents, "SYNOPSIS") != 0)
-                continue;
-
-            fprintf(output_file, "%s", ".SH SYNOPSIS\n.br\n");
-            
-            /* If the body already exists (i.e there is stuff before the
-             * embeds), make a new line for the embeds if there are any */
-            if(section.body.length > 0 && synopsis_embed.length > 0) {
-                translate_newlines(output_file, section.body);
-                fprintf(output_file, "%s", "\n.br\n");
-            }
-
-            translate_newlines(output_file, synopsis_embed);
-        }
-
-        /* Get the other sections */
-        for(index_ = 0; index_ < carray_length(sections); index_++) {
-            struct Section section = sections->contents[index_];
-
-            if(strcmp(section.name.contents, "NAME") == 0 || strcmp(section.name.contents, "SYNOPSIS") == 0)
-                continue;
-
-            fprintf(output_file, ".SH %s\n.br\n", section.name.contents);
-            translate_newlines(output_file, section.body);
-        }
-
-
-        /* Dump the see-also if there is any. */
-        if(carray_length(references) > 0) {
-            fprintf(output_file, ".SH SEE ALSO\n.br\n"); 
-
-            for(index_ = 0; index_ < carray_length(references); index_++) {
-                fprintf(output_file, "%s(%s)", references->contents[index_].name.contents, references->contents[index_].category.contents);
-
-                if(index_ == (carray_length(references) - 1))
-                    continue; 
-
-                fprintf(output_file, "%s", ", ");
-            }
-
-            fprintf(output_file, "%c", '\n');
-        }
-
-        cstring_free(synopsis_embed);
-        carray_free(sections, SECTION);
-        carray_free(embed_requests, EMBED_REQUEST);
-
-        fclose(output_file);
-    }
-
-    carray_free(embeds, EMBED);
-    carray_free(input_lines, CSTRING);
-
-    return 0;
-}
-
 struct Section *find_section(struct Sections sections, const char *name) {
     int section_index = 0;
 
@@ -299,6 +164,30 @@ void add_embeds(struct Sections sections, struct CString embed_string) {
     cstring_concat(&(synopsis_section->body), embed_string);
 }
 
+void add_section_see_also(struct Manual *location, struct References references) {
+    int section_index = 0;
+
+    /* No references? Do not add this section. */
+    if(carray_length(&references) == 0)
+        return;
+
+    cstring_concats(&(location->body), ".SH SEE ALSO\n");
+
+    /* Add each section */
+    for(section_index = 0; section_index < carray_length(&references); section_index++) {
+        cstring_concat(&(location->body), references.contents[section_index].name);
+        cstring_concats(&(location->body), "(");
+        cstring_concat(&(location->body), references.contents[section_index].category);
+        cstring_concats(&(location->body), ")");
+
+        /* Do not add a comma unless there are still references to add */
+        if(section_index == (carray_length(&references) - 1))
+            continue; 
+
+        cstring_concats(&(location->body), ", ");
+    }
+}
+
 struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArguments arguments) {
     int line_index = 0;
     struct Embeds *embeds = NULL;
@@ -313,9 +202,10 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
     for(line_index = 0; line_index < carray_length(&input_lines); line_index++) {
         int section_index = 0;
         struct Manual new_manual;
+        struct CString manual_embeds;
         struct Sections *sections = NULL;
+        struct References *references = NULL;
         struct EmbedRequests *requests = NULL;
-        struct CString manual_embeds = cstring_init("");
         struct CString line = input_lines.contents[line_index];
 
         LIBERROR_INIT(new_manual);
@@ -325,8 +215,10 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
 
         sections = carray_init(sections, SECTION);
         requests = carray_init(requests, EMBED_REQUEST);
+        references = carray_init(references, REFERENCE);
         new_manual.body = cstring_init("");
         new_manual.name = cstring_init("");
+        manual_embeds = cstring_init("");
 
         /* Get the name of the manual (which is right after the START_GROUP directive */
         cstring_concats(&(new_manual.name), strchr(line.contents, ' ') + 1);
@@ -336,6 +228,7 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         common_parse_sections(input_lines, sections, line_index);
         common_parse_appends(input_lines, sections, line_index);
         common_parse_embed_requests(input_lines, requests, line_index);
+        common_parse_references(input_lines, references, line_index);
 
         /* Generate the synopsis' embed string */
         common_parse_format_embeds(*embeds, *requests, &manual_embeds);
@@ -363,13 +256,19 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         add_section(&new_manual, *sections, "NOTES");
         add_section(&new_manual, *sections, "EXAMPLES");
 
+        /* SEE ALSO is something we need to construct manually */
+        add_section_see_also(&new_manual, *references);
+
         /* Add the final manual */
         carray_append(manuals, new_manual, MANUAL);
 
         carray_free(sections, SECTION);
         carray_free(requests, EMBED_REQUEST);
+        carray_free(references, REFERENCE);
         cstring_free(manual_embeds);
     }
+
+    carray_free(embeds, EMBED);
 
     return manuals;
 }
@@ -410,6 +309,7 @@ int main(int argc, char **argv) {
 
     carray_free(input_lines, CSTRING);
     carray_free(manuals, MANUAL);
+    cstring_free(manual_path);
 
     return 0;    
 }
