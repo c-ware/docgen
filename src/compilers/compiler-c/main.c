@@ -936,6 +936,36 @@ int has_parameters(struct ProgramState *state, int start_index) {
     return 0;
 }
 
+int has_description(struct ProgramState *state, int start_index) {
+    int line_index = 0;
+
+    VERIFY_PROGRAM_STATE(state);
+
+    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
+        struct CString line;
+    
+        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
+        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
+        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
+
+        line = state->input_lines->contents[line_index];
+        common_parse_read_tag(line, &(state->tag_name)); 
+
+        VERIFY_CSTRING(&(state->tag_name));
+
+        /* Do not go past the end of the docgen block! */
+        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
+            break;
+
+        /* Description tag */
+        if(strcmp(state->tag_name.contents, "@description") == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 /* 
  * =========================================
  *             Main Function
@@ -1036,8 +1066,17 @@ int main(void) {
         compile_inclusion(&state, line_index);
         compile_multilines(&state, line_index);
         compile_embed_requests(&state, line_index);
-        compile_errors(&state, line_index);
         compile_return(&state, line_index);
+
+        /* If there is text in the description AND we have errors to write,
+         * they need an empty line in between */
+        if(has_description(&state, line_index) == 1 && has_errors(&state, line_index) == 1) {
+             fprintf(state.compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n");
+             fprintf(state.compilation_output, "%s", "\n\n");
+             fprintf(state.compilation_output, "%s", "END_APPEND_TO\n");
+        }
+
+        compile_errors(&state, line_index);
 
         /* If there is errors AND parameters, we need an extra newline
          * between the two */
