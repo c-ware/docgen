@@ -102,10 +102,10 @@ struct ProgramArguments parse_arguments(int argc, char **argv) {
     argparse_error(parser);
 
     /* Extract the options arguments (they already have assigned defaults) */
-    if(argparse_option_exists(parser, "-c") != 0)
+    if(argparse_option_exists(parser, "-s") != 0)
         arguments.section = argparse_get_option_parameter(parser, "-c", 0);
-    else if(argparse_option_exists(parser, "--category") != 0)
-        arguments.section = argparse_get_option_parameter(parser, "--category", 0);
+    else if(argparse_option_exists(parser, "--section") != 0)
+        arguments.section = argparse_get_option_parameter(parser, "--section", 0);
 
     if(argparse_option_exists(parser, "-t") != 0)
         arguments.title = argparse_get_option_parameter(parser, "-t", 0);
