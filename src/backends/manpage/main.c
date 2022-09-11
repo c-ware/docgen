@@ -146,14 +146,17 @@ void add_section(struct Manual *location, struct Sections sections, const char *
     if(named_section == NULL)
         return;
 
+    if(named_section->body.length == 0)
+        return;
+
     cstring_concats(&(location->body), ".SH ");
     cstring_concat(&(location->body), named_section->name);
     cstring_concats(&(location->body), "\n");
     cstring_concat(&(location->body), named_section->body);
 }
 
-void add_embeds(struct Sections sections, struct CString embed_string) {
-    struct Section *synopsis_section = find_section(sections, "SYNOPSIS");
+void add_embeds(struct Sections *sections, struct CString embed_string) {
+    struct Section *synopsis_section = find_section(*sections, "SYNOPSIS");
 
     if(synopsis_section == NULL)
         return;
@@ -230,12 +233,24 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         common_parse_embed_requests(input_lines, requests, line_index);
         common_parse_references(input_lines, references, line_index);
 
+        /* Add the synopsis section, because if the synopsis ONLY has embeds in it, then
+         * it will not display because no APPEND, PREPEND, or START_SECTION directive
+         * appears in the compiled input. */
+        if(find_section(*sections, "SYNOPSIS") == NULL) {
+            struct Section new_section;
+
+            new_section.name = cstring_init("SYNOPSIS");
+            new_section.body = cstring_init("");
+
+            carray_append(sections, new_section, SECTION); 
+        }
+
         /* Generate the synopsis' embed string */
         common_parse_format_embeds(*embeds, *requests, &manual_embeds);
 
         /* Add an extra line between existing synopsis text, and the embeds, if there is
          * existing text. */
-        add_embeds(*sections, manual_embeds);
+        add_embeds(sections, manual_embeds);
 
         /* Manual needs a header */
         cstring_concats(&(new_manual.body), ".TH \"");
@@ -248,6 +263,8 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         cstring_concats(&(new_manual.body), "\" \"");
         cstring_concats(&(new_manual.body), arguments.title);
         cstring_concats(&(new_manual.body), "\"\n");
+
+        /* Add the synopsis section to the array of sections, unless it already exists. */
 
         /* Add the sections to the manual string */
         add_section(&new_manual, *sections, "NAME");
