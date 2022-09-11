@@ -828,6 +828,43 @@ void compile_references(struct ProgramState *state, int start_index) {
     }
 }
 
+void compile_return(struct ProgramState *state, int start_index) {
+    int line_index = 0;
+
+    VERIFY_PROGRAM_STATE(state);
+
+    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
+        struct CString line;
+    
+        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
+        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
+        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
+
+        line = state->input_lines->contents[line_index];
+        common_parse_read_tag(line, &(state->tag_name)); 
+
+        VERIFY_CSTRING(&(state->tag_name));
+
+        /* Do not go past the end of the docgen block! */
+        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
+            break;
+
+        /* Dump the return tag, although in this context, we only care about the brief. */
+        if(strcmp(state->tag_name.contents, "@return") == 0) {
+            line = state->input_lines->contents[line_index + 1];
+            common_parse_read_tag(line, &(state->tag_name)); 
+
+            VERIFY_CSTRING(&(state->tag_name));
+
+            fprintf(state->compilation_output, "%s", "START_SECTION RETURN VALUE\n"); 
+            fprintf(state->compilation_output, "%s\n", FIELD_VALUE(line)); 
+            fprintf(state->compilation_output, "%s", "END_SECTION\n"); 
+
+            continue;
+        }
+    }
+}
+
 /*
  * ========================
  * # Information retrival #
@@ -911,6 +948,7 @@ int main(void) {
 
     LIBERROR_INIT(state);
 
+    /* Initialize the program state (mostly for memory re-use */
     state.input_lines = carray_init(state.input_lines, CSTRING);
     state.tag_name = cstring_init("");
     state.compilation_output = stdout;
@@ -919,7 +957,6 @@ int main(void) {
     state.temp_function.return_description  = cstring_init("");
     state.temp_function.description  = cstring_init("");
     state.temp_function.parameters = carray_init(state.temp_function.parameters, FUNCTION_PARAMETER);
-
     state.temp_macro_function.name = cstring_init("");
     state.temp_macro_function.description  = cstring_init("");
     state.temp_macro_function.parameters = carray_init(state.temp_macro_function.parameters, MACRO_FUNCTION_PARAMETER);
@@ -1000,6 +1037,7 @@ int main(void) {
         compile_multilines(&state, line_index);
         compile_embed_requests(&state, line_index);
         compile_errors(&state, line_index);
+        compile_return(&state, line_index);
 
         /* If there is errors AND parameters, we need an extra newline
          * between the two */

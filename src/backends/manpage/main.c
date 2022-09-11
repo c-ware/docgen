@@ -253,6 +253,7 @@ struct Manuals *build_manuals(struct CStrings input_lines, struct ProgramArgumen
         add_section(&new_manual, *sections, "NAME");
         add_section(&new_manual, *sections, "SYNOPSIS");
         add_section(&new_manual, *sections, "DESCRIPTION");
+        add_section(&new_manual, *sections, "RETURN VALUE");
         add_section(&new_manual, *sections, "NOTES");
         add_section(&new_manual, *sections, "EXAMPLES");
 
