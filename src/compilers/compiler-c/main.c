@@ -841,7 +841,7 @@ void compile_errors(struct ProgramState *state, int start_index) {
             const char *error_description = strchr(state->input_lines->contents[line_index].contents, ' ') + 1;
 
             fprintf(state->compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n"); 
-            fprintf(state->compilation_output, "%s\n", error_description); 
+            fprintf(state->compilation_output, "    - %s\n", error_description); 
             fprintf(state->compilation_output, "%s", "END_APPEND_TO\n"); 
 
             continue;
