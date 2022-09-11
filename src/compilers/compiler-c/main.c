@@ -203,6 +203,107 @@ int is_group(struct CString tag) {
     return 0;
 }
 
+/*
+ * ========================
+ * # Information retrival #
+ * ========================
+*/
+int has_errors(struct ProgramState *state, int start_index) {
+    int line_index = 0;
+
+    VERIFY_PROGRAM_STATE(state);
+
+    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
+        struct CString line;
+ 
+        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
+        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
+        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
+
+        line = state->input_lines->contents[line_index];
+        common_parse_read_tag(line, &(state->tag_name)); 
+
+        VERIFY_CSTRING(&(state->tag_name));
+
+        /* Do not go past the end of the docgen block! */
+        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
+            break;
+
+        /* Regular error */
+        if(strcmp(state->tag_name.contents, "@error") == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+int has_parameters(struct ProgramState *state, int start_index) {
+    int line_index = 0;
+
+    VERIFY_PROGRAM_STATE(state);
+
+    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
+        struct CString line;
+    
+        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
+        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
+        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
+
+        line = state->input_lines->contents[line_index];
+        common_parse_read_tag(line, &(state->tag_name)); 
+
+        VERIFY_CSTRING(&(state->tag_name));
+
+        /* Do not go past the end of the docgen block! */
+        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
+            break;
+
+        /* Function parameters */
+        if(strcmp(state->tag_name.contents, "@fparam") == 0) {
+            return 1;
+        }
+
+        /* Macro parameters */
+        if(strcmp(state->tag_name.contents, "@mparam") == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int has_description(struct ProgramState *state, int start_index) {
+    int line_index = 0;
+
+    VERIFY_PROGRAM_STATE(state);
+
+    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
+        struct CString line;
+    
+        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
+        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
+        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
+
+        line = state->input_lines->contents[line_index];
+        common_parse_read_tag(line, &(state->tag_name)); 
+
+        VERIFY_CSTRING(&(state->tag_name));
+
+        /* Do not go past the end of the docgen block! */
+        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
+            break;
+
+        /* Description tag */
+        if(strcmp(state->tag_name.contents, "@description") == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 /* 
  * =========================================
  *         Error checking components
@@ -865,107 +966,6 @@ void compile_return(struct ProgramState *state, int start_index) {
     }
 }
 
-/*
- * ========================
- * # Information retrival #
- * ========================
-*/
-int has_errors(struct ProgramState *state, int start_index) {
-    int line_index = 0;
-
-    VERIFY_PROGRAM_STATE(state);
-
-    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
-        struct CString line;
- 
-        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
-        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
-        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
-
-        line = state->input_lines->contents[line_index];
-        common_parse_read_tag(line, &(state->tag_name)); 
-
-        VERIFY_CSTRING(&(state->tag_name));
-
-        /* Do not go past the end of the docgen block! */
-        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
-            break;
-
-        /* Regular error */
-        if(strcmp(state->tag_name.contents, "@error") == 0) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-
-int has_parameters(struct ProgramState *state, int start_index) {
-    int line_index = 0;
-
-    VERIFY_PROGRAM_STATE(state);
-
-    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
-        struct CString line;
-    
-        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
-        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
-        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
-
-        line = state->input_lines->contents[line_index];
-        common_parse_read_tag(line, &(state->tag_name)); 
-
-        VERIFY_CSTRING(&(state->tag_name));
-
-        /* Do not go past the end of the docgen block! */
-        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
-            break;
-
-        /* Function parameters */
-        if(strcmp(state->tag_name.contents, "@fparam") == 0) {
-            return 1;
-        }
-
-        /* Macro parameters */
-        if(strcmp(state->tag_name.contents, "@mparam") == 0) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
-int has_description(struct ProgramState *state, int start_index) {
-    int line_index = 0;
-
-    VERIFY_PROGRAM_STATE(state);
-
-    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
-        struct CString line;
-    
-        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
-        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
-        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
-
-        line = state->input_lines->contents[line_index];
-        common_parse_read_tag(line, &(state->tag_name)); 
-
-        VERIFY_CSTRING(&(state->tag_name));
-
-        /* Do not go past the end of the docgen block! */
-        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
-            break;
-
-        /* Description tag */
-        if(strcmp(state->tag_name.contents, "@description") == 0) {
-            return 1;
-        }
-    }
-
-    return 0;
-}
-
 /* 
  * =========================================
  *             Main Function
@@ -1071,9 +1071,17 @@ int main(void) {
         /* If there is text in the description AND we have errors to write,
          * they need an empty line in between */
         if(has_description(&state, line_index) == 1 && has_errors(&state, line_index) == 1) {
-             fprintf(state.compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n");
-             fprintf(state.compilation_output, "%s", "\n\n");
-             fprintf(state.compilation_output, "%s", "END_APPEND_TO\n");
+            fprintf(state.compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n");
+            fprintf(state.compilation_output, "%s", "\n\n");
+            fprintf(state.compilation_output, "%s", "END_APPEND_TO\n");
+        }
+
+        /* Add pre-text to the error list */
+        if(has_errors(&state, line_index) == 1) {
+            fprintf(state.compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n");
+            fprintf(state.compilation_output, "%s", "When the following conditions are met, this will produce"
+                                                     "  an error message to stderr, and abort the program.\n"); 
+            fprintf(state.compilation_output, "%s", "END_APPEND_TO\n");
         }
 
         compile_errors(&state, line_index);

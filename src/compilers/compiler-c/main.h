@@ -38,7 +38,7 @@
 #ifndef CWARE_DOCGEN_COMPILER_C_H
 #define CWARE_DOCGEN_COMPILER_C_H
 
-/* Limits */
+/* Configuration */
 #define SPACING_PER_TAB 4
 
 /* Tags */
