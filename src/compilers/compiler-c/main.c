@@ -1068,9 +1068,9 @@ int main(void) {
         compile_embed_requests(&state, line_index);
         compile_return(&state, line_index);
 
-        /* If there is text in the description AND we have errors to write,
+        /* If there is text in the description AND we have (errors OR parameters) to write,
          * they need an empty line in between */
-        if(has_description(&state, line_index) == 1 && has_errors(&state, line_index) == 1) {
+        if(has_description(&state, line_index) == 1 && (has_errors(&state, line_index) == 1 || has_parameters(&state, line_index) == 1)) {
             fprintf(state.compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n");
             fprintf(state.compilation_output, "%s", "\n\n");
             fprintf(state.compilation_output, "%s", "END_APPEND_TO\n");
