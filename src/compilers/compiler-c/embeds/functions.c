@@ -168,12 +168,12 @@ void compile_function_embeds(struct ProgramState *state) {
         /* Display return type and function name, with a return type that
          * is either void, or a type. */
         if(state->temp_function.return_type.length == 0)
-            fprintf(state->compilation_output, "void %s(", state->temp_function.name.contents);
+            fprintf(state->compilation_output, "\\Bvoid %s(", state->temp_function.name.contents);
         else
             if(strchr(state->temp_function.return_type.contents, '*') != NULL)
-                fprintf(state->compilation_output, "%s%s(", state->temp_function.return_type.contents, state->temp_function.name.contents);
+                fprintf(state->compilation_output, "\\B%s%s(", state->temp_function.return_type.contents, state->temp_function.name.contents);
             else
-                fprintf(state->compilation_output, "%s %s(", state->temp_function.return_type.contents, state->temp_function.name.contents);
+                fprintf(state->compilation_output, "\\B%s %s(", state->temp_function.return_type.contents, state->temp_function.name.contents);
 
         /* Display Function parameters */
         for(parameter_index = 0; parameter_index < carray_length(state->temp_function.parameters); parameter_index++) {
@@ -181,15 +181,15 @@ void compile_function_embeds(struct ProgramState *state) {
 
             /* Is the return type a pointer? */
             if(strchr(parameter.type.contents, '*') != NULL)
-                fprintf(state->compilation_output, "%s%s", parameter.type.contents, parameter.name.contents);
+                fprintf(state->compilation_output, "%s\\B\\I%s\\I", parameter.type.contents, parameter.name.contents);
             else
-                fprintf(state->compilation_output, "%s %s", parameter.type.contents, parameter.name.contents);
+                fprintf(state->compilation_output, "%s\\B \\I%s\\I", parameter.type.contents, parameter.name.contents);
 
             /* Do not add a ',' for the last parameter */
             if(parameter_index == carray_length(state->temp_function.parameters) - 1)
                 continue;
 
-            fprintf(state->compilation_output, "%c ", ',');
+            fprintf(state->compilation_output, "%s ", ",\\B");
         }
 
         fprintf(state->compilation_output, "%s", ");\n");

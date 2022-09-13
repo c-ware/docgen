@@ -876,7 +876,7 @@ void compile_parameters(struct ProgramState *state, int start_index) {
             const char *param_brief = strchr(state->input_lines->contents[line_index + 2].contents, ' ') + 1;
 
             fprintf(state->compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n"); 
-            fprintf(state->compilation_output, "%s will be %s\n", param_name, param_brief); 
+            fprintf(state->compilation_output, "\\I%s\\I will be %s\n", param_name, param_brief); 
             fprintf(state->compilation_output, "%s", "END_APPEND_TO\n"); 
 
             continue;
@@ -888,7 +888,7 @@ void compile_parameters(struct ProgramState *state, int start_index) {
             const char *param_brief = strchr(state->input_lines->contents[line_index + 1].contents, ' ') + 1;
 
             fprintf(state->compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n"); 
-            fprintf(state->compilation_output, "%s will be %s\n", param_name, param_brief); 
+            fprintf(state->compilation_output, "\\I%s\\I will be %s\n", param_name, param_brief); 
             fprintf(state->compilation_output, "%s", "END_APPEND_TO\n"); 
 
             continue;
