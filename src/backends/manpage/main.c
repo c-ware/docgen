@@ -68,9 +68,34 @@ static const char *help_message =
 */
 void translate_newlines(FILE *location, struct CString string) {
     int character = 0;
+    int in_tsheet_table = 0;
 
     for(character = 0; character < string.length; character++) {
-        if(string.contents[character] == '\n') {
+        /* We want to ignore the translation of lines between the troff table
+         * markers .TS, and .TE, since `.br`'s in between the table markers
+         * cause formatting to break. */
+        if(strncmp(string.contents + character, ".TS\n", strlen(".TS\n")) == 0) {
+            in_tsheet_table = 1;
+            character += 4;
+
+            fprintf(location, "%s", ".TS\n");
+
+            continue;
+        }
+
+        /* For the above statement and this one, we print a period due to
+         * the period being the first character, so we skip printing it. Because
+         * of this, we must print it ourselves.  */
+        if(strncmp(string.contents + character, ".TE\n", strlen(".TE\n")) == 0) {
+            in_tsheet_table = 0;
+            character += 4;
+
+            fprintf(location, "%s", ".TE\n");
+
+            continue;
+        }
+
+        if(string.contents[character] == '\n' && in_tsheet_table == 0) {
             fprintf(location, "%s", "\n.br\n");
         } else {
             fprintf(location, "%c", string.contents[character]);
@@ -114,6 +139,20 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
                     cstring_concats(output_string, "\\fB"); 
                 } else if(in_marker == 0) {
                     cstring_concats(output_string, "\\fR"); 
+                } else {
+                    printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
+                    abort(); 
+                }
+            }
+
+            /* Start or end a table */
+            if(next_character == 'T') {
+                INVERT_BOOLEAN(in_marker);
+ 
+                if(in_marker == 1) {
+                    cstring_concats(output_string, ".TS\n"); 
+                } else if(in_marker == 0) {
+                    cstring_concats(output_string, ".TE\n"); 
                 } else {
                     printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
                     abort(); 
