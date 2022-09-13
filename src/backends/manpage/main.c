@@ -462,6 +462,7 @@ int main(int argc, char **argv) {
         struct Manual manual = manuals->contents[manual_index];
 
         cstring_reset(&manual_path);
+        cstring_reset(&tsheet_buffer);
 
         /* Ceate the path for the manual */
         cstring_concats(&manual_path, "doc/");
