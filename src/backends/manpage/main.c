@@ -78,6 +78,56 @@ void translate_newlines(FILE *location, struct CString string) {
     }
 }
 
+void translate_tsheet(struct CString input_string, struct CString *output_string) {
+    int in_marker = 0;
+    int character_index = 0;
+
+    for(character_index = 0; character_index < input_string.length; character_index++) {
+        char character = input_string.contents[character_index];
+        char character_nul_term[2] = {0x0, 0x0};
+
+        /* Interpret a TSHEET marker, but only if there is an extra character after */
+        if(character == '\\' && character_index + 1 < input_string.length) {
+            char next_character = input_string.contents[character_index + 1];
+
+            character_index++;
+
+            /* Start or end italics */
+            if(next_character == 'I') {
+                INVERT_BOOLEAN(in_marker);
+ 
+                if(in_marker == 1) {
+                    cstring_concats(output_string, "\\fI"); 
+                } else if(in_marker == 0) {
+                    cstring_concats(output_string, "\\fR"); 
+                } else {
+                    printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
+                    abort(); 
+                }
+            }
+
+            /* Start or end bold */
+            if(next_character == 'B') {
+                INVERT_BOOLEAN(in_marker);
+ 
+                if(in_marker == 1) {
+                    cstring_concats(output_string, "\\fB"); 
+                } else if(in_marker == 0) {
+                    cstring_concats(output_string, "\\fR"); 
+                } else {
+                    printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
+                    abort(); 
+                }
+            }
+
+            continue;
+        } 
+
+        character_nul_term[0] = character;
+        cstring_concats(output_string, character_nul_term); 
+    }
+}
+
 /*
  * =====================
  * # Argument handling #
@@ -123,9 +173,9 @@ struct ProgramArguments parse_arguments(int argc, char **argv) {
 }
 
 /*
- * ===================
- * #  Main function  #
- * ===================
+ * ======================
+ * #  Main program junk #
+ * ======================
 */
 struct Section *find_section(struct Sections sections, const char *name) {
     int section_index = 0;
@@ -296,6 +346,7 @@ int main(int argc, char **argv) {
     struct Manuals *manuals = NULL;
     struct CStrings *input_lines = NULL;
     struct CString manual_path = cstring_init("");
+    struct CString tsheet_buffer = cstring_init("");
     struct ProgramArguments arguments = parse_arguments(argc, argv);
 
     input_lines = carray_init(input_lines, CSTRING);
@@ -318,9 +369,10 @@ int main(int argc, char **argv) {
         manual_file = fopen(manual_path.contents, "w+");
         LIBERROR_FILE_OPEN_FAILURE(manual_file, manual_path.contents);
 
-        /* Write the manual, translating each 0x10 (linefeed) into
-         * `\n.br\n` */
-        translate_newlines(manual_file, manual.body);
+        /* Translate TSHEET markers, and write the manual, converting each
+         * linefeed into `\n.br\n`. */
+        translate_tsheet(manual.body, &tsheet_buffer);
+        translate_newlines(manual_file, tsheet_buffer);
 
         fclose(manual_file);
     }
@@ -328,6 +380,7 @@ int main(int argc, char **argv) {
     carray_free(input_lines, CSTRING);
     carray_free(manuals, MANUAL);
     cstring_free(manual_path);
+    cstring_free(tsheet_buffer);
 
     return 0;    
 }
