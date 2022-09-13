@@ -76,19 +76,16 @@ void translate_newlines(FILE *location, struct CString string) {
          * cause formatting to break. */
         if(strncmp(string.contents + character, ".TS\n", strlen(".TS\n")) == 0) {
             in_tsheet_table = 1;
-            character += 4;
+            character += 3;
 
             fprintf(location, "%s", ".TS\n");
 
             continue;
         }
 
-        /* For the above statement and this one, we print a period due to
-         * the period being the first character, so we skip printing it. Because
-         * of this, we must print it ourselves.  */
         if(strncmp(string.contents + character, ".TE\n", strlen(".TE\n")) == 0) {
             in_tsheet_table = 0;
-            character += 4;
+            character += 3;
 
             fprintf(location, "%s", ".TE\n");
 
@@ -103,6 +100,37 @@ void translate_newlines(FILE *location, struct CString string) {
     }
 }
 
+int characters_until_linefeed(const char *input) {
+    int character_index = 0;
+    int calculated_length = 0;
+    int length = strlen(input);
+
+    for(character_index = 0; character_index < length; character_index++) {
+        if(input[character_index] == '\n')
+           break;
+
+        calculated_length++;
+    }
+
+    return calculated_length;
+}
+
+void write_until_linefeed(const char *input, struct CString *output) {
+    int character_index = 0;
+    int length = strlen(input);
+
+    for(character_index = 0; character_index < length; character_index++) {
+        char character_nul_term[2] = {0x0, 0x0};
+
+        if(input[character_index] == '\n')
+           break;
+
+        character_nul_term[0] = input[character_index];
+
+        cstring_concats(output, character_nul_term);
+    }
+}
+
 void translate_tsheet(struct CString input_string, struct CString *output_string) {
     int in_marker = 0;
     int character_index = 0;
@@ -114,8 +142,6 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
         /* Interpret a TSHEET marker, but only if there is an extra character after */
         if(character == '\\' && character_index + 1 < input_string.length) {
             char next_character = input_string.contents[character_index + 1];
-
-            character_index++;
 
             /* Start or end italics */
             if(next_character == 'I') {
@@ -145,8 +171,33 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
                 }
             }
 
-            /* Start or end a table */
-            if(next_character == 'T') {
+            /* Display the separator and dump the rest of stuff. */
+            if(next_character == 'S') {
+                char separator_string[2] = {0x0, 0x0};
+
+                separator_string[0] = *(input_string.contents + character_index + 1 + 1 + 1);
+
+                cstring_concats(output_string, "tab("); 
+                cstring_concats(output_string, separator_string);
+                cstring_concats(output_string, ");\n"); 
+                cstring_concats(output_string, "l l l\n"); 
+                cstring_concats(output_string, "_ _ _\n"); 
+                cstring_concats(output_string, "l l l\n"); 
+                cstring_concats(output_string, ".\n"); 
+
+                character_index += characters_until_linefeed(input_string.contents + character_index) - 1;
+            }
+
+            /* Dump an element */
+            if(next_character == 'E') {
+                write_until_linefeed(input_string.contents + character_index + 1 + 1 + 1, output_string);
+                cstring_concats(output_string, "\n"); 
+
+                character_index += characters_until_linefeed(input_string.contents + character_index) - 1;
+            }
+
+            /* Start or end a table (line-based) */
+            if(strncmp(input_string.contents + character_index, "\\T\n", strlen("\\T\n")) == 0) {
                 INVERT_BOOLEAN(in_marker);
  
                 if(in_marker == 1) {
@@ -157,7 +208,20 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
                     printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
                     abort(); 
                 }
+
+                character_index += characters_until_linefeed(input_string.contents + character_index) - 1;
             }
+
+
+            /* Print a table header */
+            if(strncmp(input_string.contents + character_index, "\\H ", strlen("\\H ")) == 0) {
+                write_until_linefeed(input_string.contents + character_index + strlen("\\H "), output_string);
+                cstring_concats(output_string, "\n"); 
+
+                character_index += characters_until_linefeed(input_string.contents + character_index) - 1;
+            }
+
+            character_index++;
 
             continue;
         } 
