@@ -340,7 +340,8 @@ struct CString *common_parse_read_tag(struct CString line, struct CString *locat
     return location;
 }
 
-/* Display the string converted to uppercase */
+/* Display the string converted to uppercase, and translate
+ * underscores into spaces. */
 void common_parse_upper_string(FILE *location, const char *string, int length) {
     int index = 0;
 
@@ -352,7 +353,9 @@ void common_parse_upper_string(FILE *location, const char *string, int length) {
     for(index = 0; index < length; index++) {
         LIBERROR_OUT_OF_BOUNDS(index, length);
 
-        if(isalpha(string[index]) != 0)
+        if(string[index] == '_')
+            fprintf(location, "%c", ' ');
+        else if(isalpha(string[index]) != 0)
             fprintf(location, "%c", toupper(string[index]));
         else
             fprintf(location, "%c", string[index]);

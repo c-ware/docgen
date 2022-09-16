@@ -125,6 +125,9 @@ int is_multiline(struct CString tag) {
     if(strcmp(tag.contents, "@description") == 0)
         return 1;
 
+    if(strcmp(tag.contents, "@return_value") == 0)
+        return 1;
+
     if(strcmp(tag.contents, "@synopsis") == 0)
         return 1;
 
@@ -929,43 +932,6 @@ void compile_references(struct ProgramState *state, int start_index) {
     }
 }
 
-void compile_return(struct ProgramState *state, int start_index) {
-    int line_index = 0;
-
-    VERIFY_PROGRAM_STATE(state);
-
-    for(line_index = start_index; line_index < carray_length(state->input_lines); line_index++) {
-        struct CString line;
-    
-        LIBERROR_OUT_OF_BOUNDS(line_index, carray_length(state->input_lines));
-        VERIFY_CSTRING(&(state->input_lines->contents[line_index]));
-        LIBERROR_IS_NULL(strchr((state->input_lines->contents[line_index].contents), '@'));
-
-        line = state->input_lines->contents[line_index];
-        common_parse_read_tag(line, &(state->tag_name)); 
-
-        VERIFY_CSTRING(&(state->tag_name));
-
-        /* Do not go past the end of the docgen block! */
-        if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
-            break;
-
-        /* Dump the return tag, although in this context, we only care about the brief. */
-        if(strcmp(state->tag_name.contents, "@return") == 0) {
-            line = state->input_lines->contents[line_index + 1];
-            common_parse_read_tag(line, &(state->tag_name)); 
-
-            VERIFY_CSTRING(&(state->tag_name));
-
-            fprintf(state->compilation_output, "%s", "START_SECTION RETURN VALUE\n"); 
-            fprintf(state->compilation_output, "%s\n", FIELD_VALUE(line)); 
-            fprintf(state->compilation_output, "%s", "END_SECTION\n"); 
-
-            continue;
-        }
-    }
-}
-
 /* 
  * =========================================
  *             Main Function
@@ -1013,7 +979,6 @@ int main(void) {
 
     /* Verify all tags have the tags that they require following them */
     error_tags_have_postrequisites(&state, "@mparam",       1, "@brief");
-    error_tags_have_postrequisites(&state, "@return",       1, "@brief");
     error_tags_have_postrequisites(&state, "@embed",        1, "@show_brief");
     error_tags_have_postrequisites(&state, "@field",        2, "@type", "@brief");
     error_tags_have_postrequisites(&state, "@struct_start", 2, "@name", "@brief");
@@ -1066,7 +1031,6 @@ int main(void) {
         compile_inclusion(&state, line_index);
         compile_multilines(&state, line_index);
         compile_embed_requests(&state, line_index);
-        compile_return(&state, line_index);
 
         /* If there is text in the description AND we have (errors OR parameters) to write,
          * they need an empty line in between */
