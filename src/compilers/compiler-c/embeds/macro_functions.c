@@ -150,22 +150,22 @@ void compile_macro_function_embeds(struct ProgramState *state) {
         compile_macro_function_embed(state, line_index); 
 
         fprintf(state->compilation_output, "/* %s */\n", state->temp_macro_function.description.contents);
-        fprintf(state->compilation_output, "#define %s(", state->temp_macro_function.name.contents);
+        fprintf(state->compilation_output, "\\B#define %s(\\B", state->temp_macro_function.name.contents);
 
         /* Display macro function parameters */
         for(parameter_index = 0; parameter_index < carray_length(state->temp_macro_function.parameters); parameter_index++) {
             struct MacroFunctionParameter parameter = state->temp_macro_function.parameters->contents[parameter_index];
 
-            fprintf(state->compilation_output, "%s", parameter.name.contents);
+            fprintf(state->compilation_output, "\\I%s\\I", parameter.name.contents);
 
             /* Do not add a ',' for the last parameter */
             if(parameter_index == carray_length(state->temp_macro_function.parameters) - 1)
                 continue;
 
-            fprintf(state->compilation_output, "%c ", ',');
+            fprintf(state->compilation_output, "%s ", "\\B,\\B");
         }
 
-        fprintf(state->compilation_output, "%s", ");\n");
+        fprintf(state->compilation_output, "%s", "\\B);\\B\n");
         fprintf(state->compilation_output, "%s", "END_EMBED\n");
 
         carray_free(state->temp_macro_function.parameters, MACRO_FUNCTION_PARAMETER);
