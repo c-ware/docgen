@@ -171,6 +171,10 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
                 }
             }
 
+            /* Escape a backslash */
+            if(next_character == '\\')
+                cstring_concats(output_string, "\\"); 
+
             /* Display the separator and dump the rest of stuff. */
             if(next_character == 'S') {
                 char separator_string[2] = {0x0, 0x0};

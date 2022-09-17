@@ -11,7 +11,7 @@ clean:
 	rm -f $(PROGNAME)
 
 install:
-	mkdir -p $(PREIFX)/bin
+	mkdir -p $(PREFIX)/bin
 	cp $(PROGNAME) $(PREFIX)/bin
 
 $(PROGNAME): main.c $(OBJS)
