@@ -865,7 +865,7 @@ struct CString *common_parse_format_embeds(struct Embeds embeds, struct EmbedReq
 
 int common_parse_count_lines_between_multilines(struct CStrings lines, int index, const char *multiline) {
     int line_index = 0;
-    int counted_lines = 0;
+    int counted_lines = 1;
 
     /* We go past the first opening multiline then search */
     for(line_index = index + 1; line_index < lines.length; line_index++) {
