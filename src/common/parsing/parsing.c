@@ -863,6 +863,22 @@ struct CString *common_parse_format_embeds(struct Embeds embeds, struct EmbedReq
     return embed_location;
 }
 
-int common_parse_count_lines_between_multilines(struct CStrings lines, int index, const char *mutliline) {
+int common_parse_count_lines_between_multilines(struct CStrings lines, int index, const char *multiline) {
+    int line_index = 0;
+    int counted_lines = 0;
 
+    /* We go past the first opening multiline then search */
+    for(line_index = index + 1; line_index < lines.length; line_index++) {
+        struct CString line = lines.contents[line_index];
+
+        if(strcmp(strchr(line.contents, '@'), multiline) != 0) {
+            counted_lines++;
+
+            continue;
+        }
+
+        break;
+    }
+
+    return counted_lines;
 }

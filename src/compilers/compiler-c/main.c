@@ -232,6 +232,13 @@ int has_errors(struct ProgramState *state, int start_index) {
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
 
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
+
         /* Regular error */
         if(strcmp(state->tag_name.contents, "@error") == 0) {
             return 1;
@@ -262,6 +269,13 @@ int has_parameters(struct ProgramState *state, int start_index) {
         /* Do not go past the end of the docgen block! */
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
+
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
 
         /* Function parameters */
         if(strcmp(state->tag_name.contents, "@fparam") == 0) {
@@ -297,6 +311,13 @@ int has_description(struct ProgramState *state, int start_index) {
         /* Do not go past the end of the docgen block! */
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
+        
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
 
         /* Description tag */
         if(strcmp(state->tag_name.contents, "@description") == 0) {
@@ -716,6 +737,13 @@ void compile_inclusion(struct ProgramState *state, int start_index) {
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
 
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
+
         if(strcmp(state->tag_name.contents, "@include") != 0)
             continue;
 
@@ -744,6 +772,13 @@ void compile_multilines(struct ProgramState *state, int start_index) {
         /* Do not go past the end of the docgen block! */
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
+
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
 
         /* Display the start or end marker of this section */
         if(is_multiline(state->tag_name) == 1) {
@@ -798,6 +833,13 @@ void compile_embed_requests(struct ProgramState *state, int start_index) {
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
 
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
+
         if(strcmp(state->tag_name.contents, "@embed") != 0)
             continue;
 
@@ -839,6 +881,13 @@ void compile_errors(struct ProgramState *state, int start_index) {
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
 
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
+
         /* Regular error */
         if(strcmp(state->tag_name.contents, "@error") == 0) {
             const char *error_description = strchr(state->input_lines->contents[line_index].contents, ' ') + 1;
@@ -872,6 +921,13 @@ void compile_parameters(struct ProgramState *state, int start_index) {
         /* Do not go past the end of the docgen block! */
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
+
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
 
         /* Function parameters */
         if(strcmp(state->tag_name.contents, "@fparam") == 0) {
@@ -919,6 +975,13 @@ void compile_references(struct ProgramState *state, int start_index) {
         /* Do not go past the end of the docgen block! */
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
+
+        /* Skip past multiline blocks */
+        if(is_multiline(state->tag_name) == 1) {
+            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
+
+            continue;
+        }
 
         /* Dump reference tags */
         if(strcmp(state->tag_name.contents, "@reference") == 0) {
