@@ -862,3 +862,7 @@ struct CString *common_parse_format_embeds(struct Embeds embeds, struct EmbedReq
 
     return embed_location;
 }
+
+int common_parse_count_lines_between_multilines(struct CStrings lines, int index, const char *mutliline) {
+
+}

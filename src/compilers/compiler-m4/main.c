@@ -167,6 +167,9 @@ int is_field(struct CString tag) {
     if(strcmp(tag.contents, "@name") == 0)
         return 1;
 
+    if(strcmp(tag.contents, "@show_brief") == 0)
+        return 1;
+
     if(strcmp(tag.contents, "@brief") == 0)
         return 1;
 

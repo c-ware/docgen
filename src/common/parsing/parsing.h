@@ -155,5 +155,6 @@ void common_parse_sections(struct CStrings lines, struct Sections *array, int st
 void common_parse_prepends(struct CStrings lines, struct Sections *array, int start_index);
 void common_parse_embed_requests(struct CStrings lines, struct EmbedRequests *array, int start_index);
 void common_parse_embeds(struct CStrings lines, struct Embeds *array);
+int common_parse_count_lines_between_multilines(struct CStrings lines, int index, const char *mutliline);
 
 #endif
