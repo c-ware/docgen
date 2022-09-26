@@ -312,13 +312,6 @@ int has_description(struct ProgramState *state, int start_index) {
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
         
-        /* Skip past multiline blocks */
-        if(is_multiline(state->tag_name) == 1) {
-            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
-
-            continue;
-        }
-
         /* Description tag */
         if(strcmp(state->tag_name.contents, "@description") == 0) {
             return 1;
