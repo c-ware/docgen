@@ -102,6 +102,23 @@ void translate_newlines(FILE *location, struct CString string) {
     }
 }
 
+void write_translated_lines(struct CString *location, struct CString string) {
+    int index = 0;
+    int length = string.length;
+
+    for(index = 0; index < length; index++) {
+        char character[2] = {0x0, 0x0};
+
+        character[0] = string.contents[index];
+
+        if(string.contents[index] == '\n') {
+            cstring_concats(location, "\n.br\n");
+        } else {
+            cstring_concats(location, character); 
+        }
+    }
+}
+
 int characters_until_linefeed(const char *input) {
     int character_index = 0;
     int calculated_length = 0;
@@ -311,7 +328,13 @@ void add_section(struct Manual *location, struct Sections sections, const char *
     cstring_concats(&(location->body), ".SH ");
     cstring_concat(&(location->body), named_section->name);
     cstring_concats(&(location->body), "\n");
-    cstring_concat(&(location->body), named_section->body);
+
+    /* Only the example section really needs to have breaks explicitly made */
+    if(strcmp(name, "EXAMPLES") == 0) {
+        write_translated_lines(&(location->body), named_section->body);
+    } else {
+        cstring_concat(&(location->body), named_section->body);
+    }
 }
 
 void add_embeds(struct Sections *sections, struct CString embed_string) {
