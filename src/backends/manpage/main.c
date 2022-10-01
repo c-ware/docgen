@@ -190,6 +190,10 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
                 }
             }
 
+            /* Force a new line (\n.br\n)*/
+            if(next_character == 'N')
+                cstring_concats(output_string, "\n.br"); 
+
             /* Escape a backslash */
             if(next_character == '\\')
                 cstring_concats(output_string, "\\"); 
