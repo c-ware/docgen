@@ -27,7 +27,7 @@ clean:
 	rm -f $(BINS)
 
 install:
-	cp src/backends/manpage/main $(PREFIX)/bin/docgen-backend-manapge
+	cp src/backends/manpage/main $(PREFIX)/bin/docgen-backend-manpage
 	cp src/compilers/compiler-c/main $(PREFIX)/bin/docgen-compiler-c
 	cp src/compilers/compiler-m4/main $(PREFIX)/bin/docgen-compiler-m4
 	cp src/extractors/extractor-c/main $(PREFIX)/bin/docgen-extractor-c

@@ -766,13 +766,6 @@ void compile_multilines(struct ProgramState *state, int start_index) {
         if(strcmp(state->tag_name.contents, DOCGEN_END) == 0)
             break;
 
-        /* Skip past multiline blocks */
-        if(is_multiline(state->tag_name) == 1) {
-            line_index += common_parse_count_lines_between_multilines(*state->input_lines, line_index, state->tag_name.contents);
-
-            continue;
-        }
-
         /* Display the start or end marker of this section */
         if(is_multiline(state->tag_name) == 1) {
             INVERT_BOOLEAN(in_multiline);

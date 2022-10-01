@@ -92,11 +92,13 @@ void translate_newlines(FILE *location, struct CString string) {
             continue;
         }
 
+        /*
         if(string.contents[character] == '\n' && in_tsheet_table == 0) {
-            fprintf(location, "%s", "\n.br\n");
+            fprintf(location, "%s", "\n.br\n");*
         } else {
-            fprintf(location, "%c", string.contents[character]);
         }
+        */
+        fprintf(location, "%c", string.contents[character]);
     }
 }
 
