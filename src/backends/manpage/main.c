@@ -194,6 +194,16 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
                 }
             }
 
+            /* Make an inline-section. */
+            if(next_character == 'M') {
+                cstring_concats(output_string, "\n"); 
+                cstring_concats(output_string, ".SH "); 
+                write_until_linefeed(input_string.contents + character_index + 1 + 1, output_string);
+                cstring_concats(output_string, "\n"); 
+
+                character_index += characters_until_linefeed(input_string.contents + character_index) - 1;
+             }
+
             /* Force a new line (\n.br\n)*/
             if(next_character == 'N')
                 cstring_concats(output_string, "\n.br"); 
@@ -215,6 +225,7 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
                     abort(); 
                 }
             }
+
             /* Escape a backslash */
             if(next_character == '\\')
                 cstring_concats(output_string, "\\"); 
