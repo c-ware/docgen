@@ -151,7 +151,11 @@ void write_until_linefeed(const char *input, struct CString *output) {
 }
 
 void translate_tsheet(struct CString input_string, struct CString *output_string) {
-    int in_marker = 0;
+    int in_bold_marker = 0;
+    int in_italics_marker = 0;
+    int in_table_marker = 0;
+    int in_list_marker = 0;
+    int in_right_shift_marker = 0;
     int character_index = 0;
 
     for(character_index = 0; character_index < input_string.length; character_index++) {
@@ -164,11 +168,11 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
 
             /* Start or end italics */
             if(next_character == 'I') {
-                INVERT_BOOLEAN(in_marker);
+                INVERT_BOOLEAN(in_italics_marker);
  
-                if(in_marker == 1) {
+                if(in_italics_marker == 1) {
                     cstring_concats(output_string, "\\fI"); 
-                } else if(in_marker == 0) {
+                } else if(in_italics_marker == 0) {
                     cstring_concats(output_string, "\\fR"); 
                 } else {
                     printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
@@ -178,11 +182,11 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
 
             /* Start or end bold */
             if(next_character == 'B') {
-                INVERT_BOOLEAN(in_marker);
+                INVERT_BOOLEAN(in_bold_marker);
  
-                if(in_marker == 1) {
+                if(in_bold_marker == 1) {
                     cstring_concats(output_string, "\\fB"); 
-                } else if(in_marker == 0) {
+                } else if(in_bold_marker == 0) {
                     cstring_concats(output_string, "\\fR"); 
                 } else {
                     printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
@@ -194,6 +198,23 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
             if(next_character == 'N')
                 cstring_concats(output_string, "\n.br"); 
 
+            /* Start or end a right-shift */
+            if(next_character == 'R') {
+                INVERT_BOOLEAN(in_right_shift_marker);
+ 
+                if(in_right_shift_marker == 1) {
+                    cstring_concats(output_string, ".RS"); 
+                    write_until_linefeed(input_string.contents + character_index + 1 + 1, output_string);
+                    cstring_concats(output_string, "i\n"); 
+
+                    character_index += characters_until_linefeed(input_string.contents + character_index) - 1;
+                } else if(in_right_shift_marker == 0) {
+                    cstring_concats(output_string, ".RE\n"); 
+                } else {
+                    printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
+                    abort(); 
+                }
+            }
             /* Escape a backslash */
             if(next_character == '\\')
                 cstring_concats(output_string, "\\"); 
@@ -225,11 +246,11 @@ void translate_tsheet(struct CString input_string, struct CString *output_string
 
             /* Start or end a table (line-based) */
             if(strncmp(input_string.contents + character_index, "\\T\n", strlen("\\T\n")) == 0) {
-                INVERT_BOOLEAN(in_marker);
+                INVERT_BOOLEAN(in_table_marker);
  
-                if(in_marker == 1) {
+                if(in_table_marker == 1) {
                     cstring_concats(output_string, ".TS\n"); 
-                } else if(in_marker == 0) {
+                } else if(in_table_marker == 0) {
                     cstring_concats(output_string, ".TE\n"); 
                 } else {
                     printf("unhandled (%s:%i)\n", __FILE__, __LINE__);
