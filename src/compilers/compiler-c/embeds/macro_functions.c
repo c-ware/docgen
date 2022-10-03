@@ -149,7 +149,7 @@ void compile_macro_function_embeds(struct ProgramState *state) {
          * increment the line variable rather than the counter. */
         compile_macro_function_embed(state, line_index); 
 
-        fprintf(state->compilation_output, "/* %s */\n", state->temp_macro_function.description.contents);
+        fprintf(state->compilation_output, "/* %s */\\N\n", state->temp_macro_function.description.contents);
         fprintf(state->compilation_output, "\\B#define %s(\\B", state->temp_macro_function.name.contents);
 
         /* Display macro function parameters */
@@ -165,7 +165,7 @@ void compile_macro_function_embeds(struct ProgramState *state) {
             fprintf(state->compilation_output, "%s ", "\\B,\\B");
         }
 
-        fprintf(state->compilation_output, "%s", "\\B);\\B\n");
+        fprintf(state->compilation_output, "%s", "\\B);\\B\\N\n");
         fprintf(state->compilation_output, "%s", "END_EMBED\n");
 
         carray_free(state->temp_macro_function.parameters, MACRO_FUNCTION_PARAMETER);

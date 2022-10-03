@@ -163,7 +163,7 @@ void compile_function_embeds(struct ProgramState *state) {
          * increment the line variable rather than the counter. */
         compile_function_embed(state, line_index); 
 
-        fprintf(state->compilation_output, "/* %s */\n", state->temp_function.description.contents);
+        fprintf(state->compilation_output, "/* %s */\\N\n", state->temp_function.description.contents);
 
         /* Display return type and function name, with a return type that
          * is either void, or a type. */
@@ -192,7 +192,7 @@ void compile_function_embeds(struct ProgramState *state) {
             fprintf(state->compilation_output, "%s ", ",\\B");
         }
 
-        fprintf(state->compilation_output, "%s", ");\n");
+        fprintf(state->compilation_output, "%s", ");\\N\n");
         fprintf(state->compilation_output, "%s", "END_EMBED\n");
 
         carray_free(state->temp_function.parameters, FUNCTION_PARAMETER);

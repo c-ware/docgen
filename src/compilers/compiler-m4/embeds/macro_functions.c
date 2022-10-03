@@ -149,8 +149,8 @@ void compile_macro_embeds(struct ProgramState *state) {
          * increment the line variable rather than the counter. */
         compile_macro_embed(state, line_index); 
 
-        fprintf(state->compilation_output, "/* %s */\n", state->temp_macro_function.description.contents);
-        fprintf(state->compilation_output, "\\Bdefine(%s);\\B\n", state->temp_macro_function.name.contents);
+        fprintf(state->compilation_output, "/* %s */\\N\n", state->temp_macro_function.description.contents);
+        fprintf(state->compilation_output, "\\Bdefine(%s);\\B\\N\n", state->temp_macro_function.name.contents);
         fprintf(state->compilation_output, "%s", "END_EMBED\n");
 
         carray_free(state->temp_macro_function.parameters, MACRO_FUNCTION_PARAMETER);

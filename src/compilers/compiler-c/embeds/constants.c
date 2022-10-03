@@ -52,7 +52,7 @@ void compile_constant_embed(struct ProgramState *state, int docgen_start_index) 
     VERIFY_PROGRAM_STATE(state);
 
     /* Get the name and description */
-    fprintf(state->compilation_output, "/* %s */\n", strchr(state->input_lines->contents[docgen_start_index + 3].contents, ' ') + 1);
+    fprintf(state->compilation_output, "/* %s */\\N\n", strchr(state->input_lines->contents[docgen_start_index + 3].contents, ' ') + 1);
     fprintf(state->compilation_output, "#define %s %s", strchr(state->input_lines->contents[docgen_start_index + 2].contents, ' ') + 1, "");
 
     for(line_index = docgen_start_index; line_index < carray_length(state->input_lines); line_index++) {
@@ -72,7 +72,7 @@ void compile_constant_embed(struct ProgramState *state, int docgen_start_index) 
             break;
 
         if(strcmp(state->tag_name.contents, "@value") == 0) {
-            fprintf(state->compilation_output, "%s\n", strchr(line.contents, ' ') + 1);
+            fprintf(state->compilation_output, "%s\\N\n", strchr(line.contents, ' ') + 1);
         }
     }
 }

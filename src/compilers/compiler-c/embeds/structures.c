@@ -110,7 +110,7 @@ void compile_structure_embed(struct ProgramState *state, int docgen_start_index)
 
             VERIFY_CSTRING(&(state->tag_name));
 
-            fprintf(state->compilation_output, "/* %s */\n", strchr(line.contents, ' ') + 1);
+            fprintf(state->compilation_output, "/* %s */\\N\n", strchr(line.contents, ' ') + 1);
 
             /* Write the required number of spaces for the name */
             for(depth_index = 0; depth_index < (depth * SPACING_PER_TAB); depth_index++) {
@@ -126,7 +126,7 @@ void compile_structure_embed(struct ProgramState *state, int docgen_start_index)
             cstring_concats(&next_name, strchr(line.contents, ' ') + 1);
             carray_append(names, next_name, CSTRING);
 
-            fprintf(state->compilation_output, "%s", "struct {\n");
+            fprintf(state->compilation_output, "%s", "struct {\\N\n");
         }
 
         /* Pop the name of the next structure off the stack and decrease the depth */
@@ -140,7 +140,7 @@ void compile_structure_embed(struct ProgramState *state, int docgen_start_index)
             }
 
             /* Write the struct name and closing */
-            fprintf(state->compilation_output, "} %s;\n", structure_name.contents); 
+            fprintf(state->compilation_output, "} %s;\\N\n", structure_name.contents); 
             cstring_free(structure_name);
 
             depth--; 
@@ -162,7 +162,7 @@ void compile_structure_embed(struct ProgramState *state, int docgen_start_index)
 
             VERIFY_CSTRING(&(state->tag_name));
 
-            fprintf(state->compilation_output, "/* %s */\n", strchr(line.contents, ' ') + 1); 
+            fprintf(state->compilation_output, "/* %s */\\N\n", strchr(line.contents, ' ') + 1); 
 
             /* Write the required number of spaces for the field */
             for(depth_index = 0; depth_index < ((depth + 1) * SPACING_PER_TAB); depth_index++) {
@@ -188,7 +188,7 @@ void compile_structure_embed(struct ProgramState *state, int docgen_start_index)
 
             VERIFY_CSTRING(&(state->tag_name));
 
-            fprintf(state->compilation_output, "%s;\n", strchr(line.contents, ' ') + 1); 
+            fprintf(state->compilation_output, "%s;\\N\n", strchr(line.contents, ' ') + 1); 
         }
     }
 
@@ -236,13 +236,13 @@ void compile_structure_embeds(struct ProgramState *state) {
 
         /* Since we always start at the start of the docgen body (at "@docgen_start", we
          * can get the description and name first from here. */
-        fprintf(state->compilation_output, "/* %s */\nstruct %s {\n", strchr(state->input_lines->contents[line_index + 3].contents, ' ') + 1,
-                                                                      strchr(state->input_lines->contents[line_index + 2].contents, ' ') + 1);
+        fprintf(state->compilation_output, "/* %s */\\N\nstruct %s {\\N\n", strchr(state->input_lines->contents[line_index + 3].contents, ' ') + 1,
+                                                                            strchr(state->input_lines->contents[line_index + 2].contents, ' ') + 1);
 
 
         compile_structure_embed(state, line_index);
 
-        fprintf(state->compilation_output, "%s", "}\n");
+        fprintf(state->compilation_output, "%s", "}\\N\n");
         fprintf(state->compilation_output, "%s", "END_EMBED\n");
 
     }
