@@ -741,7 +741,7 @@ void compile_inclusion(struct ProgramState *state, int start_index) {
             continue;
 
         fprintf(state->compilation_output, "%s", "START_PREPEND_TO SYNOPSIS\n"); 
-        fprintf(state->compilation_output, "#include \"%s\"\n", strchr(line.contents, ' ') + 1); 
+        fprintf(state->compilation_output, "#include \"%s\"\\N\n", strchr(line.contents, ' ') + 1); 
         fprintf(state->compilation_output, "%s", "END_PREPEND_TO\n"); 
     }
 }
@@ -879,7 +879,7 @@ void compile_errors(struct ProgramState *state, int start_index) {
             const char *error_description = strchr(state->input_lines->contents[line_index].contents, ' ') + 1;
 
             fprintf(state->compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n"); 
-            fprintf(state->compilation_output, "    - %s\n", error_description); 
+            fprintf(state->compilation_output, "    - %s\\N\n", error_description); 
             fprintf(state->compilation_output, "%s", "END_APPEND_TO\n"); 
 
             continue;
@@ -921,7 +921,7 @@ void compile_parameters(struct ProgramState *state, int start_index) {
             const char *param_brief = strchr(state->input_lines->contents[line_index + 2].contents, ' ') + 1;
 
             fprintf(state->compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n"); 
-            fprintf(state->compilation_output, "\\I%s\\I will be %s\n", param_name, param_brief); 
+            fprintf(state->compilation_output, "\\I%s\\I will be %s\\N\n", param_name, param_brief); 
             fprintf(state->compilation_output, "%s", "END_APPEND_TO\n"); 
 
             continue;
@@ -933,7 +933,7 @@ void compile_parameters(struct ProgramState *state, int start_index) {
             const char *param_brief = strchr(state->input_lines->contents[line_index + 1].contents, ' ') + 1;
 
             fprintf(state->compilation_output, "%s", "START_APPEND_TO DESCRIPTION\n"); 
-            fprintf(state->compilation_output, "\\I%s\\I will be %s\n", param_name, param_brief); 
+            fprintf(state->compilation_output, "\\I%s\\I will be %s\\N\n", param_name, param_brief); 
             fprintf(state->compilation_output, "%s", "END_APPEND_TO\n"); 
 
             continue;
