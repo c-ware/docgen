@@ -365,12 +365,17 @@ void add_section(struct Manual *location, struct Sections sections, const char *
     cstring_concat(&(location->body), named_section->name);
     cstring_concats(&(location->body), "\n");
 
-    /* Only the example section really needs to have breaks explicitly made */
+    /* Only the example section really needs to have breaks explicitly made.
+     * (Or at least, this was our old plan). */
+    cstring_concat(&(location->body), named_section->body);
+
+    /*
     if(strcmp(name, "EXAMPLES") == 0) {
         write_translated_lines(&(location->body), named_section->body);
     } else {
         cstring_concat(&(location->body), named_section->body);
     }
+    */
 }
 
 void add_embeds(struct Sections *sections, struct CString embed_string) {
