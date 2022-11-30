@@ -1,5 +1,7 @@
 # docgen
 
+## This is the "legacy" version of Docgen, suitable for older-style Docgen input.
+
 Docgen is a utility program for generating documentation from the source
 code of a program. While docgen is mainly intended to produce manual pages (its
 UNIX heritage can easily be seen in pretty much all documentation produced, as
